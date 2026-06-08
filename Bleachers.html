@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#111110">
+<title>Bleachers — Log the matches you live</title>
+<style>
+/* ============================ THEME / TOKENS ============================ */
+:root{
+  --bg:#111110;
+  --surface:#1e1e1c;
+  --surface2:#262420;
+  --green:#5DCAA5;
+  --gold:#EF9F27;
+  --purple:#AFA9EC;
+  --red:#E24B4A;
+  --text:#f3f3ef;
+  --muted:#8d8d86;
+  --border:#2c2c28;
+  --radius:18px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.4;
+  overflow-x:hidden;
+}
+#app{min-height:100vh}
+.shell{
+  max-width:440px;
+  margin:0 auto;
+  min-height:100vh;
+  position:relative;
+  padding-bottom:84px;
+  background:var(--bg);
+}
+button{font-family:inherit}
+b{font-weight:700}
+
+/* ============================ TYPOGRAPHY / UTIL ============================ */
+.muted{color:var(--muted)}
+.tiny{font-size:11px}
+.small{font-size:13px}
+.center{text-align:center}
+.row{display:flex;align-items:center}
+.between{display:flex;align-items:center;justify-content:space-between}
+.gap8{gap:8px}.gap12{gap:12px}
+.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt24{margin-top:24px}
+.section-title{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:18px 4px 8px}
+
+/* ============================ TOP BAR ============================ */
+.topbar{
+  position:sticky;top:0;z-index:30;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px 10px;
+  background:linear-gradient(180deg,var(--bg) 70%,rgba(17,17,16,0));
+}
+.wordmark{font-weight:800;font-size:20px;letter-spacing:-.02em}
+.wordmark .b{color:var(--green)}
+.chips{display:flex;gap:8px}
+.chip{
+  display:flex;align-items:center;gap:5px;
+  background:var(--surface);border:1px solid var(--border);
+  padding:6px 10px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;
+}
+.chip.flame{color:var(--gold)}
+.chip.level{color:var(--green)}
+
+/* ============================ SCREEN TRANSITION ============================ */
+.screen{padding:0 16px;animation:fadeSlide .26s ease both}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.screen h1{font-size:24px;margin:6px 4px 2px}
+.screen .sub{color:var(--muted);margin:0 4px 6px;font-size:14px}
+
+/* ============================ CARDS ============================ */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px;
+  margin-bottom:14px;
+}
+.card.tap{cursor:pointer;transition:transform .12s ease,border-color .12s ease}
+.card.tap:active{transform:scale(.985);border-color:#3a3a34}
+
+/* ============================ SPORT TOGGLE ============================ */
+.toggle{
+  display:flex;background:var(--surface);border:1px solid var(--border);
+  border-radius:999px;padding:5px;margin:10px 4px 6px;
+}
+.toggle button{
+  flex:1;border:0;background:transparent;color:var(--muted);
+  padding:10px;border-radius:999px;font-weight:700;font-size:15px;cursor:pointer;transition:all .2s;
+}
+.toggle button.on{background:var(--green);color:#06241a}
+
+/* ============================ MATCH CARD ============================ */
+.mc-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tag{font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+.tag.green{color:var(--green);border-color:rgba(93,202,165,.4)}
+.tag.gold{color:var(--gold);border-color:rgba(239,159,39,.4)}
+.tag.purple{color:var(--purple);border-color:rgba(175,169,236,.4)}
+.tag.red{color:var(--red);border-color:rgba(226,75,74,.4)}
+.mc-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mc-team{display:flex;flex-direction:column;align-items:center;gap:8px;width:96px}
+.badge-circle{
+  width:46px;height:46px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:14px;letter-spacing:.02em;
+  box-shadow:0 2px 8px rgba(0,0,0,.35);
+}
+.mc-name{font-size:13px;font-weight:600;text-align:center;line-height:1.15}
+.mc-score{font-size:26px;font-weight:800;letter-spacing:.02em;min-width:70px;text-align:center}
+.mc-date{margin-top:12px;font-size:12px;color:var(--muted)}
+.mc-log{
+  margin-top:12px;border-top:1px solid var(--border);padding-top:12px;
+}
+.mc-stars{color:var(--gold);font-size:15px;letter-spacing:1px}
+.mc-snippet{font-size:13px;color:#cfcfc8;margin-top:4px;font-style:italic}
+.mc-unlogged{margin-top:12px;border-top:1px dashed var(--border);padding-top:10px;font-size:12px;color:var(--muted)}
+
+/* ============================ MATCH DETAIL ============================ */
+.detail-head{
+  position:sticky;top:0;z-index:30;background:var(--bg);
+  padding:14px 16px 8px;display:flex;align-items:center;gap:12px;
+}
+.iconbtn{
+  width:38px;height:38px;border-radius:12px;border:1px solid var(--border);
+  background:var(--surface);color:var(--text);font-size:18px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.detail-title{font-weight:700;font-size:16px}
+.tabs{display:flex;gap:6px;padding:0 16px;margin-bottom:6px}
+.tabs button{
+  flex:1;border:0;background:var(--surface);color:var(--muted);
+  padding:11px;border-radius:12px 12px 0 0;font-weight:700;font-size:14px;cursor:pointer;
+  border-bottom:2px solid transparent;
+}
+.tabs button.on{color:var(--text);background:var(--surface);border-bottom-color:var(--green)}
+.detail-body{padding:0 16px;animation:fadeSlide .2s ease both}
+
+.summary{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.summary .mc-team{width:88px}
+
+.label{font-weight:700;font-size:15px;margin:18px 2px 8px}
+.stars{display:flex;gap:8px;justify-content:center;margin:6px 0}
+.stars span{font-size:34px;cursor:pointer;color:#3b3b35;transition:transform .1s,color .15s}
+.stars span.on{color:var(--gold)}
+.stars span:active{transform:scale(1.2)}
+.rating-label{text-align:center;font-weight:700;color:var(--gold);min-height:20px}
+textarea{
+  width:100%;background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  color:var(--text);padding:12px;font-family:inherit;font-size:14px;resize:vertical;min-height:74px;
+}
+textarea:focus{outline:none;border-color:var(--green)}
+
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pill{
+  background:var(--surface);border:1px solid var(--border);color:var(--text);
+  padding:9px 13px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;
+}
+.pill.on{background:rgba(93,202,165,.16);border-color:var(--green);color:var(--green)}
+
+.xp-hint{
+  margin-top:16px;background:rgba(239,159,39,.1);border:1px solid rgba(239,159,39,.35);
+  color:var(--gold);padding:10px 12px;border-radius:12px;font-size:13px;font-weight:600;text-align:center;
+}
+
+.loc-opts{display:flex;flex-direction:column;gap:10px}
+.loc-opt{
+  display:flex;align-items:center;gap:12px;cursor:pointer;
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:13px;transition:all .15s;
+}
+.loc-opt.on{border-color:var(--green);background:rgba(93,202,165,.12)}
+.loc-opt .ic{font-size:24px;width:34px;text-align:center}
+.loc-opt .nm{font-weight:700}
+.loc-opt .xp{margin-left:auto;font-weight:800;color:var(--gold)}
+
+.stadium-note{
+  margin-top:14px;background:rgba(175,169,236,.12);border:1px solid rgba(175,169,236,.4);
+  color:var(--purple);padding:12px;border-radius:12px;font-size:13px;font-weight:600;
+  animation:pop .3s ease both;
+}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.photo-tile{
+  aspect-ratio:1;background:var(--surface2);border:1px dashed var(--border);border-radius:12px;
+  display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--muted);
+}
+.logbtn{
+  width:100%;border:0;background:var(--green);color:#06241a;font-weight:800;font-size:16px;
+  padding:15px;border-radius:14px;cursor:pointer;margin:22px 0 8px;transition:transform .1s,filter .15s;
+}
+.logbtn:active{transform:scale(.98)}
+.logbtn.edit{background:var(--gold);color:#2a1900}
+
+/* ============================ PROGRESS / LEVEL ============================ */
+.level-card{background:linear-gradient(150deg,var(--surface2),var(--surface));}
+.level-top{display:flex;align-items:center;gap:14px}
+.level-emoji{font-size:40px}
+.level-name{font-size:22px;font-weight:800}
+.level-xp{color:var(--muted);font-size:13px}
+.bar{height:12px;background:var(--surface2);border-radius:999px;overflow:hidden;margin-top:12px;border:1px solid var(--border)}
+.bar .fill{height:100%;border-radius:999px;transition:width .9s cubic-bezier(.22,1,.36,1)}
+.bar.lg{height:14px}
+.next-hint{font-size:12px;color:var(--muted);margin-top:8px;text-align:right}
+
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px}
+.stat .v{font-size:24px;font-weight:800}
+.stat .k{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* ============================ BADGES ============================ */
+.badge-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.badge{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:10px 4px;text-align:center;cursor:pointer;transition:transform .12s;
+}
+.badge:active{transform:scale(.94)}
+.badge .be{font-size:26px;filter:grayscale(1);opacity:.32}
+.badge.on .be{filter:none;opacity:1}
+.badge .bn{font-size:10px;margin-top:5px;color:var(--muted);line-height:1.1}
+.badge.on .bn{color:var(--text)}
+
+/* ============================ CHALLENGES ============================ */
+.chal{position:relative}
+.chal .between{margin-bottom:6px}
+.chal .rew{font-size:12px;font-weight:800;color:var(--gold)}
+.chal .done{font-size:12px;font-weight:800;color:var(--green)}
+.chal-prog{font-size:12px;color:var(--muted);margin-top:6px}
+
+/* ============================ LEADERBOARD ============================ */
+.lb-row{display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid var(--border)}
+.lb-row:last-child{border-bottom:0}
+.lb-rank{width:26px;text-align:center;font-weight:800;font-size:15px}
+.lb-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;background:var(--surface2);border:1px solid var(--border)}
+.lb-name{font-weight:700;flex:1}
+.lb-xp{font-weight:800;color:var(--gold)}
+.lb-row.me{background:rgba(93,202,165,.08);border-radius:12px;border-bottom:0}
+.lb-row.me .lb-name{color:var(--green)}
+
+/* ============================ PROFILE ============================ */
+.prof-head{display:flex;align-items:center;gap:14px}
+.avatar{
+  width:64px;height:64px;border-radius:50%;background:linear-gradient(140deg,var(--green),#3a8e72);
+  display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#06241a;
+}
+.prof-name{font-size:20px;font-weight:800}
+.counters{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+.counter{text-align:center}
+.counter .v{font-size:20px;font-weight:800}
+.counter .k{font-size:11px;color:var(--muted)}
+.team-pill{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:7px 12px;margin:0 8px 8px 0;font-size:13px;font-weight:600}
+.team-dot{width:14px;height:14px;border-radius:50%}
+.team-pill .sp{font-size:11px;color:var(--muted)}
+.toggle-switch{width:46px;height:27px;border-radius:999px;background:var(--surface2);border:1px solid var(--border);position:relative;cursor:pointer;transition:background .2s}
+.toggle-switch.on{background:var(--green)}
+.toggle-switch::after{content:"";position:absolute;top:2px;left:2px;width:21px;height:21px;border-radius:50%;background:#fff;transition:transform .2s}
+.toggle-switch.on::after{transform:translateX(19px)}
+.danger{color:var(--red);font-weight:700;cursor:pointer}
+.recent{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.recent:last-child{border-bottom:0}
+.recent .rs{margin-left:auto;color:var(--gold);font-size:13px;white-space:nowrap}
+
+/* ============================ BOTTOM NAV ============================ */
+.bottom-nav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:440px;height:72px;
+  background:rgba(30,30,28,.95);backdrop-filter:blur(10px);
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-around;z-index:50;
+  padding-bottom:env(safe-area-inset-bottom,0);
+}
+.nav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;background:none;border:0;
+}
+.nav-item .ni{font-size:21px}
+.nav-item.active{color:var(--green)}
+.fab{
+  width:58px;height:58px;border-radius:50%;background:var(--green);color:#06241a;
+  border:0;font-size:30px;font-weight:700;cursor:pointer;margin-top:-26px;
+  box-shadow:0 8px 22px rgba(93,202,165,.45);display:flex;align-items:center;justify-content:center;
+  transition:transform .12s;
+}
+.fab:active{transform:scale(.92)}
+
+/* ============================ OVERLAYS / MODALS ============================ */
+.overlay{
+  position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.62);padding:24px;animation:fade .2s ease both;
+}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.modal-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:20px;
+  padding:22px;max-width:380px;width:100%;animation:pop .25s ease both;
+}
+.modal-card h3{margin:0 0 8px;font-size:19px}
+.modal-card p{color:var(--muted);font-size:14px;margin:0 0 18px}
+.modal-actions{display:flex;gap:10px}
+.btn{flex:1;padding:13px;border-radius:12px;border:0;font-weight:700;font-size:15px;cursor:pointer}
+.btn.ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn.primary{background:var(--green);color:#06241a}
+.btn.red{background:var(--red);color:#fff}
+.modal-emoji{font-size:48px;text-align:center;margin-bottom:6px}
+
+/* ============================ CELEBRATION ============================ */
+.celebration{
+  position:fixed;inset:0;z-index:90;overflow:auto;
+  background:radial-gradient(120% 80% at 50% -10%,rgba(93,202,165,.18),transparent 60%),
+             linear-gradient(180deg,#16241f,var(--bg));
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  padding:48px 22px 40px;
+}
+.celeb-inner{max-width:400px;width:100%;text-align:center}
+.celeb-emoji{font-size:74px;animation:bounceIn .6s cubic-bezier(.2,1.3,.4,1) both}
+@keyframes bounceIn{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.25)}100%{transform:scale(1);opacity:1}}
+.celeb-title{font-size:26px;font-weight:800;margin-top:6px}
+.celeb-sub{color:var(--muted);margin-top:2px}
+.celeb-xp{font-size:46px;font-weight:800;color:var(--gold);margin:14px 0 4px;animation:pop .4s .15s ease both}
+.celeb-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0}
+.celeb-chip{background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:700;animation:pop .35s ease both}
+.celeb-chip .v{color:var(--gold)}
+.celeb-streak{margin:16px 0 4px;font-weight:800;font-size:18px;color:var(--gold)}
+.celeb-level{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;margin-top:14px;text-align:left}
+.celeb-badges{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:18px}
+.celeb-badge{background:var(--surface);border:1px solid var(--gold);border-radius:16px;padding:14px 16px;text-align:center;width:120px;animation:pop .4s ease both}
+.celeb-badge .be{font-size:34px}
+.celeb-badge .bt{font-size:12px;color:var(--gold);font-weight:800;margin-top:4px}
+.celeb-badge .bn{font-size:13px;font-weight:700;margin-top:2px}
+.celeb-cont{width:100%;border:0;background:var(--green);color:#06241a;font-weight:800;font-size:17px;padding:16px;border-radius:14px;cursor:pointer;margin-top:26px}
+
+@keyframes pop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+
+.empty{text-align:center;color:var(--muted);padding:26px 10px;font-size:14px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* =============================================================================
+   BLEACHERS  —  "Letterboxd for football & basketball matches"
+   -----------------------------------------------------------------------------
+   A single-file, dependency-free, offline-first web app. Users LOG matches they
+   watched (at the stadium OR on the couch). Each match is the central object,
+   like a film on Letterboxd. Engagement is gamified Duolingo-style with XP,
+   levels, daily streaks, badges, weekly challenges and a friends leaderboard.
+   All state lives in one object persisted to localStorage under a versioned key.
+
+   Code map:
+     (1) DATA & STATE      static demo data, defaults, load/save
+     (2) GAMIFICATION      XP, levels, streaks, badges, challenges
+     (3) RENDER / SCREENS   pure functions that return HTML strings
+     (4) ACTIONS           user intents that mutate state then re-render
+     (5) NAVIGATION & INIT  event delegation + bootstrap
+   No frameworks, no CDN, no build step. Open the file by double-clicking.
+============================================================================= */
+
+/* =============================================================================
+   (1) DATA & STATE
+============================================================================= */
+const STORAGE_KEY = 'bleachers_v1';
+
+/* --- Demo matches: each is teams, abbrs, colours, score, league, date,
+       derby flag, euro flag, 4 players, and a venue name. --- */
+const MATCHES = [
+  /* ---------------- FOOTBALL ---------------- */
+  { id:'f1', sport:'football', league:'Bundesliga', date:'2026-04-04', derby:true, euro:false,
+    venue:'Signal Iduna Park',
+    home:{name:'Borussia Dortmund', abbr:'BVB', color:'#FDE100'},
+    away:{name:'Bayern München',    abbr:'FCB', color:'#DC052D'},
+    score:{home:2, away:2},
+    players:['Marco Reus','Harry Kane','Jamal Musiala','Julian Brandt'] },
+
+  { id:'f2', sport:'football', league:'Premier League', date:'2026-03-22', derby:false, euro:false,
+    venue:'Etihad Stadium',
+    home:{name:'Manchester City', abbr:'MCI', color:'#6CABDD'},
+    away:{name:'Arsenal',         abbr:'ARS', color:'#EF0107'},
+    score:{home:1, away:2},
+    players:['Erling Haaland','Kevin De Bruyne','Bukayo Saka','Martin Ødegaard'] },
+
+  { id:'f3', sport:'football', league:'La Liga', date:'2026-03-08', derby:true, euro:false,
+    venue:'Santiago Bernabéu',
+    home:{name:'Real Madrid', abbr:'RMA', color:'#C9D2DE'},
+    away:{name:'Barcelona',   abbr:'BAR', color:'#A50044'},
+    score:{home:2, away:1},
+    players:['Jude Bellingham','Vinícius Jr','Robert Lewandowski','Lamine Yamal'] },
+
+  /* ---------------- BASKETBALL ---------------- */
+  { id:'b1', sport:'basketball', league:'EuroLeague', date:'2026-04-02', derby:true, euro:true,
+    venue:'OAKA Arena',
+    home:{name:'Panathinaikos', abbr:'PAO', color:'#1A7A3F'},
+    away:{name:'Olympiacos',    abbr:'OLY', color:'#E2231A'},
+    score:{home:78, away:72},
+    players:['Kostas Sloukas','Kendrick Nunn','Thomas Walkup','Shaquielle McKissic'] },
+
+  { id:'b2', sport:'basketball', league:'EuroLeague', date:'2026-03-19', derby:true, euro:true,
+    venue:'WiZink Center',
+    home:{name:'Real Madrid', abbr:'RMA', color:'#C9D2DE'},
+    away:{name:'Barcelona',   abbr:'BAR', color:'#A50044'},
+    score:{home:85, away:80},
+    players:['Facundo Campazzo','Sergio Llull','Nikola Mirotić','Walter Tavares'] },
+
+  { id:'b3', sport:'basketball', league:'EuroLeague', date:'2026-03-05', derby:false, euro:true,
+    venue:'Žalgirio Arena',
+    home:{name:'Žalgiris',    abbr:'ZAL', color:'#2E7D32'},
+    away:{name:'Fenerbahçe',  abbr:'FEN', color:'#15224B'},
+    score:{home:90, away:88},
+    players:['Sylvain Francisco','Edgaras Ulanovas','Nigel Hayes-Davis','Scottie Wilbekin'] },
+];
+
+/* --- Demo friends for the leaderboard (the real user is injected live). --- */
+const FRIENDS = [
+  { name:'Μαρία',   xp:1480 },
+  { name:'Νίκος',   xp:920  },
+  { name:'Έλενα',   xp:610  },
+  { name:'Γιώργος', xp:280  },
+];
+
+/* --- Levels keyed by total XP. --- */
+const LEVELS = [
+  { name:'Casual',   min:0,    emoji:'🌱' },
+  { name:'Fan',      min:200,  emoji:'⚽' },
+  { name:'Die Hard', min:600,  emoji:'🔥' },
+  { name:'Ultras',   min:1200, emoji:'🛡️' },
+  { name:'Legend',   min:2000, emoji:'👑' },
+];
+
+/* --- Rating labels (1..5). --- */
+const RATING_LABELS = ['', 'Απογοητευτικό', 'Μέτριο', 'Καλό', 'Εξαιρετικό', 'Αριστούργημα'];
+
+/* --- Watch locations and their XP bonus. --- */
+const LOCATIONS = {
+  stadium:{ label:'Γήπεδο',      icon:'🏟️', xp:100, sub:'Ήσουν εκεί, ζωντανά' },
+  home:   { label:'Σπίτι',       icon:'🛋️', xp:50,  sub:'Από τον καναπέ' },
+  bar:    { label:'Μπαρ / Παμπ', icon:'🍺', xp:60,  sub:'Με παρέα' },
+};
+
+/* --- Stadium-only atmosphere options. --- */
+const ATMOSPHERES = [
+  ['electric','⚡ Electric'], ['intense','🔥 Intense'], ['chants','📣 Loud chants'],
+  ['view','👀 Great view'], ['tense','😬 Tense'], ['party','🎉 Party'],
+];
+
+/* --- Badge definitions. cond() reads live state; once earned they stick. --- */
+const BADGES = [
+  { id:'first',   emoji:'🎬', name:'First Match',    desc:'Κατέγραψες τον πρώτο σου αγώνα.',        cond:()=>logCount()>=1 },
+  { id:'derby',   emoji:'⚔️', name:'Derby Watcher',  desc:'Παρακολούθησες ένα φλογερό ντέρμπι.',    cond:()=>anyLog(l=>matchById(l.matchId)&&matchById(l.matchId).derby) },
+  { id:'streak7', emoji:'🔥', name:'7-Day Streak',   desc:'Έφτασες σερί 7 ημερών.',                 cond:()=>state.streak.best>=7 },
+  { id:'critic',  emoji:'✍️', name:'The Critic',     desc:'Έγραψες την πρώτη σου κριτική.',          cond:()=>anyLog(l=>l.review&&l.review.trim()) },
+  { id:'away',    emoji:'🏟️', name:'Away Day',       desc:'Παρακολούθησες αγώνα μέσα στο γήπεδο.',   cond:()=>anyLog(l=>l.location==='stadium') },
+  { id:'euro',    emoji:'🌍', name:'Euro Night',     desc:'Κατέγραψες ευρωπαϊκό αγώνα.',             cond:()=>anyLog(l=>matchById(l.matchId)&&matchById(l.matchId).euro) },
+  { id:'legend',  emoji:'👑', name:'Legend',         desc:'Έφτασες στο ανώτατο level.',             cond:()=>totalXP()>=2000 },
+  { id:'cent',    emoji:'💯', name:'100 Matches',    desc:'Κατέγραψες 100 αγώνες. Θρύλος.',          cond:()=>logCount()>=100 },
+];
+
+/* --- Default (clean) state. --- */
+function defaultState(){
+  return {
+    version: 1,
+    user: {
+      name:'Κώστας', handle:'@kostas', city:'Αθήνα',
+      favoriteTeams:[
+        { name:'Panathinaikos',     sport:'basketball', color:'#1A7A3F' },
+        { name:'Borussia Dortmund', sport:'football',   color:'#FDE100' },
+      ],
+    },
+    activeSport:'football',
+    logs:{},                                  // matchId -> log object
+    streak:{ current:0, best:0, lastLogDate:null },
+    badges:{},                                // badgeId -> unlock timestamp
+    settings:{ showStats:true },
+  };
+}
+
+/* --- Persistence (wrapped so a blocked localStorage never throws). --- */
+function load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return defaultState();
+    const parsed = JSON.parse(raw);
+    return Object.assign(defaultState(), parsed);   // forward-compatible merge
+  }catch(e){ return defaultState(); }
+}
+function save(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){ /* ignore */ }
+}
+
+/* --- Live state + transient UI state (UI is never persisted). --- */
+let state = load();
+const App = { ui:{ screen:'feed', backScreen:'feed', draft:null, celebration:null, modal:null } };
+
+/* =============================================================================
+   (2) GAMIFICATION
+============================================================================= */
+
+/* HTML escaper for any user-entered text. */
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => (
+    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+  ));
+}
+
+/* Date helpers (local, no timezone surprises). */
+function pad(n){ return String(n).padStart(2,'0'); }
+function dateStr(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function parseDate(s){ const [y,m,d]=s.split('-').map(Number); return new Date(y, m-1, d); }
+function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
+
+/* Small queries over the logs. */
+function matchById(id){ return MATCHES.find(m=>m.id===id); }
+function logCount(){ return Object.keys(state.logs).length; }
+function anyLog(fn){ return Object.values(state.logs).some(fn); }
+
+/* XP for a single match log (or a draft preview). Base 50 + rating + review + location. */
+function computeMatchXP(o){
+  let xp = 50;                                   // base per logged match
+  if(o.rating) xp += 10;                         // rated
+  if(o.review && String(o.review).trim()) xp += 20; // wrote a review
+  if(o.location === 'stadium') xp += 100;
+  else if(o.location === 'home') xp += 50;
+  else if(o.location === 'bar') xp += 60;
+  return xp;
+}
+
+/* Total XP is DERIVED from the logs, so editing updates in place and a match
+   can never be double-counted ("no duplicate XP"). */
+function totalXP(){
+  return Object.values(state.logs).reduce((sum,l)=>sum + computeMatchXP(l), 0);
+}
+
+/* Current level, next level and progress percentage toward it. */
+function levelInfo(){
+  const xp = totalXP();
+  let idx = 0;
+  for(let i=0;i<LEVELS.length;i++){ if(xp >= LEVELS[i].min) idx = i; }
+  const cur = LEVELS[idx];
+  const next = LEVELS[idx+1] || null;
+  let pct = 100;
+  if(next){
+    pct = Math.round((xp - cur.min) / (next.min - cur.min) * 100);
+    pct = Math.max(0, Math.min(100, pct));
+  }
+  return { xp, idx, cur, next, pct };
+}
+
+/* Streak: +1 on a new consecutive day, reset to 1 if a day was skipped. */
+function updateStreak(today){
+  const s = state.streak;
+  if(s.lastLogDate === today) return;                 // already counted today
+  const yesterday = dateStr(addDays(parseDate(today), -1));
+  s.current = (s.lastLogDate === yesterday) ? s.current + 1 : 1;
+  s.lastLogDate = today;
+  if(s.current > s.best) s.best = s.current;
+}
+
+/* Unlock any newly-earned badges (sticky once earned). */
+function evaluateBadges(){
+  BADGES.forEach(b=>{ if(!state.badges[b.id] && b.cond()) state.badges[b.id] = Date.now(); });
+}
+
+/* Weekly challenges. The first two track real progress; "Attend a live match"
+   is shown completed in the demo. */
+function challengeProgress(){
+  const logs = Object.values(state.logs);
+  const reviews = logs.filter(l=>l.review && l.review.trim()).length;
+  const live = logs.filter(l=>l.location==='stadium').length;
+  return [
+    { id:'log5', label:'Κατέγραψε 5 αγώνες', icon:'📋', cur:Math.min(logs.length,5), target:5, reward:150, color:'var(--green)' },
+    { id:'rev3', label:'Γράψε 3 κριτικές',   icon:'✍️', cur:Math.min(reviews,3),      target:3, reward:100, color:'var(--gold)' },
+    { id:'live', label:'Δες έναν αγώνα live', icon:'🏟️', cur:Math.max(live,1),         target:1, reward:200, color:'var(--purple)' },
+  ];
+}
+
+/* Pick readable text colour for a coloured team badge. */
+function textColorFor(hex){
+  const c = hex.replace('#','');
+  const r=parseInt(c.substr(0,2),16), g=parseInt(c.substr(2,2),16), b=parseInt(c.substr(4,2),16);
+  return (0.299*r + 0.587*g + 0.114*b) > 150 ? '#11110f' : '#ffffff';
+}
+
+/* =============================================================================
+   (3) RENDER / SCREENS  (pure-ish: build HTML strings from state)
+============================================================================= */
+
+function teamBadge(team, size){
+  const s = size || 46;
+  return `<span class="badge-circle" style="background:${team.color};color:${textColorFor(team.color)};width:${s}px;height:${s}px">${esc(team.abbr)}</span>`;
+}
+
+function starsDisplay(n){
+  let out = '';
+  for(let i=1;i<=5;i++) out += (i<=n ? '★' : '☆');
+  return out;
+}
+
+function topBar(){
+  const li = levelInfo();
+  return `<div class="topbar">
+    <div class="wordmark">Bleach<span class="b">ers</span></div>
+    <div class="chips">
+      <div class="chip flame" data-action="nav" data-screen="progress">🔥 ${state.streak.current}</div>
+      <div class="chip level" data-action="nav" data-screen="progress">${li.cur.emoji} ${li.xp} XP</div>
+    </div>
+  </div>`;
+}
+
+/* ---------- FEED ---------- */
+function renderFeed(){
+  const sport = state.activeSport;
+  const matches = MATCHES.filter(m=>m.sport===sport);
+  return `
+    <div class="toggle">
+      <button class="${sport==='football'?'on':''}" data-action="setSport" data-sport="football">⚽ Ποδόσφαιρο</button>
+      <button class="${sport==='basketball'?'on':''}" data-action="setSport" data-sport="basketball">🏀 Μπάσκετ</button>
+    </div>
+    <h1>Η Ροή σου</h1>
+    <p class="sub">Κατέγραψε αγώνες — είτε στο γήπεδο είτε στον καναπέ.</p>
+    ${matches.map(renderMatchCard).join('')}
+  `;
+}
+
+function renderMatchCard(m){
+  const log = state.logs[m.id];
+  const tags = [`<span class="tag">${esc(m.league)}</span>`];
+  if(m.derby) tags.push(`<span class="tag red">Ντέρμπι</span>`);
+  if(m.euro)  tags.push(`<span class="tag purple">Euro</span>`);
+  if(log)     tags.push(`<span class="tag green">✓ Καταγεγραμμένο</span>`);
+
+  let footer;
+  if(log){
+    const snippet = log.review && log.review.trim()
+      ? `<div class="mc-snippet">“${esc(log.review.trim().slice(0,90))}${log.review.trim().length>90?'…':''}”</div>` : '';
+    const stadium = log.location==='stadium' ? `<span class="tag purple">🏟️ Stadium</span>` : '';
+    const potm = log.potm ? `<span class="tag gold">⭐ ${esc(log.potm)}</span>` : '';
+    footer = `<div class="mc-log">
+      <div class="between">
+        <span class="mc-stars">${starsDisplay(log.rating)}</span>
+        <span style="display:flex;gap:6px">${stadium}${potm}</span>
+      </div>${snippet}
+    </div>`;
+  } else {
+    footer = `<div class="mc-unlogged">Δεν το έχεις καταγράψει — πάτα για βαθμολογία ➜</div>`;
+  }
+
+  return `<div class="card match-card tap" data-action="openMatch" data-id="${m.id}">
+    <div class="mc-tags">${tags.join('')}</div>
+    <div class="mc-row">
+      <div class="mc-team">${teamBadge(m.home)}<div class="mc-name">${esc(m.home.name)}</div></div>
+      <div class="mc-score">${m.score.home} <span class="muted">-</span> ${m.score.away}</div>
+      <div class="mc-team">${teamBadge(m.away)}<div class="mc-name">${esc(m.away.name)}</div></div>
+    </div>
+    <div class="mc-date">📍 ${esc(m.venue)} · ${esc(m.date)}</div>
+    ${footer}
+  </div>`;
+}
+
+/* ---------- PICKER (FAB) ---------- */
+function renderPicker(){
+  const groups = [['football','⚽ Ποδόσφαιρο'],['basketball','🏀 Μπάσκετ']];
+  return `
+    <h1>Κατέγραψε αγώνα</h1>
+    <p class="sub">Διάλεξε ποιον αγώνα παρακολούθησες.</p>
+    ${groups.map(([sp,label])=>`
+      <div class="section-title">${label}</div>
+      ${MATCHES.filter(m=>m.sport===sp).map(m=>`
+        <div class="card tap" data-action="openMatch" data-id="${m.id}" style="padding:13px">
+          <div class="mc-row">
+            <div class="mc-team" style="width:78px">${teamBadge(m.home,38)}<div class="mc-name tiny">${esc(m.home.abbr)}</div></div>
+            <div class="mc-score" style="font-size:18px">${m.score.home}-${m.score.away}</div>
+            <div class="mc-team" style="width:78px">${teamBadge(m.away,38)}<div class="mc-name tiny">${esc(m.away.abbr)}</div></div>
+            <div style="margin-left:auto;text-align:right">
+              <div class="tiny muted">${esc(m.league)}</div>
+              ${state.logs[m.id]?'<div class="tag green tiny">✓</div>':'<div class="tag tiny">Log</div>'}
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    `).join('')}
+  `;
+}
+
+/* ---------- MATCH DETAIL (two tabs) ---------- */
+function renderMatchDetail(){
+  const d = App.ui.draft;
+  const m = matchById(d.matchId);
+  const isEdit = !!state.logs[d.matchId];
+  const body = d.tab==='experience' ? detailExperience(d,m) : detailMatch(d,m);
+
+  return `<div class="detail-head">
+      <button class="iconbtn" data-action="back">←</button>
+      <div>
+        <div class="detail-title">${esc(m.home.abbr)} ${m.score.home}-${m.score.away} ${esc(m.away.abbr)}</div>
+        <div class="tiny muted">${esc(m.league)} · ${esc(m.date)}</div>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="${d.tab!=='experience'?'on':''}" data-action="setTab" data-tab="match">The Match</button>
+      <button class="${d.tab==='experience'?'on':''}" data-action="setTab" data-tab="experience">The Experience</button>
+    </div>
+    <div class="detail-body" key="${d.tab}">${body}</div>`;
+}
+
+function detailMatch(d,m){
+  const stars = [1,2,3,4,5].map(i=>`<span class="${i<=d.rating?'on':''}" data-action="setRating" data-val="${i}">★</span>`).join('');
+  const potmPills = m.players.map((p,i)=>`<button class="pill ${d.potm===p?'on':''}" data-action="setPotm" data-idx="${i}">${esc(p)}</button>`).join('');
+  return `
+    <div class="card summary">
+      <div class="mc-team">${teamBadge(m.home)}<div class="mc-name">${esc(m.home.name)}</div></div>
+      <div class="mc-score">${m.score.home}-${m.score.away}</div>
+      <div class="mc-team">${teamBadge(m.away)}<div class="mc-name">${esc(m.away.name)}</div></div>
+    </div>
+
+    <div class="label">Βαθμολογία</div>
+    <div class="stars">${stars}</div>
+    <div class="rating-label">${d.rating?esc(RATING_LABELS[d.rating]):'Πάτησε τα αστέρια'}</div>
+
+    <div class="label">Η κριτική σου</div>
+    <textarea data-field="review" placeholder="Πώς ήταν ο αγώνας; Η ατμόσφαιρα, οι φάσεις, το συναίσθημα…">${esc(d.review)}</textarea>
+
+    <div class="label">Player of the Match</div>
+    <div class="pills">${potmPills}</div>
+
+    ${xpHint(d)}
+    ${logButton(d)}
+  `;
+}
+
+function detailExperience(d,m){
+  const opts = Object.keys(LOCATIONS).map(k=>{
+    const o = LOCATIONS[k];
+    return `<div class="loc-opt ${d.location===k?'on':''}" data-action="setLocation" data-loc="${k}">
+      <div class="ic">${o.icon}</div>
+      <div><div class="nm">${o.label}</div><div class="tiny muted">${o.sub}</div></div>
+      <div class="xp">+${o.xp} XP</div>
+    </div>`;
+  }).join('');
+
+  let stadiumExtras = '';
+  if(d.location==='stadium'){
+    const atmo = ATMOSPHERES.map(([k,lbl])=>`<button class="pill ${d.atmosphere.indexOf(k)>=0?'on':''}" data-action="toggleAtmo" data-atmo="${k}">${esc(lbl)}</button>`).join('');
+    stadiumExtras = `
+      <div class="stadium-note">🏟️ <b>Stadium badge</b> ξεκλειδώθηκε — ${esc(m.venue)}</div>
+      <div class="label">Ατμόσφαιρα</div>
+      <div class="pills">${atmo}</div>
+      <div class="label">Φωτογραφίες</div>
+      <div class="photo-grid">
+        <div class="photo-tile">📷</div><div class="photo-tile">📷</div><div class="photo-tile">＋</div>
+      </div>
+      <div class="tiny muted center mt8">Demo placeholder — οι φωτογραφίες δεν αποθηκεύονται.</div>
+    `;
+  }
+
+  return `
+    <div class="label">Πού το είδες;</div>
+    <div class="loc-opts">${opts}</div>
+    ${stadiumExtras}
+    <div class="label">Memory note</div>
+    <textarea data-field="memory" placeholder="Μια ανάμνηση από εκείνη τη μέρα…">${esc(d.memory)}</textarea>
+    ${xpHint(d)}
+    ${logButton(d)}
+  `;
+}
+
+function xpHint(d){
+  return `<div class="xp-hint">⚡ Θα κερδίσεις ≈ <b class="xp-hint-val">${computeMatchXP(d)}</b> XP</div>`;
+}
+function logButton(d){
+  const isEdit = !!state.logs[d.matchId];
+  return `<button class="logbtn ${isEdit?'edit':''}" data-action="logMatch">${isEdit?'Ενημέρωσε την καταγραφή':'Κατέγραψε τον αγώνα'}</button>`;
+}
+
+/* ---------- CHALLENGES ---------- */
+function renderChallenges(){
+  const chals = challengeProgress();
+  return `
+    <h1>Προκλήσεις</h1>
+    <p class="sub">Εβδομαδιαίοι στόχοι — κράτα το σερί σου ζωντανό.</p>
+    ${chals.map(c=>{
+      const done = c.cur>=c.target;
+      const pct = Math.round(c.cur/c.target*100);
+      return `<div class="card chal">
+        <div class="between">
+          <div style="font-weight:700">${c.icon} ${esc(c.label)}</div>
+          ${done?`<div class="done">✓ Έτοιμο</div>`:`<div class="rew">+${c.reward} XP</div>`}
+        </div>
+        <div class="bar"><div class="fill" data-fill="${pct}%" style="width:0;background:${c.color}"></div></div>
+        <div class="chal-prog">${c.cur}/${c.target}</div>
+      </div>`;
+    }).join('')}
+    <div class="section-title">Leaderboard φίλων</div>
+    ${renderLeaderboard()}
+  `;
+}
+
+function renderLeaderboard(){
+  const me = { name:state.user.name, xp:totalXP(), me:true };
+  const rows = FRIENDS.map(f=>({...f})).concat([me]).sort((a,b)=>b.xp-a.xp);
+  const medals = ['🥇','🥈','🥉'];
+  return `<div class="card">${rows.map((r,i)=>`
+    <div class="lb-row ${r.me?'me':''}">
+      <div class="lb-rank">${medals[i]||('#'+(i+1))}</div>
+      <div class="lb-av">${esc(r.name[0])}</div>
+      <div class="lb-name">${esc(r.name)}${r.me?' (εσύ)':''}</div>
+      <div class="lb-xp">${r.xp} XP</div>
+    </div>`).join('')}</div>`;
+}
+
+/* ---------- PROGRESS ---------- */
+function renderProgress(){
+  const li = levelInfo();
+  const nextHint = li.next
+    ? `${li.next.min - li.xp} XP για ${li.next.emoji} ${li.next.name}`
+    : 'Έφτασες στην κορυφή 👑';
+  return `
+    <h1>Πρόοδος</h1>
+    <p class="sub">Το ταξίδι σου από Casual σε Legend.</p>
+
+    <div class="card level-card">
+      <div class="level-top">
+        <div class="level-emoji">${li.cur.emoji}</div>
+        <div>
+          <div class="level-name">${li.cur.name}</div>
+          <div class="level-xp">${li.xp} XP συνολικά</div>
+        </div>
+      </div>
+      <div class="bar lg"><div class="fill" data-fill="${li.pct}%" style="width:0;background:linear-gradient(90deg,var(--green),var(--gold))"></div></div>
+      <div class="next-hint">${esc(nextHint)}</div>
+    </div>
+
+    <div class="card">
+      <div class="between">
+        <div><div style="font-size:18px;font-weight:800">🔥 ${state.streak.current} μέρες σερί</div>
+        <div class="tiny muted">Καλύτερο σερί: ${state.streak.best} μέρες</div></div>
+        <div class="level-emoji">🔥</div>
+      </div>
+    </div>
+
+    <div class="section-title">Badges</div>
+    <div class="badge-grid">
+      ${BADGES.map(b=>`<div class="badge ${state.badges[b.id]?'on':''}" data-action="openBadge" data-id="${b.id}">
+        <div class="be">${b.emoji}</div><div class="bn">${esc(b.name)}</div>
+      </div>`).join('')}
+    </div>
+
+    <div class="section-title">Leaderboard</div>
+    ${renderLeaderboard()}
+  `;
+}
+
+/* ---------- PROFILE ---------- */
+function renderProfile(){
+  const logs = Object.values(state.logs);
+  const reviews = logs.filter(l=>l.review && l.review.trim()).length;
+  const stadiums = logs.filter(l=>l.location==='stadium').length;
+  const rated = logs.filter(l=>l.rating);
+  const avg = rated.length ? (rated.reduce((a,l)=>a+l.rating,0)/rated.length).toFixed(1) : '–';
+  const fb = logs.filter(l=>{const m=matchById(l.matchId);return m&&m.sport==='football';}).length;
+  const total = logs.length;
+  const pf = total ? Math.round(fb/total*100) : 0;
+  const pb = total ? Math.round((total-fb)/total*100) : 0;
+
+  const recent = logs
+    .sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||''))
+    .slice(0,5)
+    .map(l=>{
+      const m = matchById(l.matchId);
+      if(!m) return '';
+      return `<div class="recent">
+        ${teamBadge(m.home,30)}
+        <div><div style="font-weight:700;font-size:14px">${esc(m.home.abbr)} ${m.score.home}-${m.score.away} ${esc(m.away.abbr)}</div>
+        <div class="tiny muted">${esc(m.league)}${l.location?' · '+esc(LOCATIONS[l.location].label):''}</div></div>
+        <div class="rs">${starsDisplay(l.rating)}</div>
+      </div>`;
+    }).join('');
+
+  const statsBlock = state.settings.showStats ? `
+    <div class="section-title">Στατιστικά 2026</div>
+    <div class="stat-grid">
+      <div class="stat"><div class="v">${avg}</div><div class="k">Μ.Ο. βαθμολογίας</div></div>
+      <div class="stat"><div class="v">${stadiums}</div><div class="k">Live στο γήπεδο</div></div>
+      <div class="stat"><div class="v">${pf}%</div><div class="k">Ποδόσφαιρο</div></div>
+      <div class="stat"><div class="v">${pb}%</div><div class="k">Μπάσκετ</div></div>
+    </div>` : '';
+
+  return `
+    <h1>Προφίλ</h1>
+    <div class="card">
+      <div class="prof-head">
+        <div class="avatar">${esc(state.user.name[0])}</div>
+        <div>
+          <div class="prof-name">${esc(state.user.name)}</div>
+          <div class="tiny muted">${esc(state.user.handle)} · 📍 ${esc(state.user.city)}</div>
+        </div>
+      </div>
+      <div class="counters">
+        <div class="counter"><div class="v">${total}</div><div class="k">Αγώνες</div></div>
+        <div class="counter"><div class="v">${reviews}</div><div class="k">Κριτικές</div></div>
+        <div class="counter"><div class="v">${stadiums}</div><div class="k">Γήπεδα</div></div>
+        <div class="counter"><div class="v">${FRIENDS.length}</div><div class="k">Φίλοι</div></div>
+      </div>
+    </div>
+
+    <div class="section-title">Αγαπημένες ομάδες</div>
+    <div>${state.user.favoriteTeams.map(t=>`
+      <span class="team-pill"><span class="team-dot" style="background:${t.color}"></span>${esc(t.name)}
+      <span class="sp">${t.sport==='football'?'⚽':'🏀'}</span></span>`).join('')}</div>
+
+    ${statsBlock}
+
+    <div class="section-title">Ρυθμίσεις</div>
+    <div class="card">
+      <div class="between">
+        <div><div style="font-weight:700">Εμφάνιση στατιστικών</div><div class="tiny muted">Δείξε/κρύψε το 2026 grid</div></div>
+        <div class="toggle-switch ${state.settings.showStats?'on':''}" data-action="toggleStats"></div>
+      </div>
+      <div style="border-top:1px solid var(--border);margin:14px 0"></div>
+      <div class="between">
+        <div><div style="font-weight:700">Reset all data</div><div class="tiny muted">Διαγράφει τα πάντα οριστικά</div></div>
+        <div class="danger" data-action="confirmReset">Reset</div>
+      </div>
+    </div>
+
+    <div class="section-title">Πρόσφατες καταγραφές</div>
+    <div class="card">${recent || '<div class="empty">Δεν έχεις καταγράψει αγώνες ακόμα.</div>'}</div>
+  `;
+}
+
+/* ---------- CELEBRATION OVERLAY ---------- */
+function renderCelebration(){
+  const c = App.ui.celebration;
+  const li = c.level;
+  const chips = c.breakdown.map((b,i)=>`<div class="celeb-chip" style="animation-delay:${0.1+i*0.08}s">${esc(b.label)} <span class="v">+${b.val}</span></div>`).join('');
+  const badges = c.newBadges.map((id,i)=>{
+    const b = BADGES.find(x=>x.id===id);
+    return `<div class="celeb-badge" style="animation-delay:${0.3+i*0.12}s">
+      <div class="be">${b.emoji}</div><div class="bt">NEW BADGE</div><div class="bn">${esc(b.name)}</div></div>`;
+  }).join('');
+
+  return `<div class="celebration"><div class="celeb-inner">
+    <div class="celeb-emoji">${c.sport==='football'?'⚽':'🏀'}</div>
+    <div class="celeb-title">Καταγράφηκε!</div>
+    <div class="celeb-sub">${esc(c.teams)}</div>
+    <div class="celeb-xp">+${c.xp} XP</div>
+    <div class="celeb-chips">${chips}</div>
+    <div class="celeb-streak">🔥 ${c.streak} ${c.streak===1?'μέρα':'μέρες'} σερί</div>
+
+    <div class="celeb-level">
+      <div class="between"><div style="font-weight:800">${li.cur.emoji} ${li.cur.name}</div>
+      <div class="tiny muted">${li.next?(li.next.min-li.xp)+' XP → '+li.next.name:'MAX'}</div></div>
+      <div class="bar lg"><div class="fill" data-fill="${li.pct}%" style="width:0;background:linear-gradient(90deg,var(--green),var(--gold))"></div></div>
+    </div>
+
+    ${badges?`<div class="celeb-badges">${badges}</div>`:''}
+    <button class="celeb-cont" data-action="continueCeleb">Συνέχεια</button>
+  </div></div>`;
+}
+
+/* ---------- MODALS ---------- */
+function ratingModalHTML(){
+  return `<div class="modal-card">
+    <div class="modal-emoji">⭐</div>
+    <h3 class="center">Χρειάζεται βαθμολογία</h3>
+    <p class="center">Βάλε τουλάχιστον μία βαθμολογία (1–5 αστέρια) πριν καταγράψεις τον αγώνα.</p>
+    <div class="modal-actions"><button class="btn primary" data-action="closeModal">Εντάξει</button></div>
+  </div>`;
+}
+function resetModalHTML(){
+  return `<div class="modal-card">
+    <div class="modal-emoji">⚠️</div>
+    <h3 class="center">Reset all data;</h3>
+    <p class="center">Θα διαγραφούν όλες οι καταγραφές, το XP, τα badges και τα σερί. Δεν αναιρείται.</p>
+    <div class="modal-actions">
+      <button class="btn ghost" data-action="closeModal">Άκυρο</button>
+      <button class="btn red" data-action="doReset">Διαγραφή</button>
+    </div>
+  </div>`;
+}
+function badgeModalHTML(id){
+  const b = BADGES.find(x=>x.id===id);
+  const unlocked = !!state.badges[id];
+  const when = unlocked ? new Date(state.badges[id]).toLocaleDateString('el-GR') : null;
+  return `<div class="modal-card">
+    <div class="modal-emoji" style="${unlocked?'':'filter:grayscale(1);opacity:.4'}">${b.emoji}</div>
+    <h3 class="center">${esc(b.name)}</h3>
+    <p class="center">${esc(b.desc)}</p>
+    <div class="center" style="margin-bottom:16px;font-weight:700;color:${unlocked?'var(--green)':'var(--muted)'}">
+      ${unlocked?('✓ Ξεκλειδώθηκε '+when):'🔒 Κλειδωμένο'}
+    </div>
+    <div class="modal-actions"><button class="btn primary" data-action="closeModal">Κλείσιμο</button></div>
+  </div>`;
+}
+
+/* ---------- BOTTOM NAV ---------- */
+function bottomNav(active){
+  const item = (screen,icon,label)=>`<button class="nav-item ${active===screen?'active':''}" data-action="nav" data-screen="${screen}">
+    <span class="ni">${icon}</span><span>${label}</span></button>`;
+  return `<nav class="bottom-nav">
+    ${item('feed','🏠','Ροή')}
+    ${item('challenges','🎯','Προκλήσεις')}
+    <button class="fab" data-action="openPicker">＋</button>
+    ${item('progress','📈','Πρόοδος')}
+    ${item('profile','👤','Προφίλ')}
+  </nav>`;
+}
+
+/* ---------- ROOT RENDER ---------- */
+function screenBody(screen){
+  switch(screen){
+    case 'feed':       return renderFeed();
+    case 'challenges': return renderChallenges();
+    case 'progress':   return renderProgress();
+    case 'profile':    return renderProfile();
+    case 'picker':     return renderPicker();
+    default:           return renderFeed();
+  }
+}
+
+function render(){
+  const ui = App.ui;
+  const base = ui.screen==='celebration' ? 'feed' : ui.screen;  // celebration floats over feed
+  let html = '<div class="shell">';
+
+  if(base==='matchDetail'){
+    html += renderMatchDetail();
+  } else {
+    html += topBar();
+    html += `<div class="screen">${screenBody(base)}</div>`;
+  }
+  html += bottomNav(base);
+  html += '</div>';
+
+  if(ui.screen==='celebration') html += renderCelebration();
+  if(ui.modal) html += `<div class="overlay">${ui.modal}</div>`;
+
+  document.getElementById('app').innerHTML = html;
+  animateBars();
+}
+
+/* After each render, grow every progress bar from 0 → its target width. */
+function animateBars(){
+  requestAnimationFrame(()=>{
+    document.querySelectorAll('[data-fill]').forEach(el=>{ el.style.width = el.dataset.fill; });
+  });
+}
+
+/* =============================================================================
+   (4) ACTIONS  (user intents → mutate state → save → re-render)
+============================================================================= */
+
+function setSport(sport){ state.activeSport = sport; save(); render(); }
+
+function nav(screen){ App.ui.screen = screen; window.scrollTo(0,0); render(); }
+
+function openMatch(id){
+  if(App.ui.screen !== 'matchDetail') App.ui.backScreen = App.ui.screen;
+  const log = state.logs[id];
+  App.ui.draft = log ? {
+    matchId:id, rating:log.rating, review:log.review||'', potm:log.potm||null,
+    location:log.location||null, atmosphere:[...(log.atmosphere||[])], memory:log.memory||'', tab:'match'
+  } : {
+    matchId:id, rating:0, review:'', potm:null, location:null, atmosphere:[], memory:'', tab:'match'
+  };
+  App.ui.screen = 'matchDetail';
+  window.scrollTo(0,0);
+  render();
+}
+
+/* Persist a draft as a real log, then run all gamification. */
+function applyLog(draft){
+  const beforeBadges = Object.keys(state.badges);
+  const existing = state.logs[draft.matchId];
+  state.logs[draft.matchId] = {
+    matchId:draft.matchId,
+    rating:draft.rating,
+    review:draft.review||'',
+    potm:draft.potm||null,
+    location:draft.location||null,
+    atmosphere:draft.atmosphere||[],
+    memory:draft.memory||'',
+    loggedAt: existing ? existing.loggedAt : new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  updateStreak(dateStr(new Date()));     // streak follows real-world "today"
+  evaluateBadges();
+  const newBadges = Object.keys(state.badges).filter(k=>beforeBadges.indexOf(k)<0);
+  save();
+  return { xp:computeMatchXP(state.logs[draft.matchId]), newBadges };
+}
+
+function logMatch(){
+  const d = App.ui.draft;
+  if(!d.rating){ App.ui.modal = ratingModalHTML(); render(); return; }   // require a rating
+
+  const res = applyLog(d);
+  const m = matchById(d.matchId);
+  const log = state.logs[d.matchId];
+
+  // Build the XP breakdown shown in the celebration.
+  const breakdown = [{ label:'Βάση', val:50 }];
+  if(log.rating) breakdown.push({ label:'Βαθμολογία', val:10 });
+  if(log.review && log.review.trim()) breakdown.push({ label:'Κριτική', val:20 });
+  if(log.location) breakdown.push({ label:LOCATIONS[log.location].label, val:LOCATIONS[log.location].xp });
+
+  App.ui.celebration = {
+    sport:m.sport,
+    teams:`${m.home.name} ${m.score.home}-${m.score.away} ${m.away.name}`,
+    xp:res.xp,
+    breakdown,
+    streak:state.streak.current,
+    level:levelInfo(),
+    newBadges:res.newBadges,
+  };
+  App.ui.screen = 'celebration';
+  window.scrollTo(0,0);
+  render();
+}
+
+function continueCeleb(){
+  const sport = App.ui.celebration && App.ui.celebration.sport;
+  App.ui.celebration = null;
+  App.ui.draft = null;
+  if(sport) state.activeSport = sport;
+  save();
+  nav('feed');
+}
+
+function toggleStats(){ state.settings.showStats = !state.settings.showStats; save(); render(); }
+function confirmReset(){ App.ui.modal = resetModalHTML(); render(); }
+function doReset(){
+  state = defaultState();
+  save();
+  App.ui = { screen:'feed', backScreen:'feed', draft:null, celebration:null, modal:null };
+  render();
+}
+function closeModal(){ App.ui.modal = null; render(); }
+function openBadge(id){ App.ui.modal = badgeModalHTML(id); render(); }
+
+/* =============================================================================
+   (5) NAVIGATION & INIT  (one delegated listener set, then bootstrap)
+============================================================================= */
+
+/* Map of data-action → handler. Each handler receives the clicked element. */
+const ACTIONS = {
+  nav:        el => nav(el.dataset.screen),
+  setSport:   el => setSport(el.dataset.sport),
+  openPicker: () => nav('picker'),
+  openMatch:  el => openMatch(el.dataset.id),
+  back:       () => nav(App.ui.backScreen || 'feed'),
+  setTab:     el => { App.ui.draft.tab = el.dataset.tab; render(); },
+  setRating:  el => { App.ui.draft.rating = +el.dataset.val; render(); },
+  setPotm:    el => { const m = matchById(App.ui.draft.matchId); App.ui.draft.potm = m.players[+el.dataset.idx]; render(); },
+  setLocation:el => { App.ui.draft.location = el.dataset.loc; render(); },
+  toggleAtmo: el => {
+    const arr = App.ui.draft.atmosphere, k = el.dataset.atmo, i = arr.indexOf(k);
+    if(i>=0) arr.splice(i,1); else arr.push(k);
+    render();
+  },
+  logMatch:      () => logMatch(),
+  continueCeleb: () => continueCeleb(),
+  toggleStats:   () => toggleStats(),
+  confirmReset:  () => confirmReset(),
+  doReset:       () => doReset(),
+  closeModal:    () => closeModal(),
+  openBadge:     el => openBadge(el.dataset.id),
+};
+
+/* Single delegated click handler for the whole app. */
+document.addEventListener('click', e=>{
+  const t = e.target.closest('[data-action]');
+  if(!t) return;
+  const fn = ACTIONS[t.getAttribute('data-action')];
+  if(fn){ e.preventDefault(); fn(t); }
+});
+
+/* Single delegated input handler: keep the draft in sync WITHOUT re-rendering
+   (so the textarea caret never jumps); only the live XP hint is patched. */
+document.addEventListener('input', e=>{
+  const field = e.target.getAttribute && e.target.getAttribute('data-field');
+  if(!field || !App.ui.draft) return;
+  App.ui.draft[field] = e.target.value;
+  if(field === 'review'){
+    const xp = computeMatchXP(App.ui.draft);
+    document.querySelectorAll('.xp-hint-val').forEach(el=>{ el.textContent = xp; });
+  }
+});
+
+/* Bootstrap. */
+render();
+</script>
+</body>
+</html>
