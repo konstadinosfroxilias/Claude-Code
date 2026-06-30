@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* offset for the sticky nav when jumping to anchors */
+    scroll-padding-top: 5rem;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-cream text-charcoal font-sans antialiased;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display tracking-wide;
+  }
+
+  /* Visible, branded focus states for accessibility */
+  :focus-visible {
+    @apply outline-none ring-2 ring-amber-brand ring-offset-2 ring-offset-cream rounded;
+  }
+}
+
+@layer components {
+  .container-px {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-title {
+    @apply font-display text-3xl sm:text-4xl md:text-5xl text-charcoal uppercase tracking-wide;
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] text-doner-red;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-amber-brand focus-visible:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply btn bg-doner-red text-white hover:bg-doner-red-dark px-6 py-3 shadow-soft;
+  }
+
+  .btn-secondary {
+    @apply btn bg-charcoal text-white hover:bg-charcoal-soft px-6 py-3;
+  }
+
+  .btn-ghost {
+    @apply btn bg-white/90 text-charcoal hover:bg-white px-6 py-3 ring-1 ring-black/10;
+  }
+
+  .card {
+    @apply rounded-3xl bg-white shadow-card ring-1 ring-black/5;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold;
+  }
+
+  .input {
+    @apply w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-charcoal placeholder:text-charcoal/35 focus:border-doner-red focus:outline-none focus:ring-2 focus:ring-doner-red/20;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Faint city-skyline divider drawn in CSS (no image needed) */
+  .skyline {
+    background-repeat: repeat-x;
+    background-position: bottom center;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
