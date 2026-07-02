@@ -8,6 +8,7 @@ import { useCart, type CartOptions } from '../context/CartContext'
 import MenuItemCard from './MenuItemCard'
 import BigDonerCard from './BigDonerCard'
 import OptionModal from './OptionModal'
+import Blobs from './Blobs'
 
 type Filter = 'all' | CategoryId
 
@@ -48,13 +49,14 @@ export default function Menu() {
   ]
 
   return (
-    <section id="menu" className="scroll-mt-20 bg-cream py-16 sm:py-24">
-      <div className="container-px">
+    <section id="menu" className="grain relative scroll-mt-20 overflow-hidden bg-cream py-16 sm:py-24">
+      <Blobs />
+      <div className="container-px relative">
         {/* header */}
         <div className="max-w-2xl">
           <span className="eyebrow">🔥 {t.menu.eyebrow}</span>
-          <h2 className="section-title mt-3">{t.menu.title}</h2>
-          <p className="mt-3 text-charcoal/70">{t.menu.subtitle}</p>
+          <h2 className="section-title mt-3 text-balance">{t.menu.title}</h2>
+          <p className="mt-3 text-pretty text-charcoal/70">{t.menu.subtitle}</p>
         </div>
 
         {/* location switcher */}
@@ -84,7 +86,7 @@ export default function Menu() {
           </div>
         </div>
 
-        {/* category tabs */}
+        {/* category tabs with sliding active indicator */}
         <div className="no-scrollbar mt-6 flex gap-2 overflow-x-auto pb-1">
           {tabs.map((tab) => {
             const active = filter === tab.id
@@ -93,13 +95,20 @@ export default function Menu() {
                 key={tab.id}
                 onClick={() => setFilter(tab.id)}
                 aria-pressed={active}
-                className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                className={`relative whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
                   active
-                    ? 'bg-charcoal text-white shadow-soft'
+                    ? 'text-white'
                     : 'bg-white text-charcoal/70 ring-1 ring-black/5 hover:text-charcoal'
                 }`}
               >
-                {tab.label}
+                {active && (
+                  <motion.span
+                    layoutId="menuTabPill"
+                    transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                    className="absolute inset-0 rounded-full bg-charcoal shadow-soft"
+                  />
+                )}
+                <span className="relative z-10">{tab.label}</span>
               </button>
             )
           })}

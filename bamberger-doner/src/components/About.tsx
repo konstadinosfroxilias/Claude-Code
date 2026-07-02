@@ -5,24 +5,28 @@ import { business } from '../config/content'
 import { images } from '../config/images'
 import SmartImage from './SmartImage'
 import Stamp from './Stamp'
+import CountUp from './CountUp'
+import Blobs from './Blobs'
 
 export default function About() {
   const { t, lang } = useLang()
+  const locale = lang === 'de' ? 'de-DE' : 'en-US'
 
   const stats = [
-    { icon: Star, value: `${business.rating.toLocaleString(lang === 'de' ? 'de-DE' : 'en-US')}★`, label: t.about.statRating },
-    { icon: Store, value: '2', label: t.about.statShops },
-    { icon: Heart, value: business.since.toString(), label: t.about.statSince },
+    { icon: Star, node: <CountUp value={business.rating} decimals={1} suffix="★" locale={locale} />, label: t.about.statRating },
+    { icon: Store, node: <CountUp value={2} locale={locale} />, label: t.about.statShops },
+    { icon: Heart, node: <CountUp value={business.since} grouping={false} />, label: t.about.statSince },
   ]
 
   return (
-    <section id="ueber-uns" className="scroll-mt-20 bg-cream-deep py-16 sm:py-24">
-      <div className="container-px grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+    <section id="ueber-uns" className="grain relative scroll-mt-20 overflow-hidden bg-cream-deep py-16 sm:py-24">
+      <Blobs />
+      <div className="container-px relative grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
         {/* text */}
         <div>
           <span className="eyebrow">{t.about.eyebrow}</span>
-          <h2 className="section-title mt-3">{t.about.title}</h2>
-          <div className="mt-5 space-y-4 text-charcoal/75">
+          <h2 className="section-title mt-3 text-balance">{t.about.title}</h2>
+          <div className="mt-5 space-y-4 text-pretty text-charcoal/75">
             <p>{t.about.p1}</p>
             <p>{t.about.p2}</p>
             <p className="font-medium text-charcoal">{t.about.p3}</p>
@@ -30,14 +34,22 @@ export default function About() {
 
           {/* stats */}
           <div className="mt-8 grid grid-cols-3 gap-3 sm:gap-4">
-            {stats.map((s) => {
+            {stats.map((s, i) => {
               const Icon = s.icon
               return (
-                <div key={s.label} className="card p-4 text-center">
+                <motion.div
+                  key={s.label}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: i * 0.1 }}
+                  whileHover={{ y: -4 }}
+                  className="card p-4 text-center"
+                >
                   <Icon className="mx-auto h-5 w-5 text-doner-red" aria-hidden />
-                  <div className="mt-1.5 font-display text-2xl text-charcoal sm:text-3xl">{s.value}</div>
+                  <div className="mt-1.5 font-display text-2xl text-charcoal sm:text-3xl">{s.node}</div>
                   <div className="mt-0.5 text-xs leading-tight text-charcoal/55">{s.label}</div>
-                </div>
+                </motion.div>
               )
             })}
           </div>
@@ -52,23 +64,29 @@ export default function About() {
           className="relative"
         >
           <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            <SmartImage
-              src={images.grill}
-              alt="Frisch vom Grill"
-              className="col-span-2 aspect-[16/10] rounded-4xl shadow-card"
-            />
-            <SmartImage
-              src={images.aboutInterior}
-              alt="Unser Laden"
-              className="aspect-square rounded-4xl shadow-card"
-            />
-            <SmartImage
-              src={images.heroSecondary}
-              alt="Döner Box"
-              className="aspect-square rounded-4xl shadow-card"
-            />
+            <div className="col-span-2 overflow-hidden rounded-4xl shadow-card">
+              <SmartImage
+                src={images.grill}
+                alt="Frisch vom Grill"
+                className="aspect-[16/10] w-full transition-transform duration-700 hover:scale-105"
+              />
+            </div>
+            <div className="overflow-hidden rounded-4xl shadow-card">
+              <SmartImage
+                src={images.aboutInterior}
+                alt="Unser Laden"
+                className="aspect-square w-full transition-transform duration-700 hover:scale-105"
+              />
+            </div>
+            <div className="overflow-hidden rounded-4xl shadow-card">
+              <SmartImage
+                src={images.heroSecondary}
+                alt="Döner Box"
+                className="aspect-square w-full transition-transform duration-700 hover:scale-105"
+              />
+            </div>
           </div>
-          <Stamp className="absolute -bottom-5 -left-3 sm:-left-5" />
+          <Stamp className="absolute -bottom-5 -left-3 animate-float-slow sm:-left-5" />
         </motion.div>
       </div>
     </section>

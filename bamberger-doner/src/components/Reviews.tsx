@@ -65,7 +65,8 @@ export default function Reviews() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-30px' }}
               transition={{ duration: 0.4, delay: i * 0.08 }}
-              className="card relative flex flex-col p-5"
+              whileHover={{ y: -6 }}
+              className="card relative flex flex-col p-5 transition-shadow hover:shadow-card"
             >
               <Quote className="absolute right-4 top-4 h-7 w-7 text-doner-red/10" aria-hidden />
               <Stars />

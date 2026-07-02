@@ -45,10 +45,38 @@ export default {
           '0%': { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
         },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-12px)' },
+        },
+        blob: {
+          '0%, 100%': { transform: 'translate(0, 0) scale(1)' },
+          '33%': { transform: 'translate(24px, -32px) scale(1.12)' },
+          '66%': { transform: 'translate(-20px, 18px) scale(0.92)' },
+        },
+        marquee: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
+        wiggle: {
+          '0%, 100%': { transform: 'rotate(-3deg)' },
+          '50%': { transform: 'rotate(3deg)' },
+        },
+        'gradient-pan': {
+          '0%, 100%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+        },
       },
       animation: {
         'spin-slow': 'spin-slow 14s linear infinite',
         shimmer: 'shimmer 2.5s linear infinite',
+        float: 'float 6s ease-in-out infinite',
+        'float-slow': 'float 9s ease-in-out infinite',
+        blob: 'blob 18s ease-in-out infinite',
+        marquee: 'marquee 32s linear infinite',
+        'marquee-fast': 'marquee 20s linear infinite',
+        wiggle: 'wiggle 0.4s ease-in-out',
+        'gradient-pan': 'gradient-pan 6s ease infinite',
       },
     },
   },

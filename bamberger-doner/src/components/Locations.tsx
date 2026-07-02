@@ -55,7 +55,8 @@ function LocationCard({ loc, i }: { loc: Location; i: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.45, delay: i * 0.1 }}
-      className="card overflow-hidden"
+      whileHover={{ y: -6 }}
+      className="card overflow-hidden transition-shadow hover:shadow-card"
     >
       <FauxMap label={`${loc.address}, ${loc.city}`} />
 

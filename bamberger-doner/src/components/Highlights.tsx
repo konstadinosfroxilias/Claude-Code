@@ -14,7 +14,7 @@ export default function Highlights() {
 
   return (
     <section className="bg-cream">
-      <div className="container-px -mt-10 pb-6 sm:-mt-14">
+      <div className="container-px py-10 sm:py-14">
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {items.map((item, i) => {
             const Icon = item.icon
@@ -25,10 +25,11 @@ export default function Highlights() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-40px' }}
                 transition={{ duration: 0.4, delay: i * 0.08 }}
-                className="card flex items-center gap-3 p-4 sm:flex-col sm:items-start sm:gap-3 sm:p-6"
+                whileHover={{ y: -6 }}
+                className="card group flex items-center gap-3 p-4 transition-shadow hover:shadow-card sm:flex-col sm:items-start sm:gap-4 sm:p-6"
               >
-                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-doner-red/10 text-doner-red sm:h-12 sm:w-12">
-                  <Icon className="h-6 w-6" aria-hidden />
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-doner-red/15 to-amber-brand/20 text-doner-red transition-transform group-hover:scale-110 sm:h-12 sm:w-12">
+                  <Icon className="h-6 w-6 transition-transform duration-300 group-hover:-rotate-12" aria-hidden />
                 </div>
                 <div>
                   <h3 className="font-heading text-sm font-bold uppercase leading-tight tracking-wide text-charcoal sm:text-base">
