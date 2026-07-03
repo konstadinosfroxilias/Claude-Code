@@ -151,7 +151,7 @@ button{font-family:inherit;cursor:pointer}
 .dhead .dt{font-weight:700;font-size:15px}
 .hero{margin:4px 14px 0;background:radial-gradient(120% 90% at 50% 0,rgba(93,202,165,.08),transparent 60%),var(--surface);
   border:1px solid var(--border);border-radius:18px;padding:18px 14px}
-.hero-top{text-align:center;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}
+.hero-top{display:flex;align-items:center;justify-content:center;gap:8px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}
 .hero-main{display:flex;align-items:flex-start;justify-content:space-between;gap:6px}
 .hero-team{width:108px;display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center}
 .hero-team .tn{font-size:13px;font-weight:700;line-height:1.2}
@@ -379,6 +379,10 @@ textarea:focus,input[type=text]:focus{outline:none;border-color:var(--accent)}
 .sec-head.open .chev{transform:rotate(180deg)}
 .dom-tag{font-size:9.5px;color:var(--faint);font-weight:600;white-space:nowrap;background:var(--surface2);
   border:1px solid var(--border-soft);border-radius:5px;padding:1px 5px;flex-shrink:0}
+/* competition logo on a small light chip so dark league art stays readable */
+.lg-badge{display:inline-flex;align-items:center;justify-content:center;background:#eef0ee;border-radius:6px;
+  padding:2.5px;flex-shrink:0;vertical-align:middle}
+.lg-badge img{width:100%;height:100%;object-fit:contain;display:block}
 .motd{background:linear-gradient(130deg,rgba(242,177,76,.12),transparent 55%),var(--surface);
   border:1px solid rgba(242,177,76,.5);border-radius:16px;overflow:hidden;margin-bottom:12px;animation:rise .3s ease both}
 .motd-head{display:flex;align-items:center;gap:8px;padding:11px 13px;font-size:12px;font-weight:800;
@@ -482,13 +486,14 @@ const TEAMS = {
   czv:{ name:'Crvena Zvezda', abbr:'CZV', color:'#D0103A', logo:SDB('5tlez31767366440'), sport:'basketball', str:.54, dom:'ABA Liga' },
 };
 
+const LGF = id => 'https://media.api-sports.io/football/leagues/' + id + '.png';
 const LEAGUE_META = {
-  'Premier League':{ color:'#3D195B', region:'England' },
-  'La Liga':{ color:'#E2231A', region:'Spain' },
-  'Bundesliga':{ color:'#D20515', region:'Germany' },
-  'Serie A':{ color:'#008FD7', region:'Italy' },
-  'Champions League':{ color:'#0A1E5C', region:'Europe' },
-  'EuroLeague':{ color:'#F36F21', region:'Europe' },
+  'Premier League':{ color:'#3D195B', region:'England', logo:LGF(39) },
+  'La Liga':{ color:'#E2231A', region:'Spain', logo:LGF(140) },
+  'Bundesliga':{ color:'#D20515', region:'Germany', logo:LGF(78) },
+  'Serie A':{ color:'#008FD7', region:'Italy', logo:LGF(135) },
+  'Champions League':{ color:'#0A1E5C', region:'Europe', logo:LGF(2) },
+  'EuroLeague':{ color:'#F36F21', region:'Europe', logo:'https://r2.thesportsdb.com/images/media/league/badge/7xjtuy1554397263.png' },
 };
 const LEAGUE_ORDER = {
   football:['Champions League','Premier League','La Liga','Bundesliga','Serie A'],
@@ -1000,7 +1005,9 @@ function preloadLogos(){
   const holder = document.createElement('div');
   holder.setAttribute('aria-hidden','true');
   holder.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;visibility:hidden';
-  new Set(Object.values(TEAMS).map(t=>t.logo).filter(Boolean)).forEach(u=>{
+  const urls = Object.values(TEAMS).map(t=>t.logo)
+    .concat(Object.values(LEAGUE_META).map(l=>l.logo));
+  new Set(urls.filter(Boolean)).forEach(u=>{
     const im = document.createElement('img');
     im.onload  = ()=>{ LOGO_STATE[u]='ok'; logoRefresh(); };
     im.onerror = ()=>{ LOGO_STATE[u]='fail'; };
@@ -1019,6 +1026,18 @@ function crest(team, size){
   }
   return '<span class="crest" style="width:'+s+'px;height:'+s+'px">'
     + '<span class="crest-fb" style="background:'+team.color+';color:'+textColorFor(team.color)+';font-size:'+Math.round(s*0.34)+'px">'+esc(team.abbr)+'</span></span>';
+}
+/* Competition badge: the real league/tournament logo once loaded, otherwise
+   the coloured-initials chip. */
+function leagueBadge(league, size){
+  const s = size||22;
+  const meta = LEAGUE_META[league]||{};
+  if(meta.logo && LOGO_STATE[meta.logo]==='ok'){
+    return '<span class="lg-badge" style="width:'+s+'px;height:'+s+'px">'
+      + '<img src="'+meta.logo+'" alt="'+esc(league)+'"></span>';
+  }
+  const initials = league.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  return '<span class="gbadge" style="background:'+(meta.color||'var(--faint)')+';width:'+s+'px;height:'+s+'px">'+esc(initials)+'</span>';
 }
 function starsGlyph(n){ let o=''; for(let i=1;i<=5;i++) o += (i<=n?'★':'☆'); return o; }
 function fmtDay(d){ return GRDAYS[d.getDay()]+' '+d.getDate()+' '+GRMON[d.getMonth()]; }
@@ -1066,8 +1085,6 @@ function matchRow(m){
 }
 /* Collapsible league section: tap the header to open and see the matches. */
 function leagueSection(league, matches){
-  const meta = LEAGUE_META[league]||{color:'var(--faint)',region:''};
-  const initials = league.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
   const liveIn = matches.filter(m=>m.status==='live').length;
   const favIn = matches.some(m=>state.user.favoriteTeams.indexOf(m.homeId)>-1 || state.user.favoriteTeams.indexOf(m.awayId)>-1);
   const key = state.activeSport+'|'+league;
@@ -1075,7 +1092,7 @@ function leagueSection(league, matches){
   const open = App.ui.openSecs[key];
   return '<div class="mgroup">'
     + '<button class="sec-head '+(open?'open':'')+'" data-action="toggleSection" data-sec="'+esc(key)+'" aria-expanded="'+open+'">'
-    + '<span class="gbadge" style="background:'+meta.color+'">'+esc(initials)+'</span>'
+    + leagueBadge(league,22)
     + '<span class="gname">'+esc(league)+'</span>'
     + '<span class="sec-meta">'
     + (liveIn?'<span class="sec-live"><span class="ld"></span>'+liveIn+' LIVE</span>':'')
@@ -1169,7 +1186,7 @@ function liveCard(m){
     + '<div class="lc-top"><span class="lc-badge"><span class="ld"></span>LIVE</span>'
     + '<span class="lc-clock" data-clock="'+m.id+'">'+esc(liveClock(m))+'</span>'
     + '<span class="hype '+hypeCls(h)+'" title="Παλμός" style="margin-left:2px">'+icon('pulse',11)+'<span data-hype="'+m.id+'">'+h+'</span></span>'
-    + '<span class="lc-league">'+esc(m.league)+'</span></div>'
+    + '<span class="lc-league">'+leagueBadge(m.league,16)+' '+esc(m.league)+'</span></div>'
     + '<div class="lc-team"><div class="tl" style="flex:1">'+crest(m.home,40)+'<span class="tn">'+esc(m.home.name)+'</span></div><span class="tsc">'+m.score.home+'</span></div>'
     + '<div class="lc-team"><div class="tl" style="flex:1">'+crest(m.away,40)+'<span class="tn">'+esc(m.away.name)+'</span></div><span class="tsc">'+m.score.away+'</span></div>'
     + (last?'<div class="lc-ticker">'+icon(last.type==='goal'?'goal':'clock',14)+'<span><b>'+esc(String(last.min))+'</b> '+esc(last.text)+'</span></div>':'')
@@ -1217,7 +1234,7 @@ function renderMatchDetail(){
     + '<div><div class="dt">'+esc(m.home.abbr)+(m.status==='ns'?' - ':' '+m.score.home+'-'+m.score.away+' ')+esc(m.away.abbr)+'</div>'
     + '<div class="tiny muted">'+esc(m.league)+' · '+fmtDay(dayDate(m.day))+'</div></div></div>'
     + '<div class="hero">'
-    + '<div class="hero-top">'+esc(m.league)+' · '+esc((LEAGUE_META[m.league]||{}).region||'')+'</div>'
+    + '<div class="hero-top">'+leagueBadge(m.league,18)+'<span>'+esc(m.league)+' · '+esc((LEAGUE_META[m.league]||{}).region||'')+'</span></div>'
     + '<div class="hero-main">'
     + '<div class="hero-team">'+crest(m.home,56)+'<span class="tn">'+esc(m.home.name)+'</span>'+(m.home.dom&&m.home.dom!==m.league?'<span class="dom-tag">'+esc(m.home.dom)+'</span>':'')+'</div>'
     + '<div class="hero-mid">'+scoreHtml+statusHtml+'</div>'
