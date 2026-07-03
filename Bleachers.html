@@ -21,6 +21,13 @@
   --accent-dim:#0f3a2e;
   --gold:#F2B14C;
   --live:#F0413F;
+  --win:#2F9A70;
+  --lose:#C24B4A;
+  --draw:#5b6472;
+  /* chart marks — validated for the dark card surface (CVD + contrast checks) */
+  --ch1:#2F9A70;
+  --ch2:#3B78BE;
+  --ch3:#C08120;
   --radius:16px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -28,17 +35,18 @@ html,body{margin:0;padding:0}
 body{
   background:var(--bg);color:var(--text);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Helvetica,Arial,sans-serif;
-  line-height:1.45;-webkit-font-smoothing:antialiased;
-  overflow-x:hidden;
+  line-height:1.45;-webkit-font-smoothing:antialiased;overflow-x:hidden;
 }
 .shell{max-width:440px;margin:0 auto;min-height:100vh;position:relative;padding-bottom:88px;background:var(--bg)}
 button{font-family:inherit;cursor:pointer}
-.icon{display:block}
-.crest-sprite{position:absolute;width:0;height:0;overflow:hidden}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
+}
 
 /* utilities */
 .muted{color:var(--muted)} .tiny{font-size:11px} .small{font-size:13px}
-.center{text-align:center} .nums{font-variant-numeric:tabular-nums}
+.center{text-align:center}
 .row{display:flex;align-items:center} .between{display:flex;align-items:center;justify-content:space-between}
 .mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt20{margin-top:20px}
 .sec-title{font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700;margin:20px 4px 10px}
@@ -48,11 +56,13 @@ button{font-family:inherit;cursor:pointer}
   padding:14px 16px 10px;background:linear-gradient(180deg,var(--bg) 72%,rgba(13,15,19,0))}
 .brand{font-weight:800;font-size:19px;letter-spacing:.14em;text-transform:uppercase}
 .brand b{color:var(--accent);font-weight:800}
-.tb-right{display:flex;align-items:center;gap:10px}
+.tb-right{display:flex;align-items:center;gap:9px}
 .livecount{display:flex;align-items:center;gap:6px;background:rgba(240,65,63,.12);border:1px solid rgba(240,65,63,.4);
-  color:var(--live);font-size:12px;font-weight:800;padding:5px 10px;border-radius:999px;letter-spacing:.04em}
-.tb-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(140deg,var(--accent),#2f7d64);
-  color:#06241a;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px}
+  color:var(--live);font-size:12px;font-weight:800;padding:5px 10px;border-radius:999px;letter-spacing:.04em;cursor:pointer}
+.tb-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--surface);
+  color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.tb-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(140deg,var(--accent),#2f7d64);
+  color:#06241a;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;cursor:pointer;border:0}
 
 /* ============================ SCREEN TRANSITIONS ============================ */
 .screen{padding:0 14px;animation:rise .28s cubic-bezier(.22,1,.36,1) both}
@@ -60,12 +70,19 @@ button{font-family:inherit;cursor:pointer}
 .screen h1{font-size:23px;margin:4px 4px 2px;letter-spacing:-.01em}
 .screen .sub{color:var(--muted);font-size:13px;margin:0 4px 8px}
 
-/* ============================ SEGMENTED / CHIPS ============================ */
+/* ============================ SEGMENTED / CHIPS / DATE STRIP ============================ */
 .seg{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;margin:8px 4px}
 .seg button{flex:1;border:0;background:transparent;color:var(--muted);padding:10px;border-radius:9px;font-weight:700;font-size:14px;transition:.2s}
 .seg button.on{background:var(--elev);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.35)}
-.chips-row{display:flex;gap:8px;padding:4px;overflow-x:auto;scrollbar-width:none}
-.chips-row::-webkit-scrollbar{display:none}
+.datestrip{display:flex;gap:6px;padding:4px;overflow-x:auto;scrollbar-width:none}
+.datestrip::-webkit-scrollbar{display:none}
+.dchip{flex:1;min-width:60px;border:1px solid var(--border);background:var(--surface);color:var(--muted);
+  padding:7px 4px;border-radius:12px;text-align:center;transition:.15s}
+.dchip .dw{font-size:10px;text-transform:uppercase;letter-spacing:.06em;display:block}
+.dchip .dn{font-size:14px;font-weight:800;display:block;color:var(--text)}
+.dchip.on{background:var(--accent);border-color:var(--accent)}
+.dchip.on .dw,.dchip.on .dn{color:#06241a}
+.dchip .dot{width:4px;height:4px;border-radius:50%;background:var(--live);display:inline-block;margin-top:2px}
 .fchip{border:1px solid var(--border);background:var(--surface);color:var(--muted);padding:7px 13px;border-radius:999px;
   font-size:13px;font-weight:600;white-space:nowrap;transition:.15s}
 .fchip.on{background:var(--accent);border-color:var(--accent);color:#06241a}
@@ -76,7 +93,7 @@ button{font-family:inherit;cursor:pointer}
   font-weight:800;letter-spacing:.01em;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
 .crest-img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
 
-/* ============================ MATCH GROUPS / ROWS (Flashscore) ============================ */
+/* ============================ MATCH GROUPS / ROWS ============================ */
 .mgroup{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:12px}
 .ghead{display:flex;align-items:center;gap:9px;padding:11px 13px;background:var(--surface2);border-bottom:1px solid var(--border)}
 .gbadge{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;flex-shrink:0}
@@ -85,40 +102,45 @@ button{font-family:inherit;cursor:pointer}
 .ghead.live{background:linear-gradient(90deg,rgba(240,65,63,.16),transparent)}
 .ghead.live .gname{color:var(--live)}
 .ghead.fav .gname{color:var(--gold)}
-
-.mrow{display:flex;align-items:center;gap:10px;padding:9px 12px;border-top:1px solid var(--border-soft);transition:background .15s}
+.mrow{display:flex;align-items:center;gap:10px;padding:9px 12px;border-top:1px solid var(--border-soft);transition:background .15s;cursor:pointer}
 .mrow:first-child{border-top:0}
 .mrow:active{background:var(--surface2)}
 .mrow.logged{box-shadow:inset 3px 0 0 var(--accent)}
-.mstat{width:34px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.25}
-.mstat .min{color:var(--live);font-weight:800;font-size:12px;display:flex;align-items:center;gap:3px}
-.mstat .ld{width:6px;height:6px;border-radius:50%;background:var(--live);animation:pulse 1.1s infinite}
+.mstat{width:38px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.25}
+.mstat .min{color:var(--live);font-weight:800;font-size:11.5px;display:flex;align-items:center;gap:3px;text-align:center}
+.mstat .ld{width:6px;height:6px;border-radius:50%;background:var(--live);animation:pulse 1.1s infinite;flex-shrink:0}
 .mstat .ft{font-size:10.5px;font-weight:700;color:var(--faint)}
-.mstat .dd{font-size:10px;color:var(--faint)}
+.mstat .tt{font-size:11.5px;font-weight:700;color:var(--muted)}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
 .mteams{flex:1;min-width:0}
 .tl{display:flex;align-items:center;gap:9px;padding:2.5px 0}
 .tn{flex:1;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#d6dbe3}
 .tsc{font-weight:800;font-variant-numeric:tabular-nums;font-size:15px;min-width:16px;text-align:right;color:#d6dbe3}
+.tsc.dim{color:var(--faint)}
 .tl.win .tn,.tl.win .tsc{color:#fff}
 .tl.lose .tn,.tl.lose .tsc{color:var(--faint)}
 .mside{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
 .rate-pill{background:rgba(242,177,76,.15);color:var(--gold);font-weight:800;font-size:11px;padding:2px 7px;border-radius:999px}
 .starb{background:none;border:0;color:#3c434f;padding:2px;line-height:0;transition:transform .15s,color .15s}
 .starb.on{color:var(--gold)} .starb:active{transform:scale(1.3)}
+.score-flash{animation:flash .8s ease}
+@keyframes flash{0%{background:rgba(93,202,165,.25)}100%{background:transparent}}
 
-/* ============================ LIVE TAB CARDS ============================ */
+/* ============================ LIVE CARDS ============================ */
 .livecard{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:12px;
-  position:relative;overflow:hidden}
+  position:relative;overflow:hidden;cursor:pointer}
 .livecard::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--live)}
 .lc-top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .lc-badge{display:flex;align-items:center;gap:5px;background:var(--live);color:#fff;font-weight:800;font-size:11px;padding:3px 9px;border-radius:6px;letter-spacing:.05em}
 .lc-badge .ld{width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse 1.1s infinite}
-.lc-clock{font-weight:800;color:var(--live)}
+.lc-clock{font-weight:800;color:var(--live);font-variant-numeric:tabular-nums}
 .lc-league{margin-left:auto;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 .lc-team{display:flex;align-items:center;gap:12px;padding:5px 0}
 .lc-team .tn{font-size:16px;font-weight:700;color:#fff}
 .lc-team .tsc{font-size:22px;font-weight:800}
+.lc-ticker{margin-top:10px;border-top:1px solid var(--border-soft);padding-top:9px;font-size:12px;color:var(--muted);
+  display:flex;align-items:center;gap:7px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.lc-ticker b{color:var(--text)}
 
 /* ============================ MATCH DETAIL ============================ */
 .dhead{position:sticky;top:0;z-index:30;background:var(--bg);padding:12px 14px 6px;display:flex;align-items:center;gap:12px}
@@ -132,44 +154,56 @@ button{font-family:inherit;cursor:pointer}
 .hero-team{width:108px;display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center}
 .hero-team .tn{font-size:13px;font-weight:700;line-height:1.2}
 .hero-mid{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:96px}
-.hero-score{font-size:34px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.hero-score{font-size:34px;font-weight:800;letter-spacing:.02em}
 .hero-status{margin-top:4px;font-size:12px;font-weight:700;color:var(--muted)}
-.hero-status.live{color:var(--live);display:flex;align-items:center;gap:5px}
+.hero-status.live{color:var(--live);display:flex;align-items:center;gap:5px;font-variant-numeric:tabular-nums}
 .hero-status .ld{width:7px;height:7px;border-radius:50%;background:var(--live);animation:pulse 1.1s infinite}
 .hero-meta{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:14px;color:var(--muted);font-size:12px}
 .ctx-chips{display:flex;gap:7px;justify-content:center;margin-top:12px}
 .ctx{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;border:1px solid var(--border)}
 .ctx.derby{color:var(--live);border-color:rgba(240,65,63,.4)}
 .ctx.euro{color:var(--accent);border-color:rgba(93,202,165,.4)}
-
 .tabs{display:flex;gap:6px;margin:14px 14px 0;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px}
 .tabs button{flex:1;border:0;background:transparent;color:var(--muted);padding:10px;border-radius:9px;font-weight:700;font-size:13.5px;transition:.2s}
 .tabs button.on{background:var(--elev);color:var(--text)}
 .dbody{padding:8px 14px 0;animation:rise .22s ease both}
-
 .info-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-top:12px}
 .info-row{display:flex;align-items:center;justify-content:space-between;padding:13px;border-top:1px solid var(--border-soft);font-size:14px}
 .info-row:first-child{border-top:0}
 .info-row .k{color:var(--muted)} .info-row .v{font-weight:600}
 .players-row{display:flex;align-items:center;gap:10px;padding:11px 13px;border-top:1px solid var(--border-soft)}
-.pdot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.players-row:first-child{border-top:0}
+.pdot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0}
+
+/* timeline */
+.tml{padding:6px 13px 10px}
+.tml-row{display:flex;align-items:flex-start;gap:10px;padding:7px 0;font-size:13px}
+.tml-min{width:38px;flex-shrink:0;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+.tml-ic{width:20px;flex-shrink:0;text-align:center}
+.tml-txt b{font-weight:700}
+/* H2H */
+.h2h-row{display:flex;align-items:center;gap:10px;padding:11px 13px;border-top:1px solid var(--border-soft);font-size:13px}
+.h2h-row:first-child{border-top:0}
+.h2h-score{font-weight:800;font-variant-numeric:tabular-nums;margin-left:auto}
+.wchip{width:20px;height:20px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;
+  font-size:10.5px;font-weight:800;color:#fff;flex-shrink:0}
 
 .label{font-weight:700;font-size:15px;margin:20px 2px 10px}
 .stars{display:flex;gap:10px;justify-content:center;margin:8px 0}
-.stars span{font-size:36px;color:#363c47;transition:transform .12s,color .15s}
+.stars span{font-size:36px;color:#363c47;transition:transform .12s,color .15s;cursor:pointer}
 .stars span.on{color:var(--gold)}
 .stars span:active{transform:scale(1.25)}
 .rate-label{text-align:center;font-weight:700;color:var(--gold);min-height:20px;font-size:15px}
-textarea{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:12px;color:var(--text);
-  padding:13px;font-family:inherit;font-size:14px;resize:vertical;min-height:78px}
-textarea:focus{outline:none;border-color:var(--accent)}
+textarea,input[type=text]{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:12px;color:var(--text);
+  padding:13px;font-family:inherit;font-size:14px}
+textarea{resize:vertical;min-height:78px}
+textarea:focus,input[type=text]:focus{outline:none;border-color:var(--accent)}
 .pills{display:flex;flex-wrap:wrap;gap:8px}
 .pill{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:9px 13px;border-radius:999px;
   font-size:13px;font-weight:600;transition:.15s}
 .pill.on{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
-
 .loc-opts{display:flex;flex-direction:column;gap:10px}
-.loc-opt{display:flex;align-items:center;gap:13px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;transition:.15s}
+.loc-opt{display:flex;align-items:center;gap:13px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;transition:.15s;cursor:pointer}
 .loc-opt.on{border-color:var(--accent);background:var(--accent-dim)}
 .loc-opt .lic{width:40px;height:40px;border-radius:11px;background:var(--surface2);display:flex;align-items:center;justify-content:center;color:var(--accent)}
 .loc-opt.on .lic{background:rgba(93,202,165,.18)}
@@ -180,26 +214,43 @@ textarea:focus{outline:none;border-color:var(--accent)}
 .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
 .ptile{aspect-ratio:1;background:var(--surface2);border:1px dashed var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--faint)}
 .cta{width:100%;border:0;background:var(--accent);color:#06241a;font-weight:800;font-size:16px;padding:15px;border-radius:13px;margin:22px 0 6px;transition:transform .1s}
-.cta:active{transform:scale(.985)} .cta.edit{background:var(--gold);color:#2a1900} .cta.ghost{background:var(--surface);border:1px solid var(--border);color:var(--text)}
-
-/* logged-summary banner inside summary tab */
+.cta:active{transform:scale(.985)} .cta.edit{background:var(--gold);color:#2a1900}
+.cta.ghost{background:var(--surface);border:1px solid var(--border);color:var(--text)}
+.cta:disabled{opacity:.45;cursor:not-allowed}
 .your-log{background:linear-gradient(120deg,var(--accent-dim),var(--surface));border:1px solid var(--accent);border-radius:14px;padding:14px;margin-top:12px}
 .your-log .yl-stars{color:var(--gold);font-size:16px;letter-spacing:1px}
+.ns-note{margin-top:14px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;color:var(--muted);font-size:13px}
 
-/* ============================ STATS ============================ */
+/* ============================ STATS / CHARTS ============================ */
 .stat-hero{background:radial-gradient(130% 100% at 0 0,rgba(93,202,165,.12),transparent 55%),var(--surface);
   border:1px solid var(--border);border-radius:18px;padding:18px}
 .stat-hero .big{font-size:46px;font-weight:800;line-height:1}
 .mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
 .mini{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:13px;text-align:center}
-.mini .v{font-size:22px;font-weight:800} .mini .k{font-size:11px;color:var(--muted);margin-top:2px}
+.mini .v{font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:5px}
+.mini .k{font-size:11px;color:var(--muted);margin-top:2px}
 .bar-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:15px;margin-top:12px}
 .bar-line{display:flex;align-items:center;gap:10px;margin-top:11px}
 .bar-line:first-of-type{margin-top:6px}
-.bar-line .bl{width:74px;font-size:13px;font-weight:600;flex-shrink:0;display:flex;align-items:center;gap:7px}
-.bar-line .bv{width:34px;text-align:right;font-size:12px;font-weight:700;color:var(--muted)}
-.sbar{flex:1;height:9px;background:var(--surface2);border-radius:999px;overflow:hidden}
-.sfill{height:100%;border-radius:999px;transition:width .9s cubic-bezier(.22,1,.36,1)}
+.bar-line .bl{width:86px;font-size:13px;font-weight:600;flex-shrink:0;display:flex;align-items:center;gap:7px;color:var(--text)}
+.bar-line .bv{width:34px;text-align:right;font-size:12px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.sbar{flex:1;height:9px;background:var(--surface2);border-radius:0 4px 4px 0;overflow:hidden}
+.sfill{height:100%;border-radius:0 4px 4px 0;transition:width .9s cubic-bezier(.22,1,.36,1)}
+.swatch{width:9px;height:9px;border-radius:3px;flex-shrink:0}
+/* IQ insight cards */
+.iq-card{background:linear-gradient(135deg,rgba(93,202,165,.07),transparent 50%),var(--surface);
+  border:1px solid var(--border);border-radius:14px;padding:14px;margin-top:10px;display:flex;gap:12px;align-items:flex-start}
+.iq-ic{width:38px;height:38px;border-radius:11px;background:var(--accent-dim);color:var(--accent);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.iq-t{font-weight:800;font-size:14px}
+.iq-b{font-size:13px;color:var(--muted);margin-top:2px;line-height:1.5}
+.iq-b b{color:var(--text)}
+/* radar + donut layouts */
+.chart-flex{display:flex;align-items:center;gap:14px;margin-top:8px}
+.chart-legend{flex:1}
+.cl-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px}
+.cl-row .cl-v{margin-left:auto;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text)}
+.cl-row .cl-k{color:var(--muted)}
 
 /* ============================ PROFILE ============================ */
 .prof-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:18px}
@@ -213,14 +264,15 @@ textarea:focus{outline:none;border-color:var(--accent)}
   border-radius:999px;padding:7px 13px 7px 7px;margin:0 8px 8px 0;font-size:13px;font-weight:600}
 .team-pill .sp{font-size:11px;color:var(--muted)}
 .set-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:4px 16px}
-.set-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-top:1px solid var(--border-soft)}
+.set-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-top:1px solid var(--border-soft);gap:10px}
 .set-row:first-child{border-top:0}
-.tgl{width:46px;height:27px;border-radius:999px;background:var(--surface2);border:1px solid var(--border);position:relative;transition:.2s}
+.tgl{width:46px;height:27px;border-radius:999px;background:var(--surface2);border:1px solid var(--border);position:relative;transition:.2s;cursor:pointer;flex-shrink:0}
 .tgl.on{background:var(--accent)}
 .tgl::after{content:"";position:absolute;top:2px;left:2px;width:21px;height:21px;border-radius:50%;background:#fff;transition:transform .2s}
 .tgl.on::after{transform:translateX(19px)}
-.danger{color:var(--live);font-weight:700}
-.mini-log{display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--border-soft)}
+.danger{color:var(--live);font-weight:700;cursor:pointer}
+.linkish{color:var(--accent);font-weight:700;cursor:pointer}
+.mini-log{display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--border-soft);cursor:pointer}
 .mini-log:first-child{border-top:0}
 .mini-log .ml-rt{margin-left:auto;color:var(--gold);font-size:13px;white-space:nowrap;font-weight:700}
 
@@ -234,7 +286,7 @@ textarea:focus{outline:none;border-color:var(--accent)}
   box-shadow:0 10px 24px rgba(93,202,165,.38);display:flex;align-items:center;justify-content:center;transition:transform .12s}
 .fab:active{transform:scale(.92) rotate(90deg)}
 
-/* ============================ OVERLAYS / SHEET / MODAL ============================ */
+/* ============================ OVERLAYS ============================ */
 .overlay{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.66);padding:22px;animation:fade .2s ease both}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:22px;max-width:360px;width:100%;animation:pop .24s ease both}
@@ -243,7 +295,6 @@ textarea:focus{outline:none;border-color:var(--accent)}
 .btn.ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border)} .btn.primary{background:var(--accent);color:#06241a} .btn.red{background:var(--live);color:#fff}
 .modal-ic{display:flex;justify-content:center;margin-bottom:6px;color:var(--gold)}
 @keyframes pop{0%{transform:scale(.85);opacity:0}60%{transform:scale(1.02)}100%{transform:scale(1);opacity:1}}
-
 .sheet-wrap{position:fixed;inset:0;z-index:100;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);animation:fade .2s ease both}
 .sheet{background:var(--surface);border:1px solid var(--border);border-bottom:0;border-radius:22px 22px 0 0;
   width:100%;max-width:440px;padding:10px 20px 26px;animation:slideup .34s cubic-bezier(.22,1,.36,1) both}
@@ -255,98 +306,139 @@ textarea:focus{outline:none;border-color:var(--accent)}
 .sheet .s-match{display:flex;align-items:center;justify-content:center;gap:10px;margin:14px 0;font-weight:700}
 .sheet .s-stars{text-align:center;color:var(--gold);font-size:22px;letter-spacing:2px;margin-bottom:6px}
 
+/* search overlay */
+.search-wrap{position:fixed;inset:0;z-index:100;background:rgba(13,15,19,.97);animation:fade .18s ease both;overflow:auto}
+.search-inner{max-width:440px;margin:0 auto;padding:14px}
+.search-head{display:flex;gap:10px;align-items:center;position:sticky;top:0;background:rgba(13,15,19,.97);padding:4px 0 12px;z-index:5}
+.search-res .mgroup{margin-bottom:10px}
+
+/* onboarding */
+.ob-wrap{position:fixed;inset:0;z-index:110;background:radial-gradient(120% 70% at 50% -10%,rgba(93,202,165,.14),transparent 60%),var(--bg);
+  overflow:auto;animation:fade .25s ease both}
+.ob-inner{max-width:440px;margin:0 auto;padding:44px 22px 34px;min-height:100vh;display:flex;flex-direction:column}
+.ob-logo{font-weight:800;font-size:30px;letter-spacing:.14em;text-transform:uppercase;text-align:center}
+.ob-logo b{color:var(--accent)}
+.ob-sub{color:var(--muted);text-align:center;margin-top:6px;font-size:14px}
+.ob-teams{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+.ob-team{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 6px;text-align:center;cursor:pointer;transition:.15s}
+.ob-team.on{border-color:var(--accent);background:var(--accent-dim)}
+.ob-team .tn{font-size:11px;font-weight:700;margin-top:7px;line-height:1.15}
+.ob-team .sp{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+
 .empty{text-align:center;color:var(--muted);padding:40px 18px;font-size:14px}
 .empty .ec{width:54px;height:54px;border-radius:16px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;color:var(--faint)}
 </style>
 </head>
 <body>
-
-<!-- Static fallback crest monograms are drawn in JS; this hidden SVG sprite hosts shared icon defs only. -->
-<svg class="crest-sprite" aria-hidden="true"></svg>
-
 <div id="app"></div>
-
 <script>
 /* =============================================================================
-   BLEACHERS  —  a Flashscore-style match tracker with a Letterboxd twist
+   BLEACHERS v3 — a living Flashscore-style tracker with a Letterboxd twist
    -----------------------------------------------------------------------------
-   Browse football & basketball matches like a live-scores app, then LOG the ones
-   you watched (stadium OR couch): rate them, review them, pick a Player of the
-   Match and record where you watched. A personal Stats dashboard turns those
-   logs into Spotify-Wrapped-style insights. Single file, vanilla JS.
+   What's inside (single file, vanilla JS, no build step, localStorage only):
 
-   • Team logos load from public CDNs (api-sports / TheSportsDB) with an instant
-     coloured-monogram fallback, so the UI never looks broken offline.
-   • All user data persists in localStorage under one versioned key.
+   • LIVE ENGINE — in-play matches actually play out while the app is open:
+     the clock ticks, goals/baskets land, events append to a timeline, matches
+     go to full-time. Session-only by design (a refresh restarts the demo day).
+   • FIXTURE CALENDAR — matches are generated relative to the real "today"
+     across a 5-day strip (finished, live and upcoming), grouped by league.
+   • MATCH LOGGING — rate (1–5), review, Player of the Match, and "The
+     Experience" (stadium/home/bar, atmosphere, memory note). Editing updates
+     in place. Upcoming matches cannot be logged.
+   • BLEACHERS IQ — a rule-based insights engine that turns your logs into
+     natural-language findings (in Greek), plus a taste radar, a where-you-
+     watched donut and rating charts. Chart colors are validated for contrast
+     and color-vision safety on the dark surface.
+   • H2H — head-to-head history between the two clubs, from the dataset.
+   • Onboarding, search, swipe navigation, export/import backup, migration
+     from the v2 storage key.
 
-   NOTE: the previous Duolingo-style gamification (XP, levels, streaks, badges,
-   challenges, leaderboard, celebration) was removed per request. The logs still
-   capture everything needed to reintroduce it; the full engine lives in git
-   history (commit e78ba44) if we switch it back on later.
+   Team logos load from public CDNs (api-sports / TheSportsDB) — every URL was
+   verified — with an instant coloured-monogram fallback for offline use.
 
-   Code map:  (1) DATA & STATE   (2) HELPERS   (3) RENDER / SCREENS
-              (4) ACTIONS        (5) NAVIGATION & INIT
+   Code map: (1) DATA & STATE  (2) LIVE ENGINE  (3) INSIGHTS & CHART MATH
+             (4) RENDER / SCREENS  (5) ACTIONS  (6) NAVIGATION & INIT
 ============================================================================= */
 
 /* =============================================================================
    (1) DATA & STATE
 ============================================================================= */
-const STORAGE_KEY = 'bleachers_v2';
+const STORAGE_KEY = 'bleachers_v3';
+const LEGACY_KEY  = 'bleachers_v2';
 
-const FB = id => 'https://media.api-sports.io/football/teams/' + id + '.png';
-const SDB = code => 'https://r2.thesportsdb.com/images/media/team/badge/' + code + '.png';
+const FB  = id => 'https://media.api-sports.io/football/teams/' + id + '.png';
+const SDB = c  => 'https://r2.thesportsdb.com/images/media/team/badge/' + c + '.png';
 
-/* Demo matches. Logos are verified CDN URLs; abbr/color drive the fallback. */
-const MATCHES = [
-  /* -------- FOOTBALL -------- */
-  { id:'f1', sport:'football', league:'Bundesliga', country:'Germany', date:'2026-04-04',
-    status:'live', clock:"74'", derby:true, euro:false, venue:'Signal Iduna Park',
-    home:{ name:'Borussia Dortmund', abbr:'BVB', color:'#FDE100', logo:FB(165) },
-    away:{ name:'Bayern München',    abbr:'FCB', color:'#DC052D', logo:FB(157) },
-    score:{ home:2, away:2 },
-    players:['Marco Reus','Harry Kane','Jamal Musiala','Julian Brandt'] },
+/* --- Team registry. str = attacking strength for the live engine (0..1). --- */
+const TEAMS = {
+  /* football */
+  bvb:{ name:'Borussia Dortmund', abbr:'BVB', color:'#FDE100', logo:FB(165), sport:'football', str:.62 },
+  fcb:{ name:'Bayern München',    abbr:'FCB', color:'#DC052D', logo:FB(157), sport:'football', str:.72 },
+  b04:{ name:'Bayer Leverkusen',  abbr:'B04', color:'#E32221', logo:FB(168), sport:'football', str:.60 },
+  rbl:{ name:'RB Leipzig',        abbr:'RBL', color:'#DD0741', logo:FB(173), sport:'football', str:.55 },
+  mci:{ name:'Manchester City',   abbr:'MCI', color:'#6CABDD', logo:FB(50),  sport:'football', str:.70 },
+  ars:{ name:'Arsenal',           abbr:'ARS', color:'#EF0107', logo:FB(42),  sport:'football', str:.66 },
+  liv:{ name:'Liverpool',         abbr:'LIV', color:'#C8102E', logo:FB(40),  sport:'football', str:.68 },
+  che:{ name:'Chelsea',           abbr:'CHE', color:'#034694', logo:FB(49),  sport:'football', str:.58 },
+  rma:{ name:'Real Madrid',       abbr:'RMA', color:'#C9D2DE', logo:FB(541), sport:'football', str:.72 },
+  bar:{ name:'Barcelona',         abbr:'BAR', color:'#A50044', logo:FB(529), sport:'football', str:.68 },
+  atm:{ name:'Atlético Madrid',   abbr:'ATM', color:'#CB3524', logo:FB(530), sport:'football', str:.58 },
+  ath:{ name:'Athletic Club',     abbr:'ATH', color:'#EE2523', logo:FB(531), sport:'football', str:.52 },
+  int:{ name:'Inter',             abbr:'INT', color:'#010E80', logo:FB(505), sport:'football', str:.64 },
+  mil:{ name:'AC Milan',          abbr:'MIL', color:'#FB090B', logo:FB(489), sport:'football', str:.58 },
+  juv:{ name:'Juventus',          abbr:'JUV', color:'#5b6472', logo:FB(496), sport:'football', str:.58 },
+  nap:{ name:'Napoli',            abbr:'NAP', color:'#12A0D7', logo:FB(492), sport:'football', str:.56 },
+  /* basketball */
+  pao:{ name:'Panathinaikos', abbr:'PAO', color:'#0E7A3B', logo:SDB('7cdjwz1767366987'), sport:'basketball', str:.66 },
+  oly:{ name:'Olympiacos',    abbr:'OLY', color:'#E2231A', logo:SDB('4s5lug1676581220'), sport:'basketball', str:.64 },
+  zal:{ name:'Žalgiris',      abbr:'ZAL', color:'#2E7D32', logo:SDB('dn7ouv1703960565'), sport:'basketball', str:.55 },
+  fen:{ name:'Fenerbahçe',    abbr:'FEN', color:'#15224B', logo:SDB('twxxvs1448199691'), sport:'basketball', str:.63 },
+  rmb:{ name:'Real Madrid',   abbr:'RMA', color:'#C9D2DE', logo:FB(541), sport:'basketball', str:.65 },
+  bab:{ name:'Barcelona',     abbr:'BAR', color:'#A50044', logo:FB(529), sport:'basketball', str:.58 },
+  efs:{ name:'Anadolu Efes',  abbr:'EFS', color:'#0B4EA2', logo:SDB('uldz0d1782050729'), sport:'basketball', str:.60 },
+  mon:{ name:'Monaco',        abbr:'MON', color:'#C8102E', logo:SDB('fl2ti01649168915'), sport:'basketball', str:.60 },
+  par:{ name:'Partizan',      abbr:'PAR', color:'#1a1a1a', logo:SDB('us0e1z1767366567'), sport:'basketball', str:.56 },
+  czv:{ name:'Crvena Zvezda', abbr:'CZV', color:'#D0103A', logo:SDB('5tlez31767366440'), sport:'basketball', str:.54 },
+};
 
-  { id:'f2', sport:'football', league:'Premier League', country:'England', date:'2026-03-22',
-    status:'ft', derby:false, euro:false, venue:'Etihad Stadium',
-    home:{ name:'Manchester City', abbr:'MCI', color:'#6CABDD', logo:FB(50) },
-    away:{ name:'Arsenal',         abbr:'ARS', color:'#EF0107', logo:FB(42) },
-    score:{ home:1, away:2 },
-    players:['Erling Haaland','Kevin De Bruyne','Bukayo Saka','Martin Ødegaard'] },
+const LEAGUE_META = {
+  'Premier League':{ color:'#3D195B', region:'England' },
+  'La Liga':{ color:'#E2231A', region:'Spain' },
+  'Bundesliga':{ color:'#D20515', region:'Germany' },
+  'Serie A':{ color:'#008FD7', region:'Italy' },
+  'Champions League':{ color:'#0A1E5C', region:'Europe' },
+  'EuroLeague':{ color:'#F36F21', region:'Europe' },
+};
+const LEAGUE_ORDER = {
+  football:['Champions League','Premier League','La Liga','Bundesliga','Serie A'],
+  basketball:['EuroLeague'],
+};
 
-  { id:'f3', sport:'football', league:'La Liga', country:'Spain', date:'2026-03-08',
-    status:'ft', derby:true, euro:false, venue:'Santiago Bernabéu',
-    home:{ name:'Real Madrid', abbr:'RMA', color:'#C9D2DE', logo:FB(541) },
-    away:{ name:'Barcelona',   abbr:'BAR', color:'#A50044', logo:FB(529) },
-    score:{ home:2, away:1 },
-    players:['Jude Bellingham','Vinícius Jr','Robert Lewandowski','Lamine Yamal'] },
-
-  /* -------- BASKETBALL (EuroLeague) -------- */
-  { id:'b1', sport:'basketball', league:'EuroLeague', country:'Greece', date:'2026-04-02',
-    status:'live', clock:'Q4 06:12', derby:true, euro:true, venue:'OAKA Arena',
-    home:{ name:'Panathinaikos', abbr:'PAO', color:'#0E7A3B', logo:SDB('7cdjwz1767366987') },
-    away:{ name:'Olympiacos',    abbr:'OLY', color:'#E2231A', logo:SDB('4s5lug1676581220') },
-    score:{ home:78, away:72 },
-    players:['Kostas Sloukas','Kendrick Nunn','Thomas Walkup','Shaquielle McKissic'] },
-
-  { id:'b2', sport:'basketball', league:'EuroLeague', country:'Spain', date:'2026-03-19',
-    status:'ft', derby:true, euro:true, venue:'WiZink Center',
-    home:{ name:'Real Madrid', abbr:'RMA', color:'#C9D2DE', logo:FB(541) },
-    away:{ name:'Barcelona',   abbr:'BAR', color:'#A50044', logo:FB(529) },
-    score:{ home:85, away:80 },
-    players:['Facundo Campazzo','Sergio Llull','Nikola Mirotić','Walter Tavares'] },
-
-  { id:'b3', sport:'basketball', league:'EuroLeague', country:'Lithuania', date:'2026-03-05',
-    status:'ft', derby:false, euro:true, venue:'Žalgirio Arena',
-    home:{ name:'Žalgiris',   abbr:'ZAL', color:'#2E7D32', logo:SDB('dn7ouv1703960565') },
-    away:{ name:'Fenerbahçe', abbr:'FEN', color:'#15224B', logo:SDB('twxxvs1448199691') },
-    score:{ home:90, away:88 },
-    players:['Sylvain Francisco','Edgaras Ulanovas','Nigel Hayes-Davis','Scottie Wilbekin'] },
+/* --- Fixture templates. day: offset from real today. Legacy ids (f1..f3,
+       b1..b3) keep the same matchups as v2 so old logs migrate cleanly. --- */
+const FIXTURES = [
+  /* day -2 */
+  { id:'f3', day:-2, sport:'football', league:'La Liga', h:'rma', a:'bar', hs:2, as:1, st:'ft', time:'21:00', derby:true,  euro:false, venue:'Santiago Bernabéu', players:['Jude Bellingham','Vinícius Jr','Robert Lewandowski','Lamine Yamal'] },
+  { id:'f4', day:-2, sport:'football', league:'Serie A', h:'int', a:'mil', hs:1, as:0, st:'ft', time:'21:45', derby:true,  euro:false, venue:'San Siro', players:['Lautaro Martínez','Nicolò Barella','Christian Pulisic','Rafael Leão'] },
+  { id:'b3', day:-2, sport:'basketball', league:'EuroLeague', h:'zal', a:'fen', hs:90, as:88, st:'ft', time:'20:00', derby:false, euro:true, venue:'Žalgirio Arena', players:['Sylvain Francisco','Edgaras Ulanovas','Nigel Hayes-Davis','Scottie Wilbekin'] },
+  /* day -1 */
+  { id:'f2', day:-1, sport:'football', league:'Premier League', h:'mci', a:'ars', hs:1, as:2, st:'ft', time:'19:30', derby:false, euro:false, venue:'Etihad Stadium', players:['Erling Haaland','Kevin De Bruyne','Bukayo Saka','Martin Ødegaard'] },
+  { id:'f5', day:-1, sport:'football', league:'Premier League', h:'liv', a:'che', hs:3, as:1, st:'ft', time:'22:00', derby:false, euro:false, venue:'Anfield', players:['Mohamed Salah','Virgil van Dijk','Cole Palmer','Enzo Fernández'] },
+  { id:'b2', day:-1, sport:'basketball', league:'EuroLeague', h:'rmb', a:'bab', hs:85, as:80, st:'ft', time:'21:00', derby:true, euro:true, venue:'WiZink Center', players:['Facundo Campazzo','Sergio Llull','Nikola Mirotić','Walter Tavares'] },
+  { id:'b4', day:-1, sport:'basketball', league:'EuroLeague', h:'par', a:'czv', hs:76, as:79, st:'ft', time:'19:00', derby:true, euro:true, venue:'Beogradska Arena', players:['Carlik Jones','Vanja Marinković','Miloš Teodosić','Filip Petrušev'] },
+  /* day 0 — the living day: finished, live, upcoming */
+  { id:'f6', day:0, sport:'football', league:'La Liga', h:'atm', a:'ath', hs:2, as:0, st:'ft', time:'17:15', derby:false, euro:false, venue:'Metropolitano', players:['Antoine Griezmann','Julián Álvarez','Iñaki Williams','Nico Williams'] },
+  { id:'f1', day:0, sport:'football', league:'Bundesliga', h:'bvb', a:'fcb', hs:1, as:1, st:'live', liveMin:63, time:'19:30', derby:true, euro:false, venue:'Signal Iduna Park', players:['Marco Reus','Harry Kane','Jamal Musiala','Julian Brandt'] },
+  { id:'f7', day:0, sport:'football', league:'Champions League', h:'rma', a:'mci', hs:0, as:0, st:'ns', time:'22:00', derby:false, euro:true, venue:'Santiago Bernabéu', players:['Jude Bellingham','Vinícius Jr','Erling Haaland','Phil Foden'] },
+  { id:'b1', day:0, sport:'basketball', league:'EuroLeague', h:'pao', a:'oly', hs:61, as:58, st:'live', liveQ:3, liveSec:312, time:'20:15', derby:true, euro:true, venue:'OAKA Arena', players:['Kostas Sloukas','Kendrick Nunn','Thomas Walkup','Shaquielle McKissic'] },
+  { id:'b5', day:0, sport:'basketball', league:'EuroLeague', h:'efs', a:'mon', hs:0, as:0, st:'ns', time:'21:45', derby:false, euro:true, venue:'Basketball Dev. Center', players:['Shane Larkin','Ercan Osmani','Mike James','Élie Okobo'] },
+  /* day +1 */
+  { id:'f8', day:1, sport:'football', league:'Serie A', h:'juv', a:'nap', hs:0, as:0, st:'ns', time:'21:45', derby:false, euro:false, venue:'Allianz Stadium', players:['Dušan Vlahović','Kenan Yıldız','Romelu Lukaku','Khvicha Kvaratskhelia'] },
+  { id:'b6', day:1, sport:'basketball', league:'EuroLeague', h:'fen', a:'pao', hs:0, as:0, st:'ns', time:'20:30', derby:false, euro:true, venue:'Ülker Sports Arena', players:['Nigel Hayes-Davis','Scottie Wilbekin','Kostas Sloukas','Kendrick Nunn'] },
+  /* day +2 */
+  { id:'f9', day:2, sport:'football', league:'Champions League', h:'ars', a:'bar', hs:0, as:0, st:'ns', time:'22:00', derby:false, euro:true, venue:'Emirates Stadium', players:['Bukayo Saka','Martin Ødegaard','Robert Lewandowski','Lamine Yamal'] },
+  { id:'b7', day:2, sport:'basketball', league:'EuroLeague', h:'oly', a:'rmb', hs:0, as:0, st:'ns', time:'21:15', derby:false, euro:true, venue:'ΣΕΦ', players:['Sasha Vezenkov','Kostas Papanikolaou','Facundo Campazzo','Walter Tavares'] },
 ];
-
-const LEAGUE_ORDER = { football:['Premier League','La Liga','Bundesliga'], basketball:['EuroLeague'] };
-const LEAGUE_COLOR = { 'Premier League':'#3D195B', 'La Liga':'#E2231A', 'Bundesliga':'#D20515', 'EuroLeague':'#F36F21' };
-/* Region shown in a league header (EuroLeague is pan-European, not a single nation). */
-const LEAGUE_REGION = { 'Premier League':'England', 'La Liga':'Spain', 'Bundesliga':'Germany', 'EuroLeague':'Europe' };
 
 const RATING_LABELS = ['', 'Απογοητευτικό', 'Μέτριο', 'Καλό', 'Εξαιρετικό', 'Κορυφαίο'];
 const LOCATIONS = {
@@ -355,46 +447,267 @@ const LOCATIONS = {
   bar:    { label:'Μπαρ / Παμπ', sub:'Με παρέα',            icon:'cup' },
 };
 const ATMOSPHERES = [['electric','Ηλεκτρισμένη'],['intense','Ένταση'],['chants','Συνθήματα'],['view','Θέα'],['tense','Αγωνία'],['party','Πάρτι']];
-const GRMON = ['Ιαν','Φεβ','Μαρ','Απρ','Μάι','Ιούν','Ιούλ','Αύγ','Σεπ','Οκτ','Νοέ','Δεκ'];
+const GRDAYS = ['Κυρ','Δευ','Τρί','Τετ','Πέμ','Παρ','Σάβ'];
+const GRMON  = ['Ιαν','Φεβ','Μαρ','Απρ','Μάι','Ιούν','Ιούλ','Αύγ','Σεπ','Οκτ','Νοέ','Δεκ'];
 
-/* Clean default state. */
+/* --- Build runtime MATCHES from fixtures, dated relative to the real today. --- */
+function pad(n){ return String(n).padStart(2,'0'); }
+function dateStrOf(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+const TODAY = new Date();
+function dayDate(offset){ const d = new Date(TODAY); d.setDate(d.getDate()+offset); return d; }
+
+const MATCHES = FIXTURES.map(f => ({
+  id:f.id, sport:f.sport, league:f.league, day:f.day,
+  date:dateStrOf(dayDate(f.day)), time:f.time,
+  home:TEAMS[f.h], away:TEAMS[f.a], homeId:f.h, awayId:f.a,
+  score:{ home:f.hs, away:f.as },
+  status:f.st,                        // 'ft' | 'live' | 'ns'  (mutated by the live engine)
+  liveMin:f.liveMin||0, liveQ:f.liveQ||1, liveSec:f.liveSec||600,
+  derby:!!f.derby, euro:!!f.euro, venue:f.venue, players:f.players,
+  events:[],                          // live-engine timeline
+}));
+
+/* --- Default state + persistence. --- */
 function defaultState(){
   return {
-    version:2,
-    user:{ name:'Κώστας', handle:'@kostas', city:'Αθήνα',
-      favoriteTeams:[
-        { name:'Panathinaikos',     sport:'basketball', color:'#0E7A3B', logo:SDB('7cdjwz1767366987') },
-        { name:'Borussia Dortmund', sport:'football',   color:'#FDE100', logo:FB(165) },
-      ] },
+    version:3,
+    onboarded:false,
+    user:{ name:'', handle:'', city:'', favoriteTeams:[] },   // favoriteTeams: team ids
     activeSport:'football',
-    feedFilter:'all',
+    activeDay:0,
+    mineOnly:false,
     logs:{},          // matchId -> log
-    followed:{},      // matchId -> true (Flashscore star)
+    followed:{},      // matchId -> true
     settings:{ showStats:true },
   };
 }
-
-/* Persistence (never throws even if storage is blocked). */
 function load(){
-  try{ const r = localStorage.getItem(STORAGE_KEY); return r ? Object.assign(defaultState(), JSON.parse(r)) : defaultState(); }
-  catch(e){ return defaultState(); }
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return Object.assign(defaultState(), JSON.parse(raw));
+    /* one-time migration from v2: logs / follows / prefs carry over */
+    const old = localStorage.getItem(LEGACY_KEY);
+    if(old){
+      const v2 = JSON.parse(old);
+      const s = defaultState();
+      if(v2.logs) Object.keys(v2.logs).forEach(id=>{ if(MATCHES.some(m=>m.id===id)) s.logs[id]=v2.logs[id]; });
+      if(v2.followed) s.followed = v2.followed;
+      if(v2.user && v2.user.name){ s.user.name=v2.user.name; s.user.handle=v2.user.handle||''; s.user.city=v2.user.city||''; s.onboarded=true; }
+      if(v2.settings) s.settings = Object.assign(s.settings, v2.settings);
+      return s;
+    }
+    return defaultState();
+  }catch(e){ return defaultState(); }
 }
 function save(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
 
 let state = load();
-const App = { ui:{ screen:'feed', backScreen:'feed', draft:null, sheet:null, modal:null } };
+const App = { ui:{ screen:'feed', backScreen:'feed', draft:null, sheet:null, modal:null, search:null, obStep:0, obPick:{}, obName:'' } };
 
 /* =============================================================================
-   (2) HELPERS
+   (2) LIVE ENGINE — matches play out in real time while the app is open
+============================================================================= */
+const SIM = { timer:null, tickMs:3500 };
+
+function liveMatches(){ return MATCHES.filter(m=>m.status==='live'); }
+
+function pushEvent(m, min, type, teamSide, text){
+  m.events.push({ min, type, team:teamSide, text });
+  if(m.events.length>40) m.events.shift();
+}
+function buzz(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){} }
+
+/* One simulation step for a football match. */
+function tickFootball(m){
+  m.liveMin += Math.random()<0.5 ? 1 : 2;
+  const r = Math.random();
+  if(r < 0.045){                                     // goal
+    const homeP = 0.5 + (m.home.str - m.away.str);
+    const side = Math.random() < homeP ? 'home' : 'away';
+    m.score[side]++;
+    const scorer = m.players[Math.floor(Math.random()*m.players.length)];
+    pushEvent(m, m.liveMin, 'goal', side, 'ΓΚΟΛ! '+scorer+' — '+m[side].name);
+    buzz(60);
+    return true;
+  } else if(r < 0.085){                              // yellow card
+    const side = Math.random()<0.5?'home':'away';
+    pushEvent(m, m.liveMin, 'yellow', side, 'Κίτρινη κάρτα ('+m[side].abbr+')');
+  }
+  if(m.liveMin >= 90 + Math.floor(Math.random()*5)){ // full time
+    m.status='ft';
+    pushEvent(m, 90, 'ft', null, 'Τέλος αγώνα — '+m.score.home+'–'+m.score.away);
+    return true;
+  }
+  return false;
+}
+/* One simulation step for a basketball match. */
+function tickBasketball(m){
+  m.liveSec -= 20 + Math.floor(Math.random()*25);
+  let scored = false;
+  for(const side of ['home','away']){
+    const p = 0.38 + (m[side].str - m[side==='home'?'away':'home'].str)*0.3;
+    if(Math.random() < p){
+      const pts = Math.random()<0.3 ? 3 : 2;
+      m.score[side]+=pts; scored = true;
+      if(Math.random()<0.22){
+        const scorer = m.players[Math.floor(Math.random()*m.players.length)];
+        pushEvent(m, 'Q'+m.liveQ, 'basket', side, scorer+' — '+pts+'π. ('+m[side].abbr+')');
+      }
+    }
+  }
+  if(m.liveSec <= 0){
+    if(m.liveQ >= 4){
+      if(m.score.home === m.score.away){ m.liveQ++; m.liveSec=300; pushEvent(m,'OT','period',null,'Παράταση!'); }
+      else{ m.status='ft'; pushEvent(m,'FT','ft',null,'Τέλος αγώνα — '+m.score.home+'–'+m.score.away); }
+    } else { m.liveQ++; m.liveSec=600; pushEvent(m,'Q'+m.liveQ,'period',null,'Αρχή '+m.liveQ+'ης περιόδου'); }
+    return true;
+  }
+  return scored;
+}
+function liveClock(m){
+  if(m.sport==='football') return m.liveMin+'′';
+  const s = Math.max(0,m.liveSec);
+  return (m.liveQ>4?'OT':'Q'+m.liveQ)+' '+pad(Math.floor(s/60))+':'+pad(s%60);
+}
+/* Re-render only when it's safe (never yank the keyboard/caret or an open sheet). */
+function safeToRerender(){
+  const ae = document.activeElement;
+  if(ae && (ae.tagName==='TEXTAREA' || ae.tagName==='INPUT')) return false;
+  if(App.ui.modal || App.ui.sheet || App.ui.search!==null || !state.onboarded) return false;
+  return true;
+}
+function simTick(){
+  if(document.hidden) return;
+  const live = liveMatches();
+  if(!live.length) return;
+  let changed = false;
+  live.forEach(m=>{ changed = (m.sport==='football'?tickFootball(m):tickBasketball(m)) || changed; });
+  const s = App.ui.screen;
+  const watching = s==='feed'||s==='live'||s==='picker'||(s==='matchDetail'&&App.ui.draft&&matchById(App.ui.draft.matchId));
+  if(changed && watching && safeToRerender()) render();
+  else if(watching && safeToRerender()) patchClocks();
+}
+/* Cheap DOM patch for ticking clocks between full renders. */
+function patchClocks(){
+  document.querySelectorAll('[data-clock]').forEach(el=>{
+    const m = matchById(el.getAttribute('data-clock'));
+    if(m && m.status==='live') el.textContent = liveClock(m);
+  });
+}
+function startSim(){ if(!SIM.timer) SIM.timer = setInterval(simTick, SIM.tickMs); }
+
+/* =============================================================================
+   (3) INSIGHTS ("Bleachers IQ") & CHART MATH
 ============================================================================= */
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function matchById(id){ return MATCHES.find(m=>m.id===id); }
-function fmtDate(s){ const [y,m,d]=s.split('-').map(Number); return d+' '+GRMON[m-1]; }
-function shortDate(s){ const [y,m,d]=s.split('-').map(Number); return d+'/'+m; }
-function textColorFor(hex){ const c=hex.replace('#',''); const r=parseInt(c.substr(0,2),16),g=parseInt(c.substr(2,2),16),b=parseInt(c.substr(4,2),16); return (0.299*r+0.587*g+0.114*b)>150?'#11110f':'#fff'; }
 function logsArr(){ return Object.values(state.logs); }
+function ratedLogs(){ return logsArr().filter(l=>l.rating); }
+function avg(arr){ return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0; }
+function avgRating(logs){ return avg(logs.filter(l=>l.rating).map(l=>l.rating)); }
 
-/* Inline icon set (stroke = currentColor). */
+/* Rule-based natural-language findings. Each rule returns null or a card. */
+function computeInsights(){
+  const logs = ratedLogs();
+  const out = [];
+  if(logs.length < 2){
+    out.push({ icon:'spark', title:'Το IQ σου ζεσταίνεται', body:'Κατέγραψε τουλάχιστον <b>2 αγώνες</b> για να αρχίσουν οι αναλύσεις σου.' });
+    return out;
+  }
+  const withM = logs.map(l=>({ l, m:matchById(l.matchId) })).filter(x=>x.m);
+  const derby = withM.filter(x=>x.m.derby), nonDerby = withM.filter(x=>!x.m.derby);
+  if(derby.length && nonDerby.length){
+    const d = avg(derby.map(x=>x.l.rating)) - avg(nonDerby.map(x=>x.l.rating));
+    if(d >= 0.5) out.push({ icon:'fire', title:'Ζεις για τα ντέρμπι', body:'Βαθμολογείς τα ντέρμπι <b>+'+d.toFixed(1)+'★</b> ψηλότερα από τους υπόλοιπους αγώνες.' });
+    else if(d <= -0.5) out.push({ icon:'fire', title:'Υπερτιμημένα ντέρμπι;', body:'Βαθμολογείς τα ντέρμπι <b>'+d.toFixed(1)+'★</b> χαμηλότερα — ο αντικειμενικός θεατής.' });
+  }
+  const stad = logs.filter(l=>l.location==='stadium'), rest = logs.filter(l=>l.location && l.location!=='stadium');
+  if(stad.length && rest.length){
+    const d = avg(stad.map(l=>l.rating)) - avg(rest.map(l=>l.rating));
+    if(d >= 0.5) out.push({ icon:'pin', title:'Το γήπεδο σε απογειώνει', body:'Οι αγώνες που είδες live παίρνουν <b>+'+d.toFixed(1)+'★</b> σε σχέση με καναπέ και μπαρ.' });
+  }
+  const fb = withM.filter(x=>x.m.sport==='football').length, total = withM.length;
+  const share = fb/total;
+  if(total>=3 && share>=0.7) out.push({ icon:'ball', title:'Ποδοσφαιρόφιλος στην καρδιά', body:'Το <b>'+Math.round(share*100)+'%</b> των καταγραφών σου είναι ποδόσφαιρο.' });
+  else if(total>=3 && share<=0.3) out.push({ icon:'ball', title:'Παρκέ πάνω απ’ όλα', body:'Το <b>'+Math.round((1-share)*100)+'%</b> των καταγραφών σου είναι μπάσκετ.' });
+  const revRate = logs.filter(l=>l.review && l.review.trim()).length / logs.length;
+  if(logs.length>=3 && revRate>=0.6) out.push({ icon:'pen', title:'Ο κριτικός', body:'Γράφεις κριτική στο <b>'+Math.round(revRate*100)+'%</b> των αγώνων σου — πάνω από κάθε μέσο όρο.' });
+  const close = withM.filter(x=>Math.abs(x.m.score.home-x.m.score.away) <= (x.m.sport==='football'?1:4));
+  const blow  = withM.filter(x=>Math.abs(x.m.score.home-x.m.score.away) >  (x.m.sport==='football'?1:4));
+  if(close.length && blow.length){
+    const d = avg(close.map(x=>x.l.rating)) - avg(blow.map(x=>x.l.rating));
+    if(d >= 0.5) out.push({ icon:'bolt', title:'Θες ματς-θρίλερ', body:'Τα ντέρμπι σκορ (μικρή διαφορά) τα βαθμολογείς <b>+'+d.toFixed(1)+'★</b> πάνω από τις "περίπατο" νίκες.' });
+  }
+  const euro = withM.filter(x=>x.m.euro);
+  if(euro.length>=2){
+    const d = avg(euro.map(x=>x.l.rating)) - avgRating(logs);
+    if(d >= 0.4) out.push({ icon:'star', title:'Euro nights person', body:'Οι ευρωπαϊκές βραδιές σου παίρνουν <b>+'+d.toFixed(1)+'★</b> από τον μέσο όρο σου.' });
+  }
+  if(!out.length) out.push({ icon:'spark', title:'Ισορροπημένο προφίλ', body:'Έχεις <b>'+logs.length+'</b> καταγραφές με μέσο όρο <b>'+avgRating(logs).toFixed(1)+'★</b> — συνέχισε για βαθύτερα insights.' });
+  return out.slice(0,3);
+}
+
+/* Taste radar axes, each normalised 0..1. */
+function computeRadar(){
+  const logs = logsArr();
+  const withM = logs.map(l=>({ l, m:matchById(l.matchId) })).filter(x=>x.m);
+  const n = logs.length || 1;
+  const leagues = new Set(withM.map(x=>x.m.league)).size;
+  return [
+    { k:'Πάθος',     v:Math.min(1, logs.length/8) },
+    { k:'Κριτικός',  v:logs.filter(l=>l.review&&l.review.trim()).length/n },
+    { k:'Γήπεδο',    v:logs.filter(l=>l.location==='stadium').length/n },
+    { k:'Ντέρμπι',   v:withM.filter(x=>x.m.derby).length/n },
+    { k:'Ευρώπη',    v:withM.filter(x=>x.m.euro).length/n },
+    { k:'Ποικιλία',  v:Math.min(1, leagues/4) },
+  ];
+}
+/* SVG radar — single series: 2px accent line, ~10% wash, labels in text tokens.
+   The viewBox carries extra horizontal padding so side labels never clip. */
+function radarSVG(axes, size){
+  const S = size||240, PAD=62, W=S+PAD*2, cx=W/2, cy=S/2, R=S*0.34;
+  const pt = (i, r) => { const a = -Math.PI/2 + i*2*Math.PI/axes.length; return [cx + r*Math.cos(a), cy + r*Math.sin(a)]; };
+  let grid = '';
+  [0.33,0.66,1].forEach(g=>{
+    const pts = axes.map((_,i)=>pt(i,R*g).join(',')).join(' ');
+    grid += '<polygon points="'+pts+'" fill="none" stroke="#272d38" stroke-width="1"/>';
+  });
+  let spokes = axes.map((_,i)=>{ const [x,y]=pt(i,R); return '<line x1="'+cx+'" y1="'+cy+'" x2="'+x+'" y2="'+y+'" stroke="#272d38" stroke-width="1"/>'; }).join('');
+  const dataPts = axes.map((a,i)=>pt(i, R*Math.max(0.04,a.v)));
+  const poly = dataPts.map(p=>p.join(',')).join(' ');
+  const dots = dataPts.map(p=>'<circle cx="'+p[0]+'" cy="'+p[1]+'" r="3.5" fill="#5DCAA5" stroke="#161a20" stroke-width="2"/>').join('');
+  const labels = axes.map((a,i)=>{
+    const [x,y] = pt(i, R+20);
+    let anchor = Math.abs(x-cx)<8 ? 'middle' : (x>cx?'start':'end');
+    return '<text x="'+x+'" y="'+(y+4)+'" text-anchor="'+anchor+'" font-size="11" font-weight="600" fill="#8a93a3">'+esc(a.k)+'</text>';
+  }).join('');
+  return '<svg viewBox="0 0 '+W+' '+S+'" width="100%" role="img" aria-label="Ραντάρ προφίλ θεατή">'
+    + grid + spokes
+    + '<polygon points="'+poly+'" fill="rgba(93,202,165,.12)" stroke="#5DCAA5" stroke-width="2" stroke-linejoin="round"/>'
+    + dots + labels + '</svg>';
+}
+/* SVG donut — part-to-whole (3 segments max here), 2px surface gaps, hero center. */
+function donutSVG(parts, total){
+  const S=140, cx=S/2, cy=S/2, r=52, C=2*Math.PI*r;
+  let off = -C/4, segs='';
+  parts.forEach(p=>{
+    if(!p.v) return;
+    const len = p.v/total*C;
+    segs += '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+p.c+'" stroke-width="14" '
+      + 'stroke-dasharray="'+Math.max(0,len-2)+' '+(C-len+2)+'" stroke-dashoffset="'+(-off)+'"/>';
+    off += len;
+  });
+  return '<svg viewBox="0 0 '+S+' '+S+'" width="132" role="img" aria-label="Πού είδες τους αγώνες">'
+    + '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="#1d222b" stroke-width="14"/>' + segs
+    + '<text x="'+cx+'" y="'+(cy-2)+'" text-anchor="middle" font-size="26" font-weight="800" fill="#eef1f5">'+total+'</text>'
+    + '<text x="'+cx+'" y="'+(cy+16)+'" text-anchor="middle" font-size="10" fill="#8a93a3">αγώνες</text>'
+    + '</svg>';
+}
+
+/* =============================================================================
+   (4) RENDER / SCREENS
+============================================================================= */
+function textColorFor(hex){ const c=hex.replace('#',''); const r=parseInt(c.substr(0,2),16),g=parseInt(c.substr(2,2),16),b=parseInt(c.substr(4,2),16); return (0.299*r+0.587*g+0.114*b)>150?'#11110f':'#fff'; }
 const ICONS = {
   scores:'<rect x="3" y="5" width="18" height="14" rx="2.2"/><path d="M12 5v14M7 10v4M17 10v4"/>',
   live:'<circle cx="12" cy="12" r="2"/><path d="M8 8a5.6 5.6 0 0 0 0 8M16 8a5.6 5.6 0 0 1 0 8M5 5a10 10 0 0 0 0 14M19 5a10 10 0 0 1 0 14"/>',
@@ -408,52 +721,91 @@ const ICONS = {
   check:'<path d="M5 12l5 5 9-10"/>',
   star:'<path d="M12 3.5l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17.5l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
   trophy:'<path d="M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M5 5H3v2a3 3 0 0 0 3 3M19 5h2v2a3 3 0 0 1-3 3M9 18h6M12 14v4"/>',
-  edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/>',
+  close:'<path d="M6 6l12 12M18 6L6 18"/>',
+  fire:'<path d="M12 3c1 3-3 4.5-3 8a3 3 0 0 0 6 0c0-1.5-.8-2.5-.8-2.5S17 10 17 13a5 5 0 0 1-10 0c0-5 5-7 5-10z"/>',
+  ball:'<circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/>',
+  pen:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',
+  bolt:'<path d="M13 2L5 13h6l-1 9 8-11h-6z"/>',
+  spark:'<path d="M12 2v5M12 17v5M2 12h5M17 12h5M5 5l3.5 3.5M15.5 15.5L19 19M19 5l-3.5 3.5M8.5 15.5L5 19"/>',
+  goal:'<circle cx="12" cy="12" r="9"/><path d="M12 7l4.8 3.5-1.9 5.5H9.1L7.2 10.5z"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
+  down:'<path d="M12 4v13M6 12l6 6 6-6"/>',
+  up:'<path d="M12 20V7M6 12l6-6 6 6"/>',
 };
 function icon(name, size, cls){
   const s = size||22;
-  return '<svg class="icon '+(cls||'')+'" viewBox="0 0 24 24" width="'+s+'" height="'+s+'" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+ICONS[name]+'</svg>';
+  return '<svg class="icon '+(cls||'')+'" viewBox="0 0 24 24" width="'+s+'" height="'+s+'" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(ICONS[name]||'')+'</svg>';
 }
 function starIcon(filled, size){
   const s=size||20;
-  return '<svg viewBox="0 0 24 24" width="'+s+'" height="'+s+'" fill="'+(filled?'currentColor':'none')+'" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">'+ICONS.star+'</svg>';
+  return '<svg viewBox="0 0 24 24" width="'+s+'" height="'+s+'" fill="'+(filled?'currentColor':'none')+'" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true">'+ICONS.star+'</svg>';
 }
-
-/* Team crest: real CDN logo over an instant coloured-monogram fallback. */
+/* Logos are preloaded once at startup; a crest only renders its <img> after the
+   URL is known-good, so the fallback monogram never flashes and the constant
+   live-engine re-renders (innerHTML) can't kill an in-flight download. */
+const LOGO_STATE = {};   // url -> 'ok' | 'fail'
+let logoRefreshT = null;
+function logoRefresh(){
+  clearTimeout(logoRefreshT);
+  logoRefreshT = setTimeout(()=>{
+    const ae = document.activeElement;
+    if(ae && (ae.tagName==='TEXTAREA'||ae.tagName==='INPUT')) return;
+    if(App.ui.modal || App.ui.sheet || App.ui.search!==null) return;
+    render();
+  }, 250);
+}
+function preloadLogos(){
+  if(!document.body || !document.body.appendChild) return;   // non-browser environment
+  /* Real <img> nodes in a hidden holder OUTSIDE #app: innerHTML re-renders can't
+     abort them, and once loaded the visible crests hit the warm cache instantly. */
+  const holder = document.createElement('div');
+  holder.setAttribute('aria-hidden','true');
+  holder.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;visibility:hidden';
+  new Set(Object.values(TEAMS).map(t=>t.logo).filter(Boolean)).forEach(u=>{
+    const im = document.createElement('img');
+    im.onload  = ()=>{ LOGO_STATE[u]='ok'; logoRefresh(); };
+    im.onerror = ()=>{ LOGO_STATE[u]='fail'; };
+    im.src = u;
+    holder.appendChild(im);
+  });
+  document.body.appendChild(holder);
+}
 function crest(team, size){
   const s = size||40;
   const fb = '<span class="crest-fb" style="background:'+team.color+';color:'+textColorFor(team.color)+';font-size:'+Math.round(s*0.34)+'px">'+esc(team.abbr)+'</span>';
-  const img = team.logo ? '<img class="crest-img" src="'+team.logo+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : '';
+  const img = (team.logo && LOGO_STATE[team.logo]==='ok') ? '<img class="crest-img" src="'+team.logo+'" alt="">' : '';
   return '<span class="crest" style="width:'+s+'px;height:'+s+'px">'+fb+img+'</span>';
 }
 function starsGlyph(n){ let o=''; for(let i=1;i<=5;i++) o += (i<=n?'★':'☆'); return o; }
+function fmtDay(d){ return GRDAYS[d.getDay()]+' '+d.getDate()+' '+GRMON[d.getMonth()]; }
 
-/* =============================================================================
-   (3) RENDER / SCREENS
-============================================================================= */
 function topBar(){
-  const live = MATCHES.filter(m=>m.status==='live').length;
+  const live = liveMatches().length;
   return '<div class="topbar">'
     + '<div class="brand">Bleach<b>ers</b></div>'
     + '<div class="tb-right">'
     + (live ? '<div class="livecount" data-action="nav" data-screen="live"><span style="width:6px;height:6px;border-radius:50%;background:var(--live);display:inline-block"></span>'+live+' LIVE</div>' : '')
-    + '<div class="tb-av" data-action="nav" data-screen="profile">'+esc(state.user.name[0])+'</div>'
+    + '<button class="tb-btn" data-action="openSearch" aria-label="Αναζήτηση">'+icon('search',17)+'</button>'
+    + '<button class="tb-av" data-action="nav" data-screen="profile" aria-label="Προφίλ">'+esc((state.user.name||'B')[0].toUpperCase())+'</button>'
     + '</div></div>';
 }
 
 /* ---------- FEED ---------- */
 function teamLine(m, side){
   const team = m[side], score = m.score[side];
-  let cls = '';
+  let cls='';
   if(m.status==='ft'){
-    const mine = m.score[side], other = m.score[side==='home'?'away':'home'];
-    cls = mine>other ? 'win' : (mine<other ? 'lose' : '');
+    const mine=m.score[side], other=m.score[side==='home'?'away':'home'];
+    cls = mine>other?'win':(mine<other?'lose':'');
   }
-  return '<div class="tl '+cls+'">'+crest(team,26)+'<span class="tn">'+esc(team.name)+'</span><span class="tsc">'+score+'</span></div>';
+  const sc = m.status==='ns' ? '<span class="tsc dim">–</span>' : '<span class="tsc">'+score+'</span>';
+  return '<div class="tl '+cls+'">'+crest(team,26)+'<span class="tn">'+esc(team.name)+'</span>'+sc+'</div>';
 }
 function statusCol(m){
-  if(m.status==='live') return '<span class="min"><span class="ld"></span>'+esc(m.clock)+'</span>';
-  return '<span class="ft">Τελ.</span><span class="dd">'+shortDate(m.date)+'</span>';
+  if(m.status==='live') return '<span class="min"><span class="ld"></span><span data-clock="'+m.id+'">'+esc(liveClock(m))+'</span></span>';
+  if(m.status==='ns')   return '<span class="tt">'+esc(m.time)+'</span>';
+  return '<span class="ft">Τελ.</span>';
 }
 function matchRow(m){
   const log = state.logs[m.id], fol = !!state.followed[m.id];
@@ -462,131 +814,175 @@ function matchRow(m){
     + '<div class="mteams">'+teamLine(m,'home')+teamLine(m,'away')+'</div>'
     + '<div class="mside">'
     + (log?'<span class="rate-pill">★ '+log.rating+'</span>':'')
-    + '<button class="starb '+(fol?'on':'')+'" data-action="toggleStar" data-id="'+m.id+'">'+starIcon(fol,19)+'</button>'
+    + '<button class="starb '+(fol?'on':'')+'" data-action="toggleStar" data-id="'+m.id+'" aria-label="Παρακολούθηση">'+starIcon(fol,19)+'</button>'
     + '</div></div>';
 }
-function leagueGroup(league, country, matches, variant){
+function leagueGroup(league, matches, variant){
   let head;
   if(variant==='live') head = '<div class="ghead live"><span class="gbadge" style="background:var(--live)">'+icon('live',13)+'</span><span class="gname">ΖΩΝΤΑΝΑ ΤΩΡΑ</span></div>';
-  else if(variant==='fav') head = '<div class="ghead fav"><span class="gbadge" style="background:var(--gold);color:#2a1900">'+starIcon(true,13)+'</span><span class="gname">ΤΑ ΑΓΑΠΗΜΕΝΑ ΣΟΥ</span></div>';
+  else if(variant==='fav') head = '<div class="ghead fav"><span class="gbadge" style="background:var(--gold);color:#2a1900">'+starIcon(true,13)+'</span><span class="gname">ΟΙ ΟΜΑΔΕΣ ΣΟΥ</span></div>';
   else {
-    const color = LEAGUE_COLOR[league] || 'var(--faint)';
+    const meta = LEAGUE_META[league]||{color:'var(--faint)',region:''};
     const initials = league.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-    const region = LEAGUE_REGION[league] || country || '';
-    head = '<div class="ghead"><span class="gbadge" style="background:'+color+'">'+esc(initials)+'</span><span class="gname">'+esc(league)+'</span><span class="gcountry">'+esc(region)+'</span></div>';
+    head = '<div class="ghead"><span class="gbadge" style="background:'+meta.color+'">'+esc(initials)+'</span><span class="gname">'+esc(league)+'</span><span class="gcountry">'+esc(meta.region)+'</span></div>';
   }
   return '<div class="mgroup">'+head+matches.map(matchRow).join('')+'</div>';
 }
+function dateStrip(){
+  return '<div class="datestrip">'+[-2,-1,0,1,2].map(off=>{
+    const d = dayDate(off);
+    const hasLive = off===0 && liveMatches().length>0;
+    const lbl = off===0 ? 'Σήμερα' : GRDAYS[d.getDay()];
+    return '<button class="dchip '+(state.activeDay===off?'on':'')+'" data-action="setDay" data-day="'+off+'">'
+      + '<span class="dw">'+lbl+'</span><span class="dn">'+d.getDate()+'</span>'
+      + (hasLive?'<span class="dot"></span>':'')
+      + '</button>';
+  }).join('')+'</div>';
+}
 function renderFeed(){
-  const sport = state.activeSport, filter = state.feedFilter;
-  let all = MATCHES.filter(m=>m.sport===sport);
-  let body = '';
-
-  if(filter==='logged') all = all.filter(m=>state.logs[m.id]);
-
-  if(all.length===0){
-    body = emptyState('scores','Κανένας αγώνας εδώ', filter==='logged'?'Δεν έχεις καταγράψει αγώνες σε αυτό το άθλημα.':'Δοκίμασε άλλο φίλτρο.');
-  } else if(filter==='all'){
-    const fav = all.filter(m=>state.followed[m.id]);
-    const live = all.filter(m=>m.status==='live' && !state.followed[m.id]);
-    const rest = all.filter(m=>m.status!=='live' && !state.followed[m.id]);
-    if(fav.length) body += leagueGroup(null,null,fav,'fav');
-    if(live.length) body += leagueGroup(null,null,live,'live');
+  const sport = state.activeSport;
+  let all = MATCHES.filter(m=>m.sport===sport && m.day===state.activeDay);
+  if(state.mineOnly) all = MATCHES.filter(m=>m.sport===sport && (state.logs[m.id]||state.followed[m.id]));
+  let body='';
+  if(!all.length){
+    body = emptyState('scores','Κανένας αγώνας','Δεν υπάρχουν αγώνες εδώ — δοκίμασε άλλη μέρα ή άθλημα.');
+  } else {
+    const isFav = m => state.user.favoriteTeams.indexOf(m.homeId)>-1 || state.user.favoriteTeams.indexOf(m.awayId)>-1 || state.followed[m.id];
+    const fav  = all.filter(isFav);
+    const live = all.filter(m=>m.status==='live' && !isFav(m));
+    const rest = all.filter(m=>m.status!=='live' && !isFav(m));
+    if(fav.length)  body += leagueGroup(null,fav,'fav');
+    if(live.length) body += leagueGroup(null,live,'live');
     LEAGUE_ORDER[sport].forEach(lg=>{
       const ms = rest.filter(m=>m.league===lg);
-      if(ms.length) body += leagueGroup(lg, ms[0].country, ms);
-    });
-  } else { // logged
-    LEAGUE_ORDER[sport].forEach(lg=>{
-      const ms = all.filter(m=>m.league===lg);
-      if(ms.length) body += leagueGroup(lg, ms[0].country, ms);
+      if(ms.length) body += leagueGroup(lg,ms);
     });
   }
-
-  const chip = (id,label)=>'<button class="fchip '+(filter===id?'on':'')+'" data-action="setFilter" data-filter="'+id+'">'+label+'</button>';
-  return '<h1>Αγώνες</h1><p class="sub">Δες τα ματς και κατέγραψε όσα παρακολούθησες.</p>'
-    + '<div class="seg">'
+  return '<h1>Αγώνες</h1><p class="sub">'+fmtDay(dayDate(state.activeDay))+' — πάτα έναν αγώνα για να τον καταγράψεις.</p>'
+    + '<div class="seg" role="tablist">'
     + '<button class="'+(sport==='football'?'on':'')+'" data-action="setSport" data-sport="football">⚽ Ποδόσφαιρο</button>'
     + '<button class="'+(sport==='basketball'?'on':'')+'" data-action="setSport" data-sport="basketball">🏀 Μπάσκετ</button>'
     + '</div>'
-    + '<div class="chips-row">'+chip('all','Όλα')+chip('logged','Καταγεγραμμένα')+'</div>'
-    + '<div class="mt12">'+body+'</div>';
+    + dateStrip()
+    + '<div class="row gap8" style="padding:4px"><button class="fchip '+(state.mineOnly?'on':'')+'" data-action="toggleMine">★ Μόνο δικά μου</button></div>'
+    + '<div class="mt8">'+body+'</div>';
 }
 
 /* ---------- LIVE TAB ---------- */
 function liveCard(m){
   const log = state.logs[m.id];
+  const last = m.events.length ? m.events[m.events.length-1] : null;
   return '<div class="livecard" data-action="openMatch" data-id="'+m.id+'">'
     + '<div class="lc-top"><span class="lc-badge"><span class="ld"></span>LIVE</span>'
-    + '<span class="lc-clock">'+esc(m.clock)+'</span>'
+    + '<span class="lc-clock" data-clock="'+m.id+'">'+esc(liveClock(m))+'</span>'
     + '<span class="lc-league">'+esc(m.league)+'</span></div>'
     + '<div class="lc-team"><div class="tl" style="flex:1">'+crest(m.home,40)+'<span class="tn">'+esc(m.home.name)+'</span></div><span class="tsc">'+m.score.home+'</span></div>'
     + '<div class="lc-team"><div class="tl" style="flex:1">'+crest(m.away,40)+'<span class="tn">'+esc(m.away.name)+'</span></div><span class="tsc">'+m.score.away+'</span></div>'
+    + (last?'<div class="lc-ticker">'+icon(last.type==='goal'?'goal':'clock',14)+'<span><b>'+esc(String(last.min))+'</b> '+esc(last.text)+'</span></div>':'')
     + (log?'<div class="tiny" style="margin-top:8px;color:var(--gold)">★ Το έχεις βαθμολογήσει με '+log.rating+'/5</div>':'')
     + '</div>';
 }
 function renderLive(){
-  const live = MATCHES.filter(m=>m.status==='live');
-  let body = live.length ? live.map(liveCard).join('') : emptyState('live','Καμία ζωντανή μετάδοση','Δεν παίζεται κάποιος αγώνας αυτή τη στιγμή.');
-  return '<h1>Live</h1><p class="sub">Ό,τι παίζεται τώρα, σε ένα μέρος.</p><div class="mt12">'+body+'</div>';
+  const live = liveMatches();
+  const done = MATCHES.filter(m=>m.day===0 && m.status==='ft' && (m.events.length));
+  let body = live.length ? live.map(liveCard).join('') : emptyState('live','Καμία ζωντανή μετάδοση','Οι αγώνες της ημέρας ολοκληρώθηκαν.');
+  if(done.length) body += '<div class="sec-title">Ολοκληρώθηκαν πριν λίγο</div><div class="mgroup">'+done.map(matchRow).join('')+'</div>';
+  return '<h1>Live</h1><p class="sub">Ό,τι παίζεται τώρα — οι αγώνες εξελίσσονται μόνοι τους.</p><div class="mt12">'+body+'</div>';
 }
 
-/* ---------- LOG PICKER (FAB) ---------- */
+/* ---------- PICKER ---------- */
 function renderPicker(){
+  const loggable = MATCHES.filter(m=>m.status!=='ns');
   const groups = [['football','⚽ Ποδόσφαιρο'],['basketball','🏀 Μπάσκετ']];
-  return '<h1>Κατέγραψε αγώνα</h1><p class="sub">Διάλεξε ποιον αγώνα παρακολούθησες.</p>'
-    + groups.map(g=>'<div class="sec-title">'+g[1]+'</div><div class="mgroup">'
-        + MATCHES.filter(m=>m.sport===g[0]).map(matchRow).join('')+'</div>').join('');
+  return '<h1>Κατέγραψε αγώνα</h1><p class="sub">Διάλεξε αγώνα που έχει παιχτεί (ή παίζεται τώρα).</p>'
+    + groups.map(g=>{
+        const ms = loggable.filter(m=>m.sport===g[0]).sort((a,b)=>b.day-a.day);
+        return ms.length ? '<div class="sec-title">'+g[1]+'</div><div class="mgroup">'+ms.map(matchRow).join('')+'</div>' : '';
+      }).join('');
 }
 
 /* ---------- MATCH DETAIL ---------- */
+function h2hFor(m){
+  return MATCHES.filter(x=>x.id!==m.id && x.sport===m.sport && x.status==='ft'
+    && ((x.homeId===m.homeId&&x.awayId===m.awayId)||(x.homeId===m.awayId&&x.awayId===m.homeId)));
+}
 function renderMatchDetail(){
   const d = App.ui.draft, m = matchById(d.matchId);
-  const tabs = [['summary','Σύνοψη'],['rate','Βαθμολογία'],['exp','Εμπειρία']];
+  const canLog = m.status!=='ns';
+  const tabs = canLog ? [['summary','Σύνοψη'],['rate','Βαθμολογία'],['exp','Εμπειρία']] : [['summary','Σύνοψη']];
   let body;
-  if(d.tab==='rate') body = tabRate(d,m);
-  else if(d.tab==='exp') body = tabExperience(d,m);
+  if(d.tab==='rate' && canLog) body = tabRate(d,m);
+  else if(d.tab==='exp' && canLog) body = tabExperience(d,m);
   else body = tabSummary(d,m);
-
   const statusHtml = m.status==='live'
-    ? '<div class="hero-status live"><span class="ld"></span>LIVE · '+esc(m.clock)+'</div>'
-    : '<div class="hero-status">Τελικό</div>';
-
-  return '<div class="dhead"><button class="iconbtn" data-action="back">'+icon('back',20)+'</button>'
-    + '<div><div class="dt">'+esc(m.home.abbr)+' '+m.score.home+'–'+m.score.away+' '+esc(m.away.abbr)+'</div>'
-    + '<div class="tiny muted">'+esc(m.league)+' · '+fmtDate(m.date)+'</div></div></div>'
+    ? '<div class="hero-status live"><span class="ld"></span>LIVE · <span data-clock="'+m.id+'">'+esc(liveClock(m))+'</span></div>'
+    : (m.status==='ns' ? '<div class="hero-status">Σέντρα '+esc(m.time)+'</div>' : '<div class="hero-status">Τελικό</div>');
+  const scoreHtml = m.status==='ns' ? '<div class="hero-score" style="color:var(--faint)">–</div>' : '<div class="hero-score">'+m.score.home+'–'+m.score.away+'</div>';
+  return '<div class="dhead"><button class="iconbtn" data-action="back" aria-label="Πίσω">'+icon('back',20)+'</button>'
+    + '<div><div class="dt">'+esc(m.home.abbr)+(m.status==='ns'?' – ':' '+m.score.home+'–'+m.score.away+' ')+esc(m.away.abbr)+'</div>'
+    + '<div class="tiny muted">'+esc(m.league)+' · '+fmtDay(dayDate(m.day))+'</div></div></div>'
     + '<div class="hero">'
-    + '<div class="hero-top">'+esc(m.league)+' · '+esc(m.country)+'</div>'
+    + '<div class="hero-top">'+esc(m.league)+' · '+esc((LEAGUE_META[m.league]||{}).region||'')+'</div>'
     + '<div class="hero-main">'
     + '<div class="hero-team">'+crest(m.home,56)+'<span class="tn">'+esc(m.home.name)+'</span></div>'
-    + '<div class="hero-mid"><div class="hero-score">'+m.score.home+'–'+m.score.away+'</div>'+statusHtml+'</div>'
+    + '<div class="hero-mid">'+scoreHtml+statusHtml+'</div>'
     + '<div class="hero-team">'+crest(m.away,56)+'<span class="tn">'+esc(m.away.name)+'</span></div>'
     + '</div>'
-    + '<div class="hero-meta">'+icon('pin',14)+'<span>'+esc(m.venue)+' · '+fmtDate(m.date)+'</span></div>'
+    + '<div class="hero-meta">'+icon('pin',14)+'<span>'+esc(m.venue)+' · '+esc(m.time)+'</span></div>'
     + ((m.derby||m.euro)?'<div class="ctx-chips">'+(m.derby?'<span class="ctx derby">Ντέρμπι</span>':'')+(m.euro?'<span class="ctx euro">Euro Night</span>':'')+'</div>':'')
     + '</div>'
-    + '<div class="tabs">'+tabs.map(t=>'<button class="'+(d.tab===t[0]?'on':'')+'" data-action="setTab" data-tab="'+t[0]+'">'+t[1]+'</button>').join('')+'</div>'
+    + (tabs.length>1?'<div class="tabs">'+tabs.map(t=>'<button class="'+(d.tab===t[0]?'on':'')+'" data-action="setTab" data-tab="'+t[0]+'">'+t[1]+'</button>').join('')+'</div>':'')
     + '<div class="dbody">'+body+'</div>';
 }
+function eventIcon(t){ return t==='goal'?icon('goal',15):t==='basket'?icon('ball',15):t==='yellow'?'<span style="display:inline-block;width:10px;height:13px;background:var(--gold);border-radius:2px"></span>':icon('clock',15); }
 function tabSummary(d,m){
   const log = state.logs[m.id];
-  let yourLog = '';
+  let yourLog='';
   if(log){
     yourLog = '<div class="your-log"><div class="between"><b>Η καταγραφή σου</b><span class="yl-stars">'+starsGlyph(log.rating)+'</span></div>'
       + (log.review&&log.review.trim()?'<div class="small mt8" style="font-style:italic;color:#d6dbe3">“'+esc(log.review.trim())+'”</div>':'')
-      + (log.location?'<div class="tiny muted mt8">'+icon('pin',12,'')+' '+esc(LOCATIONS[log.location].label)+(log.potm?' · MVP: '+esc(log.potm):'')+'</div>':'')
+      + (log.location?'<div class="tiny muted mt8">'+esc(LOCATIONS[log.location].label)+(log.potm?' · MVP: '+esc(log.potm):'')+'</div>':'')
       + '</div>';
   }
-  const info = [['Διοργάνωση',m.league],['Χώρα',m.country],['Γήπεδο',m.venue],['Ημερομηνία',fmtDate(m.date)],['Κατάσταση',m.status==='live'?'Σε εξέλιξη':'Τελικό']];
-  return yourLog
+  /* live/finished event timeline (from the live engine) */
+  let timeline='';
+  if(m.events.length){
+    const evs = m.events.slice(-8).reverse();
+    timeline = '<div class="sec-title">Εξέλιξη</div><div class="info-card"><div class="tml">'
+      + evs.map(e=>'<div class="tml-row"><span class="tml-min">'+esc(String(e.min))+'</span><span class="tml-ic">'+eventIcon(e.type)+'</span><span class="tml-txt">'+esc(e.text)+'</span></div>').join('')
+      + '</div></div>';
+  }
+  /* head-to-head from the dataset */
+  const h2h = h2hFor(m);
+  let h2hHtml='';
+  if(h2h.length){
+    h2hHtml = '<div class="sec-title">Μεταξύ τους</div><div class="info-card">'
+      + h2h.map(x=>{
+          const win = x.score.home>x.score.away ? x.homeId : (x.score.away>x.score.home ? x.awayId : null);
+          const rel = win===null ? {c:'var(--draw)',t:'Ι'} : { c:'var(--win)', t:'Ν' };
+          return '<div class="h2h-row" data-action="openMatch" data-id="'+x.id+'" style="cursor:pointer">'
+            + '<span class="wchip" style="background:'+(win?'var(--win)':'var(--draw)')+'">'+(win?esc(TEAMS[win].abbr[0]):'Ι')+'</span>'
+            + crest(x.home,20)+'<span>'+esc(x.home.abbr)+' – '+esc(x.away.abbr)+'</span>'+crest(x.away,20)
+            + '<span class="tiny muted" style="margin-left:4px">'+fmtDay(dayDate(x.day))+'</span>'
+            + '<span class="h2h-score">'+x.score.home+'–'+x.score.away+'</span></div>';
+        }).join('')
+      + '</div>';
+  }
+  const info = [['Διοργάνωση',m.league],['Γήπεδο',m.venue],['Ημερομηνία',fmtDay(dayDate(m.day))+' · '+m.time],['Κατάσταση',m.status==='live'?'Σε εξέλιξη':(m.status==='ns'?'Δεν έχει αρχίσει':'Τελικό')]];
+  const cta = m.status==='ns'
+    ? '<div class="ns-note">Ο αγώνας δεν έχει αρχίσει ακόμη.<br>Πάτα το ⭐ για να τον παρακολουθείς — θα μπορείς να τον καταγράψεις μόλις τελειώσει.</div>'
+      + '<button class="cta ghost" data-action="toggleStar" data-id="'+m.id+'">'+(state.followed[m.id]?'★ Το παρακολουθείς':'☆ Παρακολούθησέ το')+'</button>'
+    : '<button class="cta" data-action="setTab" data-tab="rate">'+(log?'Επεξεργασία καταγραφής':'Βαθμολόγησε τον αγώνα')+'</button>';
+  return yourLog + timeline
     + '<div class="sec-title">Στοιχεία αγώνα</div>'
     + '<div class="info-card">'+info.map(r=>'<div class="info-row"><span class="k">'+r[0]+'</span><span class="v">'+esc(r[1])+'</span></div>').join('')+'</div>'
+    + h2hHtml
     + '<div class="sec-title">Παίκτες-κλειδιά</div>'
     + '<div class="info-card">'+m.players.map(p=>'<div class="players-row"><span class="pdot"></span><span>'+esc(p)+'</span></div>').join('')+'</div>'
-    + '<button class="cta" data-action="setTab" data-tab="rate">'+(log?'Επεξεργασία καταγραφής':'Βαθμολόγησε τον αγώνα')+'</button>';
+    + cta;
 }
 function tabRate(d,m){
-  const stars = [1,2,3,4,5].map(i=>'<span class="'+(i<=d.rating?'on':'')+'" data-action="setRating" data-val="'+i+'">★</span>').join('');
+  const stars = [1,2,3,4,5].map(i=>'<span class="'+(i<=d.rating?'on':'')+'" data-action="setRating" data-val="'+i+'" role="button" aria-label="'+i+' αστέρια">★</span>').join('');
   const pills = m.players.map((p,i)=>'<button class="pill '+(d.potm===p?'on':'')+'" data-action="setPotm" data-idx="'+i+'">'+esc(p)+'</button>').join('');
   return '<div class="label">Βαθμολογία</div><div class="stars">'+stars+'</div>'
     + '<div class="rate-label">'+(d.rating?esc(RATING_LABELS[d.rating]):'Πάτα τα αστέρια')+'</div>'
@@ -603,7 +999,7 @@ function tabExperience(d,m){
       + '<div><div class="nm">'+o.label+'</div><div class="tiny muted">'+o.sub+'</div></div>'
       + '<div class="ck">'+icon('check',18)+'</div></div>';
   }).join('');
-  let extra = '';
+  let extra='';
   if(d.location==='stadium'){
     const atmo = ATMOSPHERES.map(a=>'<button class="pill '+(d.atmosphere.indexOf(a[0])>=0?'on':'')+'" data-action="toggleAtmo" data-atmo="'+a[0]+'">'+esc(a[1])+'</button>').join('');
     extra = '<div class="venue-note">'+icon('pin',16)+'<span>Ήσουν στο '+esc(m.venue)+'</span></div>'
@@ -622,8 +1018,8 @@ function logButton(d){
 }
 
 /* ---------- STATS ---------- */
-function statBar(label, val, pct, color){
-  return '<div class="bar-line"><div class="bl">'+label+'</div>'
+function statBar(labelHtml, val, pct, color){
+  return '<div class="bar-line"><div class="bl">'+labelHtml+'</div>'
     + '<div class="sbar"><div class="sfill" data-fill="'+pct+'%" style="width:0;background:'+color+'"></div></div>'
     + '<div class="bv">'+val+'</div></div>';
 }
@@ -633,50 +1029,50 @@ function renderStats(){
       + '<button class="cta" style="margin-top:16px;max-width:200px" data-action="toggleStats">Εμφάνιση</button></div>';
   }
   const logs = logsArr();
-  if(logs.length===0){
+  if(!logs.length){
     return '<h1>Στατιστικά</h1>'+emptyState('stats','Δεν υπάρχουν στατιστικά ακόμη','Κατέγραψε μερικούς αγώνες και θα δεις εδώ τα insights σου.');
   }
+  const withM = logs.map(l=>({l,m:matchById(l.matchId)})).filter(x=>x.m);
   const reviews = logs.filter(l=>l.review&&l.review.trim()).length;
   const stadiums = logs.filter(l=>l.location==='stadium').length;
-  const rated = logs.filter(l=>l.rating);
-  const avg = rated.length ? (rated.reduce((a,l)=>a+l.rating,0)/rated.length) : 0;
-  const fb = logs.filter(l=>{const m=matchById(l.matchId);return m&&m.sport==='football';}).length;
-  const bb = logs.length - fb;
+  const rated = ratedLogs();
+  const avgR = avgRating(logs);
+  const fb = withM.filter(x=>x.m.sport==='football').length, bb = withM.length-fb;
   const loc = { stadium:0, home:0, bar:0 };
   logs.forEach(l=>{ if(l.location && loc[l.location]!=null) loc[l.location]++; });
-  const dist = [0,0,0,0,0];
-  logs.forEach(l=>{ if(l.rating) dist[l.rating-1]++; });
-  const distMax = Math.max(...dist, 1);
+  const located = loc.stadium+loc.home+loc.bar;
+  const dist=[0,0,0,0,0]; logs.forEach(l=>{ if(l.rating) dist[l.rating-1]++; });
+  const distMax=Math.max(...dist,1);
   const top = rated.slice().sort((a,b)=>b.rating-a.rating)[0];
-  const topM = top ? matchById(top.matchId) : null;
-  const pct = (n,d)=> d?Math.round(n/d*100):0;
+  const topM = top?matchById(top.matchId):null;
+  const pct=(n,d)=>d?Math.round(n/d*100):0;
+  const insights = computeInsights();
+  const donutParts=[{v:loc.stadium,c:'var(--ch1)',k:'Γήπεδο'},{v:loc.home,c:'var(--ch2)',k:'Σπίτι'},{v:loc.bar,c:'var(--ch3)',k:'Μπαρ'}];
 
-  let html = '<h1>Στατιστικά</h1><p class="sub">Η χρονιά σου στο Bleachers.</p>'
-    + '<div class="stat-hero"><div class="big nums">'+logs.length+'</div>'
-    + '<div class="muted" style="margin-top:4px">αγώνες καταγεγραμμένοι το 2026</div></div>'
+  return '<h1>Στατιστικά</h1><p class="sub">Η σεζόν σου, διαβασμένη από το Bleachers IQ.</p>'
+    + '<div class="stat-hero"><div class="big">'+logs.length+'</div>'
+    + '<div class="muted" style="margin-top:4px">αγώνες καταγεγραμμένοι</div></div>'
     + '<div class="mini-grid">'
-    + '<div class="mini"><div class="v" style="color:var(--gold)">'+avg.toFixed(1)+'</div><div class="k">Μ.Ο. βαθμ.</div></div>'
+    + '<div class="mini"><div class="v"><span style="color:var(--gold)">'+starIcon(true,15)+'</span>'+avgR.toFixed(1)+'</div><div class="k">Μ.Ο. βαθμ.</div></div>'
     + '<div class="mini"><div class="v">'+reviews+'</div><div class="k">Κριτικές</div></div>'
     + '<div class="mini"><div class="v">'+stadiums+'</div><div class="k">Στο γήπεδο</div></div>'
     + '</div>'
-    + '<div class="bar-card"><b>Ανά άθλημα</b>'
-    + statBar('⚽ Ποδόσφαιρο', pct(fb,logs.length)+'%', pct(fb,logs.length), 'var(--accent)')
-    + statBar('🏀 Μπάσκετ', pct(bb,logs.length)+'%', pct(bb,logs.length), 'var(--gold)')
+    + '<div class="sec-title">Bleachers IQ</div>'
+    + insights.map(i=>'<div class="iq-card"><div class="iq-ic">'+icon(i.icon,19)+'</div><div><div class="iq-t">'+esc(i.title)+'</div><div class="iq-b">'+i.body+'</div></div></div>').join('')
+    + '<div class="sec-title">Προφίλ θεατή</div>'
+    + '<div class="bar-card center">'+radarSVG(computeRadar(),250)+'</div>'
+    + (located?'<div class="sec-title">Πού τους είδες</div>'
+      + '<div class="bar-card"><div class="chart-flex">'+donutSVG(donutParts,located)
+      + '<div class="chart-legend">'+donutParts.map(p=>'<div class="cl-row"><span class="swatch" style="background:'+p.c+'"></span><span class="cl-k">'+p.k+'</span><span class="cl-v">'+p.v+'</span></div>').join('')+'</div>'
+      + '</div></div>':'')
+    + '<div class="bar-card"><b class="small">Ανά άθλημα</b>'
+    + statBar('<span class="swatch" style="background:var(--ch1)"></span>Ποδόσφαιρο', pct(fb,withM.length)+'%', pct(fb,withM.length), 'var(--ch1)')
+    + statBar('<span class="swatch" style="background:var(--ch3)"></span>Μπάσκετ', pct(bb,withM.length)+'%', pct(bb,withM.length), 'var(--ch3)')
     + '</div>'
-    + '<div class="bar-card"><b>Πού τους είδες</b>'
-    + statBar('Γήπεδο', loc.stadium, pct(loc.stadium,logs.length), 'var(--accent)')
-    + statBar('Σπίτι', loc.home, pct(loc.home,logs.length), '#5B9BE0')
-    + statBar('Μπαρ', loc.bar, pct(loc.bar,logs.length), 'var(--gold)')
+    + '<div class="bar-card"><b class="small">Κατανομή βαθμολογίας</b>'
+    + [5,4,3,2,1].map(r=>statBar('<span class="cl-k">'+r+'★</span>', dist[r-1], Math.round(dist[r-1]/distMax*100), 'var(--ch3)')).join('')
     + '</div>'
-    + '<div class="bar-card"><b>Κατανομή βαθμολογίας</b>'
-    + [5,4,3,2,1].map(r=>statBar('<span style="color:var(--gold)">'+r+'★</span>', dist[r-1], Math.round(dist[r-1]/distMax*100), 'var(--gold)')).join('')
-    + '</div>';
-  if(topM){
-    html += '<div class="sec-title">Κορυφαία βαθμολογία</div>'
-      + '<div class="mgroup"><div class="ghead"><span class="gbadge" style="background:var(--gold);color:#2a1900">'+icon('trophy',13)+'</span><span class="gname">Top αγώνας</span></div>'
-      + matchRow(topM) + '</div>';
-  }
-  return html;
+    + (topM?'<div class="sec-title">Κορυφαία βαθμολογία</div><div class="mgroup"><div class="ghead"><span class="gbadge" style="background:var(--gold);color:#2a1900">'+icon('trophy',13)+'</span><span class="gname">Top αγώνας</span></div>'+matchRow(topM)+'</div>':'');
 }
 
 /* ---------- PROFILE ---------- */
@@ -692,31 +1088,95 @@ function renderProfile(){
       + '<div class="tiny muted">'+esc(m.league)+(l.location?' · '+esc(LOCATIONS[l.location].label):'')+'</div></div>'
       + '<span class="ml-rt">'+starsGlyph(l.rating)+'</span></div>';
   }).join('');
-
+  const favPills = state.user.favoriteTeams.map(id=>{
+    const t = TEAMS[id]; if(!t) return '';
+    return '<span class="team-pill">'+crest(t,24)+esc(t.name)+' <span class="sp">'+(t.sport==='football'?'⚽':'🏀')+'</span></span>';
+  }).join('');
   return '<h1>Προφίλ</h1>'
-    + '<div class="prof-card"><div class="prof-head"><div class="avatar">'+esc(state.user.name[0])+'</div>'
-    + '<div><div class="prof-name">'+esc(state.user.name)+'</div>'
-    + '<div class="tiny muted">'+esc(state.user.handle)+' · '+esc(state.user.city)+'</div></div></div>'
+    + '<div class="prof-card"><div class="prof-head"><div class="avatar">'+esc((state.user.name||'B')[0].toUpperCase())+'</div>'
+    + '<div><div class="prof-name">'+esc(state.user.name||'Φίλαθλος')+'</div>'
+    + '<div class="tiny muted">'+esc(state.user.handle||'@bleachers')+(state.user.city?' · '+esc(state.user.city):'')+'</div></div></div>'
     + '<div class="counters">'
     + '<div class="counter"><div class="v">'+logs.length+'</div><div class="k">Αγώνες</div></div>'
     + '<div class="counter"><div class="v">'+reviews+'</div><div class="k">Κριτικές</div></div>'
     + '<div class="counter"><div class="v">'+stadiums+'</div><div class="k">Γήπεδα</div></div>'
     + '<div class="counter"><div class="v">'+leagues+'</div><div class="k">Λίγκες</div></div>'
     + '</div></div>'
-    + '<div class="sec-title">Αγαπημένες ομάδες</div>'
-    + '<div>'+state.user.favoriteTeams.map(t=>'<span class="team-pill">'+crest(t,24)+esc(t.name)+' <span class="sp">'+(t.sport==='football'?'⚽':'🏀')+'</span></span>').join('')+'</div>'
+    + '<div class="sec-title between">Αγαπημένες ομάδες <span class="linkish tiny" data-action="editFavs">Αλλαγή</span></div>'
+    + '<div>'+(favPills||'<div class="empty" style="padding:14px">Δεν έχεις διαλέξει ομάδες.</div>')+'</div>'
     + '<div class="sec-title">Πρόσφατες καταγραφές</div>'
     + '<div class="set-card">'+(recent||'<div class="empty" style="padding:24px">Δεν έχεις καταγράψει αγώνες ακόμη.</div>')+'</div>'
     + '<div class="sec-title">Ρυθμίσεις</div>'
     + '<div class="set-card">'
     + '<div class="set-row"><div><div style="font-weight:700">Εμφάνιση στατιστικών</div><div class="tiny muted">Έλεγξε την καρτέλα Στατιστικά</div></div>'
-    + '<div class="tgl '+(state.settings.showStats?'on':'')+'" data-action="toggleStats"></div></div>'
+    + '<div class="tgl '+(state.settings.showStats?'on':'')+'" data-action="toggleStats" role="switch" aria-checked="'+state.settings.showStats+'"></div></div>'
+    + '<div class="set-row"><div><div style="font-weight:700">Backup δεδομένων</div><div class="tiny muted">Κατέβασε τις καταγραφές σου (JSON)</div></div>'
+    + '<span class="linkish" data-action="exportData">'+icon('down',18)+'</span></div>'
+    + '<div class="set-row"><div><div style="font-weight:700">Επαναφορά backup</div><div class="tiny muted">Φόρτωσε αρχείο backup</div></div>'
+    + '<span class="linkish" data-action="importData">'+icon('up',18)+'</span></div>'
     + '<div class="set-row"><div><div style="font-weight:700">Διαγραφή δεδομένων</div><div class="tiny muted">Σβήνει όλες τις καταγραφές</div></div>'
-    + '<div class="danger" data-action="confirmReset">Reset</div></div>'
+    + '<span class="danger" data-action="confirmReset">Reset</span></div>'
     + '</div>';
 }
 
-/* ---------- SHEET / MODALS ---------- */
+/* ---------- SEARCH ---------- */
+function renderSearch(){
+  const q = (App.ui.search||'').trim().toLowerCase();
+  let results='';
+  if(q.length>=2){
+    const hit = MATCHES.filter(m=>
+      m.home.name.toLowerCase().includes(q) || m.away.name.toLowerCase().includes(q)
+      || m.home.abbr.toLowerCase().includes(q) || m.away.abbr.toLowerCase().includes(q)
+      || m.league.toLowerCase().includes(q) || m.venue.toLowerCase().includes(q));
+    results = hit.length
+      ? '<div class="search-res"><div class="mgroup">'+hit.map(matchRow).join('')+'</div></div>'
+      : emptyState('search','Τίποτα εδώ','Δοκίμασε όνομα ομάδας, λίγκας ή γηπέδου.');
+  } else {
+    results = '<div class="empty"><div class="ec">'+icon('search',24)+'</div>Ψάξε ομάδα, διοργάνωση ή γήπεδο.</div>';
+  }
+  return '<div class="search-wrap"><div class="search-inner">'
+    + '<div class="search-head">'
+    + '<input type="text" id="searchbox" data-field="search" placeholder="Αναζήτηση…" value="'+esc(App.ui.search||'')+'" autocomplete="off">'
+    + '<button class="iconbtn" data-action="closeSearch" aria-label="Κλείσιμο">'+icon('close',18)+'</button>'
+    + '</div>'+results+'</div></div>';
+}
+
+/* ---------- ONBOARDING ---------- */
+function renderOnboarding(){
+  const step = App.ui.obStep;
+  let inner='';
+  if(step===0){
+    inner = '<div style="flex:1;display:flex;flex-direction:column;justify-content:center">'
+      + '<div class="ob-logo">Bleach<b>ers</b></div>'
+      + '<div class="ob-sub">Το ημερολόγιο των αγώνων που ζεις.<br>Γήπεδο ή καναπές — μετράνε το ίδιο.</div>'
+      + '<div class="mt20" style="display:flex;justify-content:center;gap:26px;color:var(--muted);font-size:12px;text-align:center">'
+      + '<div>'+icon('live',26)+'<br>Live σκορ</div><div>'+icon('star',26)+'<br>Βαθμολόγησε</div><div>'+icon('stats',26)+'<br>Insights</div>'
+      + '</div></div>'
+      + '<button class="cta" data-action="obNext">Ξεκίνα</button>';
+  } else if(step===1){
+    inner = '<h1 class="center" style="font-size:22px;margin-top:30px">Πώς σε λένε;</h1>'
+      + '<p class="sub center">Θα φαίνεται στο προφίλ σου.</p>'
+      + '<input type="text" data-field="obname" placeholder="π.χ. Κώστας" value="'+esc(App.ui.obName)+'" maxlength="20" style="margin-top:10px">'
+      + '<div style="flex:1"></div>'
+      + '<button class="cta" data-action="obNext">Συνέχεια</button>'
+      + '<button class="cta ghost" data-action="obSkip">Παράλειψη</button>';
+  } else {
+    const picks = App.ui.obPick;
+    inner = '<h1 class="center" style="font-size:22px;margin-top:20px">Οι ομάδες σου</h1>'
+      + '<p class="sub center">Οι αγώνες τους θα καρφιτσώνονται πάνω-πάνω.</p>'
+      + '<div class="ob-teams">'
+      + Object.keys(TEAMS).map(id=>{
+          const t = TEAMS[id];
+          return '<div class="ob-team '+(picks[id]?'on':'')+'" data-action="obPick" data-id="'+id+'">'
+            + crest(t,38)+'<div class="tn">'+esc(t.name)+'</div><div class="sp">'+(t.sport==='football'?'Ποδόσφαιρο':'Μπάσκετ')+'</div></div>';
+        }).join('')
+      + '</div>'
+      + '<button class="cta" data-action="obDone" style="margin-top:20px">Πάμε!</button>';
+  }
+  return '<div class="ob-wrap"><div class="ob-inner">'+inner+'</div></div>';
+}
+
+/* ---------- SHEET / MODALS / EMPTY ---------- */
 function renderSheet(){
   const s = App.ui.sheet, m = matchById(s.matchId);
   return '<div class="sheet-wrap" data-action="closeSheet"><div class="sheet" data-stop="1">'
@@ -727,6 +1187,7 @@ function renderSheet(){
     + '<div class="s-match">'+crest(m.home,28)+'<span>'+esc(m.home.abbr)+' '+m.score.home+'–'+m.score.away+' '+esc(m.away.abbr)+'</span>'+crest(m.away,28)+'</div>'
     + '<div class="s-stars">'+starsGlyph(s.rating)+'</div>'
     + '<div class="modal-actions" style="margin-top:18px">'
+    + (s.edit?'':'<button class="btn ghost" data-action="undoLog">Αναίρεση</button>')
     + '<button class="btn ghost" data-action="sheetStats">Στατιστικά</button>'
     + '<button class="btn primary" data-action="closeSheet">Τέλεια</button>'
     + '</div></div></div>';
@@ -742,15 +1203,18 @@ function resetModal(){
     + '<div class="modal-actions"><button class="btn ghost" data-action="closeModal">Άκυρο</button>'
     + '<button class="btn red" data-action="doReset">Διαγραφή</button></div></div></div>';
 }
-
-/* ---------- EMPTY STATE / NAV / ROOT ---------- */
+function infoModal(title, body){
+  return '<div class="overlay" data-action="closeModal"><div class="modal" data-stop="1">'
+    + '<h3 class="center">'+esc(title)+'</h3><p class="center">'+esc(body)+'</p>'
+    + '<div class="modal-actions"><button class="btn primary" data-action="closeModal">Εντάξει</button></div></div></div>';
+}
 function emptyState(ic,title,sub){
   return '<div class="empty"><div class="ec">'+icon(ic,26)+'</div><div style="font-weight:700;color:var(--text)">'+esc(title)+'</div><div class="mt8">'+esc(sub)+'</div></div>';
 }
 function bottomNav(active){
-  const item = (s,ic,label)=>'<button class="nitem '+(active===s?'active':'')+'" data-action="nav" data-screen="'+s+'">'+icon(ic,22)+'<span>'+label+'</span></button>';
+  const item=(s,ic,label)=>'<button class="nitem '+(active===s?'active':'')+'" data-action="nav" data-screen="'+s+'" aria-label="'+label+'">'+icon(ic,22)+'<span>'+label+'</span></button>';
   return '<nav class="bnav">'+item('feed','scores','Αγώνες')+item('live','live','Live')
-    + '<button class="fab" data-action="openPicker">'+icon('plus',26)+'</button>'
+    + '<button class="fab" data-action="openPicker" aria-label="Καταγραφή αγώνα">'+icon('plus',26)+'</button>'
     + item('stats','stats','Στατιστικά')+item('profile','profile','Προφίλ')+'</nav>';
 }
 function screenBody(s){
@@ -763,29 +1227,38 @@ function screenBody(s){
 }
 function render(){
   const ui = App.ui;
-  let html = '<div class="shell">';
-  if(ui.screen==='matchDetail'){
-    html += renderMatchDetail();
+  let html='';
+  if(!state.onboarded){
+    html = renderOnboarding();
   } else {
-    html += topBar() + '<div class="screen">' + screenBody(ui.screen) + '</div>';
+    html = '<div class="shell">';
+    if(ui.screen==='matchDetail') html += renderMatchDetail();
+    else html += topBar() + '<div class="screen">' + screenBody(ui.screen) + '</div>';
+    html += bottomNav(ui.screen) + '</div>';
+    if(ui.search!==null) html += renderSearch();
+    if(ui.sheet) html += renderSheet();
+    if(ui.modal) html += ui.modal;
   }
-  html += bottomNav(ui.screen) + '</div>';
-  if(ui.sheet) html += renderSheet();
-  if(ui.modal) html += ui.modal;
   document.getElementById('app').innerHTML = html;
-  requestAnimationFrame(()=>{ document.querySelectorAll('[data-fill]').forEach(el=>{ el.style.width = el.dataset.fill; }); });
+  requestAnimationFrame(()=>{
+    document.querySelectorAll('[data-fill]').forEach(el=>{ el.style.width = el.dataset.fill; });
+    const sb = document.getElementById('searchbox');
+    if(sb && App.ui.searchFocus){ sb.focus(); sb.setSelectionRange(sb.value.length, sb.value.length); App.ui.searchFocus=false; }
+  });
 }
 
 /* =============================================================================
-   (4) ACTIONS
+   (5) ACTIONS
 ============================================================================= */
 function setSport(s){ state.activeSport=s; save(); render(); }
-function setFilter(f){ state.feedFilter=f; render(); }
+function setDay(d){ state.activeDay=+d; state.mineOnly=false; save(); render(); }
+function toggleMine(){ state.mineOnly=!state.mineOnly; render(); }
 function nav(s){ App.ui.screen=s; window.scrollTo(0,0); render(); }
 function toggleStar(id){ if(state.followed[id]) delete state.followed[id]; else state.followed[id]=true; save(); render(); }
 
 function openMatch(id){
   if(App.ui.screen!=='matchDetail') App.ui.backScreen = App.ui.screen;
+  App.ui.search = null;
   const log = state.logs[id];
   App.ui.draft = log
     ? { matchId:id, rating:log.rating, review:log.review||'', potm:log.potm||null, location:log.location||null, atmosphere:[...(log.atmosphere||[])], memory:log.memory||'', tab:'summary' }
@@ -803,61 +1276,160 @@ function applyLog(d){
   return !existing;
 }
 function logMatch(){
-  const d = App.ui.draft;
+  const d = App.ui.draft, m = matchById(d.matchId);
+  if(m.status==='ns'){ App.ui.modal = infoModal('Δεν έχει αρχίσει','Μπορείς να καταγράψεις έναν αγώνα μόνο αφού αρχίσει.'); render(); return; }
   if(!d.rating){ App.ui.modal = ratingModal(); render(); return; }
   const isNew = applyLog(d);
   App.ui.sheet = { matchId:d.matchId, rating:d.rating, edit:!isNew };
+  buzz(30);
   render();
+}
+function undoLog(){
+  const s = App.ui.sheet;
+  if(s && !s.edit) { delete state.logs[s.matchId]; save(); }
+  App.ui.sheet=null; App.ui.draft=null; nav('feed');
 }
 function closeSheet(){ const m=matchById(App.ui.sheet.matchId); App.ui.sheet=null; App.ui.draft=null; if(m) state.activeSport=m.sport; save(); nav('feed'); }
 function sheetStats(){ App.ui.sheet=null; App.ui.draft=null; nav('stats'); }
 function toggleStats(){ state.settings.showStats=!state.settings.showStats; save(); render(); }
 function confirmReset(){ App.ui.modal = resetModal(); render(); }
-function doReset(){ state = defaultState(); save(); App.ui = { screen:'profile', backScreen:'feed', draft:null, sheet:null, modal:null }; render(); }
+function doReset(){ state = defaultState(); state.onboarded=false; save(); App.ui = { screen:'feed', backScreen:'feed', draft:null, sheet:null, modal:null, search:null, obStep:0, obPick:{}, obName:'' }; render(); }
 function closeModal(){ App.ui.modal=null; render(); }
+function openSearch(){ App.ui.search=''; App.ui.searchFocus=true; render(); }
+function closeSearch(){ App.ui.search=null; render(); }
+
+/* onboarding actions */
+function obNext(){
+  if(App.ui.obStep===1){
+    state.user.name = (App.ui.obName||'').trim() || 'Φίλαθλος';
+    state.user.handle = '@'+state.user.name.toLowerCase().replace(/\s+/g,'');
+  }
+  App.ui.obStep++; render();
+}
+function obSkip(){ state.user.name='Φίλαθλος'; state.user.handle='@bleachers'; App.ui.obStep=2; render(); }
+function obPick(id){ if(App.ui.obPick[id]) delete App.ui.obPick[id]; else App.ui.obPick[id]=true; render(); }
+function obDone(){
+  state.user.favoriteTeams = Object.keys(App.ui.obPick);
+  state.onboarded = true;
+  if(!state.user.name){ state.user.name='Φίλαθλος'; state.user.handle='@bleachers'; }
+  save(); render();
+}
+function editFavs(){ App.ui.obStep=2; App.ui.obPick={}; state.user.favoriteTeams.forEach(id=>App.ui.obPick[id]=true); state.onboarded=false; render(); }
+
+/* backup */
+function exportData(){
+  try{
+    const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'bleachers-backup.json';
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+  }catch(e){ App.ui.modal = infoModal('Σφάλμα','Το backup απέτυχε: '+e.message); render(); }
+}
+function importData(){
+  const inp = document.createElement('input');
+  inp.type='file'; inp.accept='application/json,.json';
+  inp.onchange = () => {
+    const f = inp.files && inp.files[0]; if(!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      try{
+        const data = JSON.parse(r.result);
+        if(!data || data.version!==3 || typeof data.logs!=='object') throw new Error('Μη έγκυρο αρχείο backup.');
+        Object.assign(state.logs, data.logs);
+        Object.assign(state.followed, data.followed||{});
+        if(data.user && data.user.name) state.user = data.user;
+        save();
+        App.ui.modal = infoModal('Έγινε!','Το backup φορτώθηκε — '+Object.keys(data.logs).length+' καταγραφές.');
+      }catch(e){ App.ui.modal = infoModal('Σφάλμα', e.message); }
+      render();
+    };
+    r.readAsText(f);
+  };
+  inp.click();
+}
 
 const ACTIONS = {
   nav: el=>nav(el.dataset.screen),
   setSport: el=>setSport(el.dataset.sport),
-  setFilter: el=>setFilter(el.dataset.filter),
+  setDay: el=>setDay(el.dataset.day),
+  toggleMine: ()=>toggleMine(),
   toggleStar: el=>toggleStar(el.dataset.id),
   openPicker: ()=>nav('picker'),
   openMatch: el=>openMatch(el.dataset.id),
   back: ()=>nav(App.ui.backScreen||'feed'),
   setTab: el=>{ App.ui.draft.tab=el.dataset.tab; render(); },
-  setRating: el=>{ App.ui.draft.rating=+el.dataset.val; render(); },
+  setRating: el=>{ App.ui.draft.rating=+el.dataset.val; buzz(15); render(); },
   setPotm: el=>{ const m=matchById(App.ui.draft.matchId); App.ui.draft.potm=m.players[+el.dataset.idx]; render(); },
   setLocation: el=>{ App.ui.draft.location=el.dataset.loc; render(); },
-  toggleAtmo: el=>{ const a=App.ui.draft.atmosphere, k=el.dataset.atmo, i=a.indexOf(k); if(i>=0)a.splice(i,1); else a.push(k); render(); },
+  toggleAtmo: el=>{ const a=App.ui.draft.atmosphere,k=el.dataset.atmo,i=a.indexOf(k); if(i>=0)a.splice(i,1); else a.push(k); render(); },
   logMatch: ()=>logMatch(),
+  undoLog: ()=>undoLog(),
   closeSheet: ()=>closeSheet(),
   sheetStats: ()=>sheetStats(),
   toggleStats: ()=>toggleStats(),
   confirmReset: ()=>confirmReset(),
   doReset: ()=>doReset(),
   closeModal: ()=>closeModal(),
+  openSearch: ()=>openSearch(),
+  closeSearch: ()=>closeSearch(),
+  obNext: ()=>obNext(),
+  obSkip: ()=>obSkip(),
+  obPick: el=>obPick(el.dataset.id),
+  obDone: ()=>obDone(),
+  editFavs: ()=>editFavs(),
+  exportData: ()=>exportData(),
+  importData: ()=>importData(),
 };
 
 /* =============================================================================
-   (5) NAVIGATION & INIT
+   (6) NAVIGATION & INIT
 ============================================================================= */
 document.addEventListener('click', e=>{
-  // overlay/sheet backdrop closes; inner content (data-stop) does not bubble to it
   const stop = e.target.closest('[data-stop]');
   const t = e.target.closest('[data-action]');
   if(!t) return;
-  // if the clicked action is the backdrop itself but we're inside protected content, ignore
-  if((t.getAttribute('data-action')==='closeSheet' || t.getAttribute('data-action')==='closeModal') && stop && t.contains(stop) && stop!==t) return;
-  const fn = ACTIONS[t.getAttribute('data-action')];
+  const act = t.getAttribute('data-action');
+  if((act==='closeSheet'||act==='closeModal') && stop && t.contains(stop) && stop!==t) return;
+  const fn = ACTIONS[act];
   if(fn){ e.preventDefault(); fn(t); }
 });
+/* Draft/search/name fields sync without re-render (keeps the caret). */
 document.addEventListener('input', e=>{
   const f = e.target.getAttribute && e.target.getAttribute('data-field');
-  if(!f || !App.ui.draft) return;
-  App.ui.draft[f] = e.target.value;   // keep draft synced without re-render (caret-safe)
+  if(!f) return;
+  if(f==='search'){
+    App.ui.search = e.target.value;
+    /* live results: re-render list only, keep input focus */
+    App.ui.searchFocus = true; render();
+  }
+  else if(f==='obname') App.ui.obName = e.target.value;
+  else if(App.ui.draft) App.ui.draft[f] = e.target.value;
 });
+/* Swipe between main screens. */
+(function(){
+  const order = ['feed','live','stats','profile'];
+  let x0=null, y0=null;
+  document.addEventListener('touchstart', e=>{ x0=e.touches[0].clientX; y0=e.touches[0].clientY; }, {passive:true});
+  document.addEventListener('touchend', e=>{
+    if(x0===null) return;
+    const dx = e.changedTouches[0].clientX-x0, dy = e.changedTouches[0].clientY-y0;
+    x0=null; y0=null;
+    if(Math.abs(dx)<64 || Math.abs(dy)>Math.abs(dx)*0.7) return;
+    if(!state.onboarded || App.ui.modal || App.ui.sheet || App.ui.search!==null || App.ui.screen==='matchDetail' || App.ui.screen==='picker') return;
+    const i = order.indexOf(App.ui.screen);
+    if(i<0) return;
+    const next = dx<0 ? Math.min(order.length-1, i+1) : Math.max(0, i-1);
+    if(next!==i) nav(order[next]);
+  }, {passive:true});
+})();
 
 render();
+/* Preload crest art after the page has painted so a slow CDN never blocks first render. */
+if(document.readyState === 'complete') preloadLogos();
+else window.addEventListener('load', preloadLogos, { once:true });
+startSim();
 </script>
 </body>
 </html>
