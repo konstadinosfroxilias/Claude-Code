@@ -325,6 +325,47 @@ textarea:focus,input[type=text]:focus{outline:none;border-color:var(--accent)}
 .ob-team .tn{font-size:11px;font-weight:700;margin-top:7px;line-height:1.15}
 .ob-team .sp{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 
+/* ============================ HYPE / PREDICTIONS / MOMENTS / BRIEF / TOASTS ============================ */
+.hype{display:inline-flex;align-items:center;gap:4px;font-weight:800;font-size:11px;padding:2px 8px;border-radius:999px;
+  border:1px solid var(--border);color:var(--muted);font-variant-numeric:tabular-nums}
+.hype.warm{color:var(--gold);border-color:rgba(242,177,76,.45)}
+.hype.fire{color:var(--live);border-color:rgba(240,65,63,.55);animation:hypepulse 1.6s infinite}
+@keyframes hypepulse{0%,100%{box-shadow:0 0 0 0 rgba(240,65,63,.3)}50%{box-shadow:0 0 0 6px rgba(240,65,63,0)}}
+.pred-card{background:linear-gradient(135deg,rgba(59,120,190,.10),transparent 55%),var(--surface);
+  border:1px solid var(--border);border-radius:14px;padding:14px;margin-top:12px}
+.pred-q{font-weight:800;font-size:14px;display:flex;align-items:center;gap:8px}
+.pred-opts{display:flex;gap:8px;margin-top:11px}
+.pred-opt{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);
+  padding:11px 6px;border-radius:11px;font-weight:800;font-size:13px;transition:.15s}
+.pred-opt:active{transform:scale(.96)}
+.pred-opt.picked{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+.pred-state{margin-top:11px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px}
+.pred-state.win{color:var(--accent)} .pred-state.lose{color:var(--live)} .pred-state.wait{color:var(--gold)}
+.moment-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;
+  background:var(--surface2);border:1px dashed var(--border);color:var(--text);border-radius:12px;
+  padding:11px;font-weight:700;font-size:13px;transition:.15s}
+.moment-btn:active{transform:scale(.97);border-color:var(--accent);color:var(--accent)}
+.mom-row{display:flex;align-items:center;gap:10px;padding:10px 13px;border-top:1px solid var(--border-soft);font-size:13px}
+.mom-row:first-child{border-top:0}
+.mom-clock{flex-shrink:0;background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  padding:2px 8px;font-weight:800;font-size:11px;color:var(--accent);font-variant-numeric:tabular-nums}
+.mom-score{font-weight:800;font-variant-numeric:tabular-nums;flex-shrink:0}
+.mom-txt{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brief{position:relative;background:linear-gradient(130deg,rgba(93,202,165,.10),transparent 60%),var(--surface);
+  border:1px solid rgba(93,202,165,.35);border-radius:16px;padding:15px;margin:10px 0 4px;animation:rise .3s ease both}
+.brief-t{font-weight:800;font-size:15px}
+.brief-line{font-size:13px;color:var(--muted);margin-top:7px;line-height:1.45}
+.brief-line b{color:var(--text)}
+.brief-x{position:absolute;top:8px;right:8px;background:none;border:0;color:var(--faint);padding:6px;line-height:0}
+.toasts{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:200;width:calc(100% - 28px);
+  max-width:412px;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{display:flex;gap:10px;align-items:center;background:var(--surface2);border:1px solid var(--border);
+  border-radius:12px;padding:11px 14px;font-size:13px;font-weight:700;box-shadow:0 10px 28px rgba(0,0,0,.55);
+  animation:toastIn .32s cubic-bezier(.22,1,.36,1) both}
+.toast .ti{flex-shrink:0;color:var(--accent)}
+.toast.hot .ti{color:var(--live)}
+@keyframes toastIn{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+
 .empty{text-align:center;color:var(--muted);padding:40px 18px;font-size:14px}
 .empty .ec{width:54px;height:54px;border-radius:16px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;color:var(--faint)}
 </style>
@@ -345,6 +386,17 @@ textarea:focus,input[type=text]:focus{outline:none;border-color:var(--accent)}
    • MATCH LOGGING — rate (1–5), review, Player of the Match, and "The
      Experience" (stadium/home/bar, atmosphere, memory note). Editing updates
      in place. Upcoming matches cannot be logged.
+   • ΠΑΛΜΟΣ (Hype Index) — a live 0–100 "is this match worth opening right
+     now" score per in-play match (closeness + stakes + scoring bursts +
+     derby weight), with a per-match pulse graph, fire-alerts when a match
+     crosses 80, and live scores ticking in the browser-tab title.
+   • ΠΡΟΒΛΕΨΕΙΣ — live micro-predictions ("who scores next?" / "who leads
+     the quarter?") that the match engine itself settles, with streaks and
+     accuracy stats.
+   • ΣΤΙΓΜΕΣ — one-tap bookmarking of the exact live second you're watching
+     (clock, score, latest event) into your personal match diary.
+   • KICKOFF BRIEF — an auto-written daily digest on the feed: what's live
+     and how hot, what's on tonight, when your favourite team plays next.
    • BLEACHERS IQ — a rule-based insights engine that turns your logs into
      natural-language findings (in Greek), plus a taste radar, a where-you-
      watched donut and rating charts. Chart colors are validated for contrast
@@ -465,6 +517,7 @@ const MATCHES = FIXTURES.map(f => ({
   liveMin:f.liveMin||0, liveQ:f.liveQ||1, liveSec:f.liveSec||600,
   derby:!!f.derby, euro:!!f.euro, venue:f.venue, players:f.players,
   events:[],                          // live-engine timeline
+  hypeLog:[],                         // Παλμός history (session-only)
 }));
 
 /* --- Default state + persistence. --- */
@@ -478,6 +531,10 @@ function defaultState(){
     mineOnly:false,
     logs:{},          // matchId -> log
     followed:{},      // matchId -> true
+    predictions:{},   // matchId -> { pick, at|q, resolved, correct, void }
+    predStats:{ correct:0, total:0, streak:0, best:0 },
+    moments:{},       // matchId -> [{c, s, t, ts}]
+    briefDismissed:'',
     settings:{ showStats:true },
   };
 }
@@ -502,7 +559,7 @@ function load(){
 function save(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
 
 let state = load();
-const App = { ui:{ screen:'feed', backScreen:'feed', draft:null, sheet:null, modal:null, search:null, obStep:0, obPick:{}, obName:'' } };
+const App = { ui:{ screen:'feed', backScreen:'feed', draft:null, sheet:null, modal:null, search:null, obStep:0, obPick:{}, obName:'', toasts:[] } };
 
 /* =============================================================================
    (2) LIVE ENGINE — matches play out in real time while the app is open
@@ -517,9 +574,82 @@ function pushEvent(m, min, type, teamSide, text){
 }
 function buzz(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){} }
 
+/* --- Παλμός (Hype Index): how much a live match deserves your attention RIGHT
+       NOW, 0–100. Closeness + stakes (how late it is) + recent scoring bursts
+       + derby/euro weight. This is the "open the app" signal. --- */
+function hypeOf(m){
+  if(m.status!=='live') return 0;
+  let h = 28;
+  const diff = Math.abs(m.score.home - m.score.away);
+  if(m.sport==='football'){
+    h += diff===0 ? 26 : diff===1 ? 18 : diff===2 ? 4 : -14;   // blowouts cool off
+    h += Math.min(24, m.liveMin/90*24);
+    const burst = m.events.filter(e=>e.type==='goal' && (m.liveMin - e.min) <= 12).length;
+    h += burst*12;
+    if(m.liveMin>=85 && diff<=1) h += 10;         // late drama
+  } else {
+    h += diff<=3 ? 26 : diff<=6 ? 15 : diff<=10 ? 2 : -18;     // blowouts cool off
+    h += (Math.min(m.liveQ,4)-1)*7 + (600-Math.max(0,Math.min(600,m.liveSec)))/600*7;
+    if(m.liveQ>=4 && diff<=5) h += 16;            // clutch time
+    if(m.liveQ>4) h = Math.max(h, 88);            // overtime
+  }
+  if(m.derby) h += 8;
+  if(m.euro)  h += 4;
+  return Math.max(5, Math.min(100, Math.round(h)));
+}
+function hypeCls(h){ return h>=80 ? 'fire' : h>=55 ? 'warm' : ''; }
+
+/* --- In-app toasts (prediction results, hype alerts, saved moments). --- */
+let toastSeq = 0;
+function toast(icn, text, hot){
+  App.ui.toasts.push({ id:++toastSeq, icn, text, hot:!!hot });
+  if(App.ui.toasts.length>3) App.ui.toasts.shift();
+  if(safeToRerender()) render();
+  const id = toastSeq;
+  setTimeout(()=>{
+    App.ui.toasts = App.ui.toasts.filter(t=>t.id!==id);
+    if(safeToRerender()) render();
+  }, 4200);
+}
+
+/* --- Live predictions: one active pick per match, resolved BY the engine. --- */
+function placePrediction(matchId, pick){
+  const m = matchById(matchId);
+  if(!m || m.status!=='live') return;
+  state.predictions[matchId] = m.sport==='football'
+    ? { pick, at:m.liveMin, resolved:false, correct:null, void:false }
+    : { pick, q:m.liveQ,    resolved:false, correct:null, void:false };
+  save(); buzz(15); render();
+}
+function resolvePrediction(m, correct, isVoid){
+  const p = state.predictions[m.id];
+  if(!p || p.resolved) return;
+  p.resolved = true; p.void = !!isVoid; p.correct = isVoid ? null : correct;
+  const st = state.predStats;
+  if(isVoid){
+    toast('target', 'Ισοπαλία στην περίοδο — η πρόβλεψη ακυρώθηκε');
+  } else {
+    st.total++;
+    if(correct){
+      st.correct++; st.streak++;
+      if(st.streak > st.best) st.best = st.streak;
+      toast('target', 'Σωστή πρόβλεψη! Σερί '+st.streak+' 🔥'); buzz(40);
+    } else {
+      st.streak = 0;
+      toast('target', 'Άστοχη πρόβλεψη — μηδένισε το σερί');
+    }
+  }
+  save();
+}
+
 /* One simulation step for a football match. */
 function tickFootball(m){
   m.liveMin += Math.random()<0.5 ? 1 : 2;
+  const p = state.predictions[m.id];
+  /* "no goal in 15'" window expiry */
+  if(p && !p.resolved && p.at!=null && (m.liveMin - p.at) >= 15){
+    resolvePrediction(m, p.pick==='none');
+  }
   const r = Math.random();
   if(r < 0.045){                                     // goal
     const homeP = 0.5 + (m.home.str - m.away.str);
@@ -527,6 +657,7 @@ function tickFootball(m){
     m.score[side]++;
     const scorer = m.players[Math.floor(Math.random()*m.players.length)];
     pushEvent(m, m.liveMin, 'goal', side, 'ΓΚΟΛ! '+scorer+' — '+m[side].name);
+    if(p && !p.resolved) resolvePrediction(m, p.pick===side);
     buzz(60);
     return true;
   } else if(r < 0.085){                              // yellow card
@@ -536,6 +667,7 @@ function tickFootball(m){
   if(m.liveMin >= 90 + Math.floor(Math.random()*5)){ // full time
     m.status='ft';
     pushEvent(m, 90, 'ft', null, 'Τέλος αγώνα — '+m.score.home+'–'+m.score.away);
+    if(p && !p.resolved) resolvePrediction(m, p.pick==='none');
     return true;
   }
   return false;
@@ -556,6 +688,13 @@ function tickBasketball(m){
     }
   }
   if(m.liveSec <= 0){
+    /* period ends: resolve any "who leads at the end of this quarter" pick */
+    const p = state.predictions[m.id];
+    if(p && !p.resolved && p.q===m.liveQ){
+      const lead = m.score.home>m.score.away ? 'home' : (m.score.away>m.score.home ? 'away' : null);
+      if(lead===null) resolvePrediction(m, false, true);   // tie → void
+      else resolvePrediction(m, p.pick===lead);
+    }
     if(m.liveQ >= 4){
       if(m.score.home === m.score.away){ m.liveQ++; m.liveSec=300; pushEvent(m,'OT','period',null,'Παράταση!'); }
       else{ m.status='ft'; pushEvent(m,'FT','ft',null,'Τέλος αγώνα — '+m.score.home+'–'+m.score.away); }
@@ -579,19 +718,40 @@ function safeToRerender(){
 function simTick(){
   if(document.hidden) return;
   const live = liveMatches();
-  if(!live.length) return;
+  if(!live.length){ try{ document.title='Bleachers'; }catch(e){} return; }
   let changed = false;
   live.forEach(m=>{ changed = (m.sport==='football'?tickFootball(m):tickBasketball(m)) || changed; });
+  /* Παλμός: record history + alert when a match catches fire */
+  MATCHES.forEach(m=>{
+    if(m.status!=='live') return;
+    const h = hypeOf(m);
+    m.hypeLog.push(h);
+    if(m.hypeLog.length>90) m.hypeLog.shift();
+    const watchingThis = App.ui.screen==='live' || (App.ui.screen==='matchDetail' && App.ui.draft && App.ui.draft.matchId===m.id);
+    if(h>=80 && (m._hypePrev||0)<80 && !watchingThis){
+      toast('fire', esc(m.home.abbr)+'–'+esc(m.away.abbr)+' άναψε! Παλμός '+h+' — άνοιξέ το', true);
+      buzz(30);
+    }
+    m._hypePrev = h;
+  });
+  /* Live scores in the browser tab — the app pulls you back even minimised. */
+  try{
+    document.title = liveMatches().map(m=>(m.sport==='football'?'⚽':'🏀')+' '+m.home.abbr+' '+m.score.home+'-'+m.score.away+' '+m.away.abbr).join(' · ') || 'Bleachers';
+  }catch(e){}
   const s = App.ui.screen;
   const watching = s==='feed'||s==='live'||s==='picker'||(s==='matchDetail'&&App.ui.draft&&matchById(App.ui.draft.matchId));
   if(changed && watching && safeToRerender()) render();
   else if(watching && safeToRerender()) patchClocks();
 }
-/* Cheap DOM patch for ticking clocks between full renders. */
+/* Cheap DOM patch for ticking clocks + hype values between full renders. */
 function patchClocks(){
   document.querySelectorAll('[data-clock]').forEach(el=>{
     const m = matchById(el.getAttribute('data-clock'));
     if(m && m.status==='live') el.textContent = liveClock(m);
+  });
+  document.querySelectorAll('[data-hype]').forEach(el=>{
+    const m = matchById(el.getAttribute('data-hype'));
+    if(m && m.status==='live') el.textContent = hypeOf(m);
   });
 }
 function startSim(){ if(!SIM.timer) SIM.timer = setInterval(simTick, SIM.tickMs); }
@@ -642,6 +802,10 @@ function computeInsights(){
   if(euro.length>=2){
     const d = avg(euro.map(x=>x.l.rating)) - avgRating(logs);
     if(d >= 0.4) out.push({ icon:'star', title:'Euro nights person', body:'Οι ευρωπαϊκές βραδιές σου παίρνουν <b>+'+d.toFixed(1)+'★</b> από τον μέσο όρο σου.' });
+  }
+  const ps = state.predStats;
+  if(ps.total>=5 && ps.correct/ps.total>=0.6){
+    out.push({ icon:'target', title:'Ο προφήτης', body:'Πετυχαίνεις το <b>'+Math.round(ps.correct/ps.total*100)+'%</b> των live προβλέψεών σου ('+ps.correct+'/'+ps.total+').' });
   }
   if(!out.length) out.push({ icon:'spark', title:'Ισορροπημένο προφίλ', body:'Έχεις <b>'+logs.length+'</b> καταγραφές με μέσο όρο <b>'+avgRating(logs).toFixed(1)+'★</b> — συνέχισε για βαθύτερα insights.' });
   return out.slice(0,3);
@@ -704,6 +868,23 @@ function donutSVG(parts, total){
     + '</svg>';
 }
 
+/* Hype sparkline — single series (2px accent line, ring-guarded end dot). */
+function sparkSVG(vals){
+  if(!vals || vals.length<2) return '';
+  const W=300, H=58, P=7;
+  const pts = vals.map((v,i)=>[
+    P + i*(W-2*P)/(vals.length-1),
+    H - P - (Math.max(0,Math.min(100,v))/100)*(H-2*P)
+  ]);
+  const line = pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  const last = pts[pts.length-1];
+  return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="Παλμός αγώνα στον χρόνο">'
+    + '<line x1="'+P+'" y1="'+(H-P-(80/100)*(H-2*P)).toFixed(1)+'" x2="'+(W-P)+'" y2="'+(H-P-(80/100)*(H-2*P)).toFixed(1)+'" stroke="#272d38" stroke-width="1"/>'
+    + '<polyline points="'+line+'" fill="none" stroke="#5DCAA5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>'
+    + '<circle cx="'+last[0].toFixed(1)+'" cy="'+last[1].toFixed(1)+'" r="4" fill="#5DCAA5" stroke="#161a20" stroke-width="2"/>'
+    + '</svg>';
+}
+
 /* =============================================================================
    (4) RENDER / SCREENS
 ============================================================================= */
@@ -732,6 +913,9 @@ const ICONS = {
   clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
   down:'<path d="M12 4v13M6 12l6 6 6-6"/>',
   up:'<path d="M12 20V7M6 12l6-6 6 6"/>',
+  target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/>',
+  bookmark:'<path d="M7 3h10v18l-5-4-5 4z"/>',
+  pulse:'<path d="M3 12h4l2.5-6 4 12 2.5-6h5"/>',
 };
 function icon(name, size, cls){
   const s = size||22;
@@ -771,11 +955,16 @@ function preloadLogos(){
   });
   document.body.appendChild(holder);
 }
+/* Flashscore-style crest: the transparent club logo floats on its own — no
+   circle, no plate behind it. The coloured monogram appears ONLY while the
+   logo hasn't loaded (or offline), then disappears entirely. */
 function crest(team, size){
   const s = size||40;
-  const fb = '<span class="crest-fb" style="background:'+team.color+';color:'+textColorFor(team.color)+';font-size:'+Math.round(s*0.34)+'px">'+esc(team.abbr)+'</span>';
-  const img = (team.logo && LOGO_STATE[team.logo]==='ok') ? '<img class="crest-img" src="'+team.logo+'" alt="">' : '';
-  return '<span class="crest" style="width:'+s+'px;height:'+s+'px">'+fb+img+'</span>';
+  if(team.logo && LOGO_STATE[team.logo]==='ok'){
+    return '<span class="crest" style="width:'+s+'px;height:'+s+'px"><img class="crest-img" src="'+team.logo+'" alt=""></span>';
+  }
+  return '<span class="crest" style="width:'+s+'px;height:'+s+'px">'
+    + '<span class="crest-fb" style="background:'+team.color+';color:'+textColorFor(team.color)+';font-size:'+Math.round(s*0.34)+'px">'+esc(team.abbr)+'</span></span>';
 }
 function starsGlyph(n){ let o=''; for(let i=1;i<=5;i++) o += (i<=n?'★':'☆'); return o; }
 function fmtDay(d){ return GRDAYS[d.getDay()]+' '+d.getDate()+' '+GRMON[d.getMonth()]; }
@@ -809,10 +998,12 @@ function statusCol(m){
 }
 function matchRow(m){
   const log = state.logs[m.id], fol = !!state.followed[m.id];
+  const h = hypeOf(m);
   return '<div class="mrow '+(log?'logged':'')+'" data-action="openMatch" data-id="'+m.id+'">'
     + '<div class="mstat">'+statusCol(m)+'</div>'
     + '<div class="mteams">'+teamLine(m,'home')+teamLine(m,'away')+'</div>'
     + '<div class="mside">'
+    + (m.status==='live'?'<span class="hype '+hypeCls(h)+'" title="Παλμός">'+icon('pulse',11)+'<span data-hype="'+m.id+'">'+h+'</span></span>':'')
     + (log?'<span class="rate-pill">★ '+log.rating+'</span>':'')
     + '<button class="starb '+(fol?'on':'')+'" data-action="toggleStar" data-id="'+m.id+'" aria-label="Παρακολούθηση">'+starIcon(fol,19)+'</button>'
     + '</div></div>';
@@ -827,6 +1018,31 @@ function leagueGroup(league, matches, variant){
     head = '<div class="ghead"><span class="gbadge" style="background:'+meta.color+'">'+esc(initials)+'</span><span class="gname">'+esc(league)+'</span><span class="gcountry">'+esc(meta.region)+'</span></div>';
   }
   return '<div class="mgroup">'+head+matches.map(matchRow).join('')+'</div>';
+}
+/* Kickoff Brief — an auto-written daily digest that gives a reason to open the
+   app: what's live (and how hot), what's on tonight, when your team plays. */
+function briefCard(){
+  if(state.activeDay!==0 || state.mineOnly) return '';
+  if(state.briefDismissed===dateStrOf(TODAY)) return '';
+  const hour = new Date().getHours();
+  const greet = hour<12 ? 'Καλημέρα' : hour<18 ? 'Καλό απόγευμα' : 'Καλησπέρα';
+  const live = liveMatches();
+  const bits = [];
+  if(live.length){
+    const hot = live.slice().sort((a,b)=>hypeOf(b)-hypeOf(a))[0];
+    bits.push('<b>'+live.length+'</b> ματς live τώρα — το '+esc(hot.home.abbr)+'–'+esc(hot.away.abbr)+' έχει Παλμό <b>'+hypeOf(hot)+'</b>');
+  }
+  const next = MATCHES.filter(m=>m.day===0 && m.status==='ns').sort((a,b)=>a.time.localeCompare(b.time))[0];
+  if(next) bits.push('Απόψε <b>'+esc(next.time)+'</b>: '+esc(next.home.name)+' – '+esc(next.away.name)+' ('+esc(next.league)+')');
+  const favId = state.user.favoriteTeams.find(id=>MATCHES.some(m=>m.day===1 && (m.homeId===id||m.awayId===id)));
+  if(favId) bits.push('Αύριο παίζει η <b>'+esc(TEAMS[favId].name)+'</b>');
+  if(!bits.length) return '';
+  return '<div class="brief">'
+    + '<button class="brief-x" data-action="dismissBrief" aria-label="Κλείσιμο">'+icon('close',15)+'</button>'
+    + '<div class="brief-t">'+greet+(state.user.name?', '+esc(state.user.name):'')+'</div>'
+    + bits.map(b=>'<div class="brief-line">'+b+'</div>').join('')
+    + (live.length?'<button class="fchip on" data-action="nav" data-screen="live" style="margin-top:11px">Δες τα live →</button>':'')
+    + '</div>';
 }
 function dateStrip(){
   return '<div class="datestrip">'+[-2,-1,0,1,2].map(off=>{
@@ -865,6 +1081,7 @@ function renderFeed(){
     + '</div>'
     + dateStrip()
     + '<div class="row gap8" style="padding:4px"><button class="fchip '+(state.mineOnly?'on':'')+'" data-action="toggleMine">★ Μόνο δικά μου</button></div>'
+    + briefCard()
     + '<div class="mt8">'+body+'</div>';
 }
 
@@ -872,9 +1089,11 @@ function renderFeed(){
 function liveCard(m){
   const log = state.logs[m.id];
   const last = m.events.length ? m.events[m.events.length-1] : null;
+  const h = hypeOf(m);
   return '<div class="livecard" data-action="openMatch" data-id="'+m.id+'">'
     + '<div class="lc-top"><span class="lc-badge"><span class="ld"></span>LIVE</span>'
     + '<span class="lc-clock" data-clock="'+m.id+'">'+esc(liveClock(m))+'</span>'
+    + '<span class="hype '+hypeCls(h)+'" title="Παλμός" style="margin-left:2px">'+icon('pulse',11)+'<span data-hype="'+m.id+'">'+h+'</span></span>'
     + '<span class="lc-league">'+esc(m.league)+'</span></div>'
     + '<div class="lc-team"><div class="tl" style="flex:1">'+crest(m.home,40)+'<span class="tn">'+esc(m.home.name)+'</span></div><span class="tsc">'+m.score.home+'</span></div>'
     + '<div class="lc-team"><div class="tl" style="flex:1">'+crest(m.away,40)+'<span class="tn">'+esc(m.away.name)+'</span></div><span class="tsc">'+m.score.away+'</span></div>'
@@ -930,11 +1149,64 @@ function renderMatchDetail(){
     + '</div>'
     + '<div class="hero-meta">'+icon('pin',14)+'<span>'+esc(m.venue)+' · '+esc(m.time)+'</span></div>'
     + ((m.derby||m.euro)?'<div class="ctx-chips">'+(m.derby?'<span class="ctx derby">Ντέρμπι</span>':'')+(m.euro?'<span class="ctx euro">Euro Night</span>':'')+'</div>':'')
+    + (m.status==='live'?'<button class="moment-btn" data-action="captureMoment">'+icon('bookmark',16)+'Κράτα αυτή τη στιγμή — '+esc(liveClock(m))+'</button>':'')
     + '</div>'
     + (tabs.length>1?'<div class="tabs">'+tabs.map(t=>'<button class="'+(d.tab===t[0]?'on':'')+'" data-action="setTab" data-tab="'+t[0]+'">'+t[1]+'</button>').join('')+'</div>':'')
     + '<div class="dbody">'+body+'</div>';
 }
 function eventIcon(t){ return t==='goal'?icon('goal',15):t==='basket'?icon('ball',15):t==='yellow'?'<span style="display:inline-block;width:10px;height:13px;background:var(--gold);border-radius:2px"></span>':icon('clock',15); }
+
+/* --- Live prediction card: pick → the engine itself settles it. --- */
+function predCard(m){
+  const p = state.predictions[m.id];
+  const st = state.predStats;
+  const acc = st.total ? Math.round(st.correct/st.total*100) : null;
+  const statsLine = st.total
+    ? '<div class="tiny muted mt8">Σερί: <b style="color:var(--gold)">'+st.streak+'</b> 🔥 · Ακρίβεια '+acc+'% ('+st.correct+'/'+st.total+')</div>' : '';
+  const head = '<div class="pred-q">'+icon('target',17)+'Πρόβλεψη</div>';
+  if(p && !p.resolved){
+    const pt = (p.pick==='home'||p.pick==='away') ? m[p.pick] : null;
+    const pickLbl = p.pick==='none' ? 'Κανένα γκολ' : (pt ? esc(pt.abbr) : '—');
+    const until = m.sport==='football' ? ' · μέχρι το '+(p.at+15)+'′' : ' · λήγει με την περίοδο';
+    return '<div class="pred-card">'+head
+      + '<div class="pred-state wait">'+icon('clock',15)+'Η πρόβλεψή σου: <b>'+pickLbl+'</b>'+until+'</div>'
+      + statsLine+'</div>';
+  }
+  let resolvedLine = '';
+  if(p && p.resolved){
+    resolvedLine = p.void
+      ? '<div class="pred-state">Άκυρη — ισοπαλία στην περίοδο</div>'
+      : (p.correct
+        ? '<div class="pred-state win">'+icon('check',15)+'Σωστή! Το πέτυχες.</div>'
+        : '<div class="pred-state lose">'+icon('close',15)+'Άστοχη αυτή τη φορά.</div>');
+  }
+  if(m.status!=='live') return (p&&p.resolved) ? '<div class="pred-card">'+head+resolvedLine+statsLine+'</div>' : '';
+  const q = m.sport==='football' ? 'Ποιος σκοράρει το επόμενο γκολ;' : 'Ποιος κλείνει μπροστά την περίοδο;';
+  const opts = m.sport==='football'
+    ? [['home',m.home.abbr],['none','Κανείς σε 15′'],['away',m.away.abbr]]
+    : [['home',m.home.abbr],['away',m.away.abbr]];
+  return '<div class="pred-card">'+head+resolvedLine
+    + '<div class="tiny muted mt8">'+q+'</div>'
+    + '<div class="pred-opts">'+opts.map(o=>'<button class="pred-opt" data-action="predict" data-pick="'+o[0]+'">'+esc(o[1])+'</button>').join('')+'</div>'
+    + statsLine+'</div>';
+}
+/* --- Παλμός graph: how the match's temperature evolved. --- */
+function hypeSparkCard(m){
+  if(!m.hypeLog || m.hypeLog.length<3) return '';
+  const now = m.status==='live' ? hypeOf(m) : m.hypeLog[m.hypeLog.length-1];
+  return '<div class="bar-card" style="margin-top:12px"><div class="between"><b class="small">'+icon('pulse',14)+' Παλμός αγώνα</b>'
+    + '<span class="hype '+hypeCls(now)+'">'+(m.status==='live'?'<span data-hype="'+m.id+'">'+now+'</span>':now)+'</span></div>'
+    + '<div class="mt8">'+sparkSVG(m.hypeLog)+'</div>'
+    + '<div class="tiny muted">Πάνω από τη γραμμή = αξίζει να το βλέπεις τώρα.</div></div>';
+}
+/* --- Your saved live moments. --- */
+function momentsCard(m){
+  const ms = state.moments[m.id]||[];
+  if(!ms.length) return '';
+  return '<div class="sec-title">Οι στιγμές σου</div><div class="info-card">'
+    + ms.map(x=>'<div class="mom-row"><span class="mom-clock">'+esc(x.c)+'</span><span class="mom-score">'+esc(x.s)+'</span><span class="mom-txt">'+esc(x.t||'—')+'</span></div>').join('')
+    + '</div>';
+}
 function tabSummary(d,m){
   const log = state.logs[m.id];
   let yourLog='';
@@ -973,7 +1245,7 @@ function tabSummary(d,m){
     ? '<div class="ns-note">Ο αγώνας δεν έχει αρχίσει ακόμη.<br>Πάτα το ⭐ για να τον παρακολουθείς — θα μπορείς να τον καταγράψεις μόλις τελειώσει.</div>'
       + '<button class="cta ghost" data-action="toggleStar" data-id="'+m.id+'">'+(state.followed[m.id]?'★ Το παρακολουθείς':'☆ Παρακολούθησέ το')+'</button>'
     : '<button class="cta" data-action="setTab" data-tab="rate">'+(log?'Επεξεργασία καταγραφής':'Βαθμολόγησε τον αγώνα')+'</button>';
-  return yourLog + timeline
+  return predCard(m) + hypeSparkCard(m) + yourLog + momentsCard(m) + timeline
     + '<div class="sec-title">Στοιχεία αγώνα</div>'
     + '<div class="info-card">'+info.map(r=>'<div class="info-row"><span class="k">'+r[0]+'</span><span class="v">'+esc(r[1])+'</span></div>').join('')+'</div>'
     + h2hHtml
@@ -1065,6 +1337,11 @@ function renderStats(){
       + '<div class="bar-card"><div class="chart-flex">'+donutSVG(donutParts,located)
       + '<div class="chart-legend">'+donutParts.map(p=>'<div class="cl-row"><span class="swatch" style="background:'+p.c+'"></span><span class="cl-k">'+p.k+'</span><span class="cl-v">'+p.v+'</span></div>').join('')+'</div>'
       + '</div></div>':'')
+    + (state.predStats.total?'<div class="bar-card"><b class="small">'+icon('target',13)+' Live προβλέψεις</b>'
+      + statBar('<span class="cl-k">Ακρίβεια</span>', Math.round(state.predStats.correct/state.predStats.total*100)+'%', Math.round(state.predStats.correct/state.predStats.total*100), 'var(--ch2)')
+      + '<div class="between mt8 small"><span class="muted">Τρέχον σερί</span><b style="color:var(--gold)">'+state.predStats.streak+' 🔥</b></div>'
+      + '<div class="between mt8 small"><span class="muted">Καλύτερο σερί</span><b>'+state.predStats.best+'</b></div>'
+      + '</div>':'')
     + '<div class="bar-card"><b class="small">Ανά άθλημα</b>'
     + statBar('<span class="swatch" style="background:var(--ch1)"></span>Ποδόσφαιρο', pct(fb,withM.length)+'%', pct(fb,withM.length), 'var(--ch1)')
     + statBar('<span class="swatch" style="background:var(--ch3)"></span>Μπάσκετ', pct(bb,withM.length)+'%', pct(bb,withM.length), 'var(--ch3)')
@@ -1239,6 +1516,10 @@ function render(){
     if(ui.sheet) html += renderSheet();
     if(ui.modal) html += ui.modal;
   }
+  if(ui.toasts.length){
+    html += '<div class="toasts">'+ui.toasts.map(t=>
+      '<div class="toast '+(t.hot?'hot':'')+'"><span class="ti">'+icon(t.icn,17)+'</span><span>'+t.text+'</span></div>').join('')+'</div>';
+  }
   document.getElementById('app').innerHTML = html;
   requestAnimationFrame(()=>{
     document.querySelectorAll('[data-fill]').forEach(el=>{ el.style.width = el.dataset.fill; });
@@ -1293,10 +1574,25 @@ function closeSheet(){ const m=matchById(App.ui.sheet.matchId); App.ui.sheet=nul
 function sheetStats(){ App.ui.sheet=null; App.ui.draft=null; nav('stats'); }
 function toggleStats(){ state.settings.showStats=!state.settings.showStats; save(); render(); }
 function confirmReset(){ App.ui.modal = resetModal(); render(); }
-function doReset(){ state = defaultState(); state.onboarded=false; save(); App.ui = { screen:'feed', backScreen:'feed', draft:null, sheet:null, modal:null, search:null, obStep:0, obPick:{}, obName:'' }; render(); }
+function doReset(){ state = defaultState(); state.onboarded=false; save(); App.ui = { screen:'feed', backScreen:'feed', draft:null, sheet:null, modal:null, search:null, obStep:0, obPick:{}, obName:'', toasts:[] }; render(); }
 function closeModal(){ App.ui.modal=null; render(); }
 function openSearch(){ App.ui.search=''; App.ui.searchFocus=true; render(); }
 function closeSearch(){ App.ui.search=null; render(); }
+function dismissBrief(){ state.briefDismissed = dateStrOf(TODAY); save(); render(); }
+function captureMoment(){
+  const m = matchById(App.ui.draft && App.ui.draft.matchId);
+  if(!m || m.status!=='live') return;
+  if(!state.moments[m.id]) state.moments[m.id]=[];
+  if(state.moments[m.id].length>=10){ toast('bookmark','Έφτασες τις 10 στιγμές για αυτόν τον αγώνα'); return; }
+  const last = m.events.length ? m.events[m.events.length-1] : null;
+  state.moments[m.id].push({
+    c:liveClock(m), s:m.score.home+'–'+m.score.away,
+    t:last ? String(last.min)+' '+last.text : '', ts:Date.now(),
+  });
+  save(); buzz(25);
+  toast('bookmark','Η στιγμή αποθηκεύτηκε — '+liveClock(m)+', '+m.score.home+'–'+m.score.away);
+  render();
+}
 
 /* onboarding actions */
 function obNext(){
@@ -1339,6 +1635,11 @@ function importData(){
         if(!data || data.version!==3 || typeof data.logs!=='object') throw new Error('Μη έγκυρο αρχείο backup.');
         Object.assign(state.logs, data.logs);
         Object.assign(state.followed, data.followed||{});
+        Object.assign(state.moments, data.moments||{});
+        Object.assign(state.predictions, data.predictions||{});
+        if(data.predStats && ['correct','total','streak','best'].every(k=>typeof data.predStats[k]==='number')){
+          state.predStats = data.predStats;
+        }
         if(data.user && data.user.name) state.user = data.user;
         save();
         App.ui.modal = infoModal('Έγινε!','Το backup φορτώθηκε — '+Object.keys(data.logs).length+' καταγραφές.');
@@ -1381,6 +1682,9 @@ const ACTIONS = {
   editFavs: ()=>editFavs(),
   exportData: ()=>exportData(),
   importData: ()=>importData(),
+  predict: el=>placePrediction(App.ui.draft && App.ui.draft.matchId, el.dataset.pick),
+  captureMoment: ()=>captureMoment(),
+  dismissBrief: ()=>dismissBrief(),
 };
 
 /* =============================================================================
