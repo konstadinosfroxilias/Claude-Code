@@ -453,6 +453,66 @@ textarea:focus,input[type=text]:focus{outline:none;border-color:var(--accent)}
 .chat-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;color:var(--accent);
   background:var(--accent-dim);border:1px solid rgba(93,202,165,.35);padding:3px 9px;border-radius:999px}
 
+/* ============================ REPORT READER ============================ */
+.rep-shell{min-height:100vh;padding-bottom:40px}
+.rep-hero{padding:18px 20px 6px}
+.rep-kicker{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--accent)}
+.rep-h1{font-size:27px;font-weight:800;line-height:1.16;letter-spacing:-.015em;margin:10px 0 8px}
+.rep-sub{color:var(--muted);font-size:14px;line-height:1.5}
+.rep-byline{display:flex;align-items:center;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);
+  font-size:11.5px;color:var(--faint)}
+.rep-score{display:flex;align-items:center;justify-content:center;gap:14px;margin:16px 20px;
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px}
+.rep-score .sc{font-size:26px;font-weight:800}
+.rep-body{padding:2px 20px;font-size:15.5px;line-height:1.75;color:#d6dbe3}
+.rep-body p{margin:0 0 16px}
+.rep-body p:first-child::first-letter{font-size:44px;font-weight:800;float:left;line-height:.9;
+  padding:4px 8px 0 0;color:var(--accent)}
+.rep-quote{margin:20px 20px;padding:14px 18px;border-left:3px solid var(--gold);background:var(--surface);
+  border-radius:0 14px 14px 0;font-size:16px;font-style:italic;color:#eef1f5;line-height:1.6}
+.rep-quote .qa{display:block;margin-top:8px;font-size:11.5px;font-style:normal;color:var(--muted);font-weight:700}
+.rep-moments{margin:6px 20px 18px}
+.rep-mom{display:flex;gap:10px;align-items:baseline;padding:7px 0;border-top:1px solid var(--border-soft);font-size:13.5px;color:var(--muted)}
+.rep-mom:first-child{border-top:0}
+.rep-mom b{color:var(--accent);font-variant-numeric:tabular-nums;flex-shrink:0}
+
+/* ============================ REWIND STORY ============================ */
+.rw-wrap{position:fixed;inset:0;z-index:120;background:#000;display:flex;flex-direction:column;
+  animation:fade .25s ease both;overflow:hidden}
+.rw-slide{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:60px 30px 80px;text-align:center;position:relative;max-width:440px;margin:0 auto;width:100%}
+.rw-progress{position:absolute;top:14px;left:14px;right:14px;display:flex;gap:5px;z-index:5;max-width:412px;margin:0 auto}
+.rw-seg{flex:1;height:3px;border-radius:999px;background:rgba(255,255,255,.22)}
+.rw-seg.done{background:#fff}
+.rw-x{position:absolute;top:26px;right:16px;z-index:6;background:rgba(0,0,0,.3);border:0;color:#fff;
+  width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.rw-kicker{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;opacity:.75;
+  animation:rwUp .5s .1s ease both}
+.rw-big{font-size:64px;font-weight:800;line-height:1;margin:14px 0 6px;animation:rwPop .55s .2s cubic-bezier(.2,1.4,.4,1) both}
+.rw-med{font-size:26px;font-weight:800;line-height:1.2;margin:12px 0 4px;animation:rwUp .5s .25s ease both}
+.rw-txt{font-size:15px;opacity:.85;line-height:1.55;max-width:300px;animation:rwUp .5s .35s ease both}
+.rw-emoji{font-size:84px;line-height:1;animation:rwPop .6s .2s cubic-bezier(.2,1.4,.4,1) both}
+.rw-stars{font-size:30px;letter-spacing:4px;color:#FFD97A;animation:rwUp .5s .3s ease both}
+.rw-crests{display:flex;align-items:center;gap:18px;margin:10px 0;animation:rwPop .5s .15s ease both}
+.rw-cta{margin-top:26px;background:#fff;color:#111;border:0;border-radius:999px;padding:13px 26px;
+  font-weight:800;font-size:14px;animation:rwUp .5s .45s ease both}
+.rw-hint{position:absolute;bottom:26px;left:0;right:0;text-align:center;font-size:11px;opacity:.5}
+@keyframes rwUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes rwPop{0%{opacity:0;transform:scale(.5)}70%{transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
+
+/* storyteller entry buttons */
+.rep-cta{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:12px;
+  background:linear-gradient(120deg,rgba(175,169,236,.14),transparent 60%),var(--surface);
+  border:1px solid rgba(175,169,236,.45);color:#cfcbf4;border-radius:12px;padding:12px;font-weight:700;font-size:13.5px}
+.rw-hero{display:flex;align-items:center;gap:13px;width:100%;margin:12px 0 2px;text-align:left;
+  background:linear-gradient(120deg,rgba(93,202,165,.16),rgba(242,177,76,.10)),var(--surface);
+  border:1px solid rgba(93,202,165,.45);border-radius:16px;padding:15px;color:var(--text)}
+.rw-hero .ic{width:42px;height:42px;border-radius:13px;background:var(--accent);color:#06241a;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.share-btn{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);
+  color:var(--text);border-radius:999px;padding:7px 13px;font-size:12px;font-weight:700}
+
 .empty{text-align:center;color:var(--muted);padding:40px 18px;font-size:14px}
 .empty .ec{width:54px;height:54px;border-radius:16px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;color:var(--faint)}
 </style>
@@ -498,6 +558,14 @@ textarea:focus,input[type=text]:focus{outline:none;border-color:var(--accent)}
      both fanbases reacts live to the engine's real goals and baskets;
      your own messages persist locally. (True cross device chat would
      need a server; this demo has no backend by design.)
+   • Η ΑΝΤΑΠΟΚΡΙΣΗ - the app writes a full Greek match report for any
+     finished match, weaving in YOUR rating, review, saved moments, live
+     reactions and prediction outcome. A personal sports newspaper,
+     generated deterministically offline.
+   • REWIND - a full screen story style recap of your season (top match,
+     habits, prediction accuracy, signature emoji), computed from your logs.
+   • SHARE CARDS - canvas drawn PNG cards of a logged match or your season,
+     downloadable with one tap, no server involved.
    • BLEACHERS IQ - a rule-based insights engine that turns your logs into
      natural-language findings (in Greek), plus a taste radar, a where-you-
      watched donut and rating charts. Chart colors are validated for contrast
@@ -1170,7 +1238,7 @@ function liveClock(m){
 function safeToRerender(){
   const ae = document.activeElement;
   if(ae && (ae.tagName==='TEXTAREA' || ae.tagName==='INPUT') && ae.id!=='chatbox') return false;
-  if(App.ui.modal || App.ui.sheet || App.ui.search!==null || !state.onboarded) return false;
+  if(App.ui.modal || App.ui.sheet || App.ui.search!==null || App.ui.rwSlides || !state.onboarded) return false;
   return true;
 }
 function simTick(){
@@ -1351,6 +1419,272 @@ function sparkSVG(vals){
 }
 
 /* =============================================================================
+   (3b) STORYTELLER - the layer no scores app has
+   -----------------------------------------------------------------------------
+   • Η ΑΝΤΑΠΟΚΡΙΣΗ: a deterministic Greek match report written by the app for
+     any finished match, weaving in YOUR log (rating, review, where you were),
+     your saved moments, reactions and prediction outcome. Your personal
+     sports newspaper, generated offline.
+   • REWIND: a full screen, story style recap of your season computed from
+     your real logs (top match, habits, prediction accuracy, moments).
+   • SHARE CARDS: canvas drawn PNG cards of a logged match or your season,
+     downloadable with one tap, no server involved.
+============================================================================= */
+function winnerOf(m){
+  if(m.score.home>m.score.away) return 'home';
+  if(m.score.away>m.score.home) return 'away';
+  return null;
+}
+/* Compose the article. Deterministic per match (seeded), dash free. */
+function reportFor(m){
+  const r = mulberry32(seedOf(m.id)+11);
+  const W = winnerOf(m), L = W==='home'?'away':W==='away'?'home':null;
+  const diff = Math.abs(m.score.home-m.score.away);
+  const wn = W ? m[W].name : null, ln = L ? m[L].name : null;
+  const V = m.venue || 'το γήπεδο';
+  let headline;
+  if(m.sport==='football'){
+    if(!W) headline = m.score.home===0 ? 'Νύχτα χωρίς γκολ, μοιρασιά στο '+V
+      : (m.derby ? 'Το ντέρμπι δεν έβγαλε νικητή' : 'Μοιρασιά με θέαμα στο '+V);
+    else if(diff>=3) headline = pick(r,[wn+' σε ρόλο οδοστρωτήρα', 'Περίπατος για την '+wn]);
+    else if(W==='away') headline = pick(r,['Μπαμ από την '+wn+' μακριά από την έδρα της', 'Η '+wn+' σίγησε το '+V]);
+    else headline = m.derby ? 'Η '+wn+' πήρε το μεγάλο ντέρμπι' : pick(r,[wn+' με το δεξί', 'Δουλειά στο σπίτι για την '+wn]);
+  } else {
+    if(m.liveQ>4) headline = 'Θρίλερ με παράταση, το πήρε η '+wn;
+    else if(diff<=5) headline = 'Ματσάρα μέχρι τέλους, νίκη για την '+wn;
+    else if(diff>=15) headline = 'Επίδειξη δύναμης από την '+wn;
+    else headline = wn+' με ουσία στο '+V;
+  }
+  const sub = 'Τελικό '+m.score.home+'-'+m.score.away+' για τη '+m.league+', '+fmtDay(dayDate(m.day))+' στο '+V+'.';
+  const paras = [];
+  /* narrative from the real event timeline when the match ran in-app */
+  const goals = m.events.filter(e=>e.type==='goal');
+  if(goals.length){
+    const bits = goals.slice(0,4).map(g=>{
+      const scorer = (g.text.split('ΓΚΟΛ! ')[1]||'').split(',')[0];
+      return (scorer||'κάποιος')+' στο '+g.min+'′';
+    });
+    paras.push('Οι στιγμές που μέτρησαν: '+bits.join(', ')+'. '
+      + (W ? 'Στο φινάλε, η '+wn+' κρατούσε το αποτέλεσμα που ήθελε.' : 'Κανείς δεν λύγισε ως το τέλος.'));
+  } else {
+    paras.push(pick(r,[
+      'Παιχνίδι με εναλλαγές ρυθμού και νεύρο, από εκείνα που δεν αφήνουν κανέναν να σηκωθεί από τη θέση του.',
+      'Δύο ομάδες με σχέδιο, ένταση στις μονομαχίες και λεπτομέρειες που έκριναν το αποτέλεσμα.',
+      'Η αναμέτρηση είχε απ΄ όλα: πίεση, απαντήσεις και ένα φινάλε που δικαίωσε όσους την είδαν.',
+    ]));
+    if(W) paras.push('Η '+wn+' βρήκε τους τρόπους να πληγώσει την '+ln+' και πήρε ένα αποτέλεσμα με ουσία.');
+  }
+  /* the personal layer: this is what makes it YOUR newspaper */
+  const log = state.logs[m.id];
+  if(log){
+    const loc = log.location ? LOCATIONS[log.location].label : null;
+    let up = 'Το παρακολούθησες'+(loc?' από '+(loc==='Γήπεδο'?'το γήπεδο':loc==='Σπίτι'?'τον καναπέ':'το μπαρ'):'')
+      + ' και το βαθμολόγησες με '+log.rating+' στα 5.';
+    if(log.potm) up += ' Κορυφαίος για σένα ο '+log.potm+'.';
+    paras.push(up);
+  }
+  const p = state.predictions[m.id];
+  if(p && p.resolved && !p.void){
+    paras.push(p.correct ? 'Σημείωση: η live πρόβλεψη βγήκε σωστή. Ένστικτο.' : 'Η live πρόβλεψη δεν δικαιώθηκε. Συμβαίνει και στους καλύτερους.');
+  }
+  const rx = state.reactions[m.id]||[];
+  if(rx.length>=2){
+    const counts={}; rx.forEach(x=>counts[x.e]=(counts[x.e]||0)+1);
+    const top = Object.keys(counts).sort((a,b)=>counts[b]-counts[a])[0];
+    paras.push('Το συναίσθημα της βραδιάς σε ένα σύμβολο: '+top+' ('+rx.length+' αντιδράσεις την ώρα του αγώνα).');
+  }
+  return {
+    headline, sub, paras,
+    quote: (log && log.review && log.review.trim()) ? log.review.trim() : null,
+    quoteBy: state.user.name || 'Εσύ',
+    moments: (state.moments[m.id]||[]),
+  };
+}
+function renderReport(){
+  const m = matchById(App.ui.reportMatch);
+  if(!m) return '<div class="screen">'+emptyState('news','Δεν βρέθηκε','Ο αγώνας δεν υπάρχει.')+'</div>';
+  const rep = reportFor(m);
+  return '<div class="rep-shell">'
+    + '<div class="dhead"><button class="iconbtn" data-action="back" aria-label="Πίσω">'+icon('back',20)+'</button>'
+    + '<div><div class="dt">Η Ανταπόκριση</div><div class="tiny muted">'+esc(m.league)+' · Bleachers Press</div></div></div>'
+    + '<div class="rep-hero">'
+    + '<div class="rep-kicker">'+icon('news',14)+'Αυτόματη ανταπόκριση</div>'
+    + '<h1 class="rep-h1">'+esc(rep.headline)+'</h1>'
+    + '<div class="rep-sub">'+esc(rep.sub)+'</div>'
+    + '<div class="rep-byline">'+leagueBadge(m.league,16)+'<span>Γράφτηκε από το Bleachers για σένα'+(m.demo?' · DEMO αγώνας':'')+'</span></div>'
+    + '</div>'
+    + '<div class="rep-score">'+crest(m.home,34)+'<span class="sc">'+m.score.home+' : '+m.score.away+'</span>'+crest(m.away,34)+'</div>'
+    + '<div class="rep-body">'+rep.paras.map(p=>'<p>'+esc(p)+'</p>').join('')+'</div>'
+    + (rep.quote?'<div class="rep-quote">“'+esc(rep.quote)+'”<span class="qa">'+esc(rep.quoteBy)+', από την καταγραφή του αγώνα</span></div>':'')
+    + (rep.moments.length?'<div class="sec-title" style="margin-left:20px">Οι στιγμές που κράτησες</div><div class="rep-moments">'
+        + rep.moments.map(x=>'<div class="rep-mom"><b>'+esc(x.c)+'</b><span>'+esc(x.s)+(x.t?' · '+esc(x.t):'')+'</span></div>').join('')+'</div>':'')
+    + (state.logs[m.id]?'<div style="padding:0 20px"><button class="share-btn" data-action="shareCard" data-id="'+m.id+'">'+icon('share',13)+'Κατέβασε την κάρτα του αγώνα</button></div>':'')
+    + '</div>';
+}
+
+/* ---- REWIND: your season as a story ---- */
+function computeRewind(){
+  const logs = logsArr();
+  const withM = logs.map(l=>({l,m:matchById(l.matchId)})).filter(x=>x.m);
+  const slides = [{ t:'intro', n:logs.length }];
+  const rated = withM.filter(x=>x.l.rating);
+  if(rated.length){
+    const top = rated.slice().sort((a,b)=>b.l.rating-a.l.rating)[0];
+    slides.push({ t:'top', m:top.m, rating:top.l.rating, review:(top.l.review||'').trim() });
+  }
+  const stadium = logs.filter(l=>l.location==='stadium').length;
+  if(logs.some(l=>l.location)) slides.push({ t:'where', stadium, home:logs.filter(l=>l.location==='home').length, bar:logs.filter(l=>l.location==='bar').length });
+  const ins = computeInsights();
+  if(ins.length && logs.length>=2) slides.push({ t:'iq', title:ins[0].title, body:ins[0].body.replace(/<[^>]+>/g,'') });
+  const ps = state.predStats;
+  if(ps.total>0) slides.push({ t:'pred', acc:Math.round(ps.correct/ps.total*100), best:ps.best, total:ps.total });
+  const momN = Object.values(state.moments).reduce((n,a)=>n+a.length,0);
+  if(momN>0) slides.push({ t:'moments', n:momN });
+  const rxAll = Object.values(state.reactions).flat();
+  if(rxAll.length){
+    const counts={}; rxAll.forEach(x=>counts[x.e]=(counts[x.e]||0)+1);
+    const top = Object.keys(counts).sort((a,b)=>counts[b]-counts[a])[0];
+    slides.push({ t:'emoji', e:top, n:counts[top] });
+  }
+  if(state.motd.best>0) slides.push({ t:'motd', best:state.motd.best });
+  slides.push({ t:'outro', n:logs.length });
+  return slides;
+}
+const RW_BGS = [
+  'radial-gradient(130% 100% at 20% 0%,#14532d,#0a0f0d 70%)',
+  'radial-gradient(130% 100% at 80% 0%,#713f12,#0f0c08 70%)',
+  'radial-gradient(130% 100% at 20% 100%,#1e3a8a,#0a0c12 70%)',
+  'radial-gradient(130% 100% at 80% 100%,#7f1d1d,#120a0a 70%)',
+  'radial-gradient(130% 100% at 50% 0%,#3b0764,#0e0a12 70%)',
+];
+function rwSlideHtml(s, i){
+  const kick = k => '<div class="rw-kicker">'+k+'</div>';
+  if(s.t==='intro') return kick('Bleachers Rewind')+'<div class="rw-emoji">🏟️</div><div class="rw-med">'+esc(state.user.name||'Φίλαθλε')+', αυτή ήταν η σεζόν σου</div><div class="rw-txt">'+s.n+' '+(s.n===1?'αγώνας καταγεγραμμένος':'αγώνες καταγεγραμμένοι')+'. Πάμε να τη θυμηθούμε.</div>';
+  if(s.t==='top') return kick('Το ματς της χρονιάς σου')
+    + '<div class="rw-crests">'+crest(s.m.home,54)+'<span style="font-size:22px;font-weight:800">'+s.m.score.home+' : '+s.m.score.away+'</span>'+crest(s.m.away,54)+'</div>'
+    + '<div class="rw-med">'+esc(s.m.home.abbr)+' vs '+esc(s.m.away.abbr)+'</div>'
+    + '<div class="rw-stars">'+starsGlyph(s.rating)+'</div>'
+    + (s.review?'<div class="rw-txt">“'+esc(s.review.slice(0,90))+(s.review.length>90?'…':'')+'”</div>':'');
+  if(s.t==='where'){
+    const max = Math.max(s.stadium,s.home,s.bar);
+    const label = s.stadium===max?'Γηπεδόλυκος':s.home===max?'Της εστίας':'Της παρέας';
+    return kick('Πού έζησες τα ματς')+'<div class="rw-big">'+label+'</div>'
+      + '<div class="rw-txt">Γήπεδο '+s.stadium+' · Σπίτι '+s.home+' · Μπαρ '+s.bar+'</div>';
+  }
+  if(s.t==='iq') return kick('Bleachers IQ')+'<div class="rw-med">'+esc(s.title)+'</div><div class="rw-txt">'+esc(s.body)+'</div>';
+  if(s.t==='pred') return kick('Οι προβλέψεις σου')+'<div class="rw-big">'+s.acc+'%</div><div class="rw-txt">ακρίβεια σε '+s.total+' live προβλέψεις. Καλύτερο σερί: '+s.best+' 🔥</div>';
+  if(s.t==='moments') return kick('Στιγμές που κράτησες')+'<div class="rw-big">'+s.n+'</div><div class="rw-txt">'+(s.n===1?'στιγμή παγωμένη':'στιγμές παγωμένες')+' στον χρόνο, με το σκορ και το ρολόι τους.</div>';
+  if(s.t==='emoji') return kick('Το συναίσθημά σου')+'<div class="rw-emoji">'+esc(s.e)+'</div><div class="rw-txt">Το σύμβολο που πάτησες '+s.n+' φορές όσο έτρεχε η μπάλα.</div>';
+  if(s.t==='motd') return kick('Ματς της Ημέρας')+'<div class="rw-big">'+s.best+' 🔥</div><div class="rw-txt">το καλύτερο σερί σου σε Ματς της Ημέρας.</div>';
+  return kick('Αυτό ήταν')+'<div class="rw-emoji">👏</div><div class="rw-med">Νέα σεζόν, νέες κερκίδες</div>'
+    + '<div class="rw-txt">Συνέχισε να καταγράφεις. Το Rewind μεγαλώνει μαζί σου.</div>'
+    + '<button class="rw-cta" data-action="shareSeason">'+icon('share',14)+' Κάρτα σεζόν</button>';
+}
+function renderRewind(){
+  const slides = App.ui.rwSlides || [];
+  const i = Math.max(0, Math.min(App.ui.rwIdx||0, slides.length-1));
+  const segs = slides.map((_,k)=>'<span class="rw-seg '+(k<=i?'done':'')+'"></span>').join('');
+  return '<div class="rw-wrap" style="background:'+RW_BGS[i%RW_BGS.length]+'" data-action="rwNext">'
+    + '<div class="rw-progress">'+segs+'</div>'
+    + '<button class="rw-x" data-action="closeRewind" aria-label="Κλείσιμο">'+icon('close',17)+'</button>'
+    + '<div class="rw-slide" key="rw'+i+'">'+rwSlideHtml(slides[i], i)+'</div>'
+    + '<button style="position:absolute;left:0;top:0;bottom:0;width:30%;background:none;border:0" data-action="rwPrev" aria-label="Πίσω"></button>'
+    + '<div class="rw-hint">Πάτα για επόμενο</div>'
+    + '</div>';
+}
+
+/* ---- SHARE CARDS: canvas drawn PNG, no server ---- */
+function roundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function cardTeam(ctx, team, cx, cy){
+  ctx.beginPath(); ctx.arc(cx,cy,86,0,7); ctx.fillStyle=team.color; ctx.fill();
+  ctx.fillStyle = textColorFor(team.color); ctx.font='800 56px system-ui,-apple-system,sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(team.abbr, cx, cy+4);
+}
+function makeMatchCard(m, log){
+  try{
+    const c = document.createElement('canvas');
+    if(!c.getContext) return null;
+    c.width=1080; c.height=1350;
+    const x = c.getContext('2d');
+    const g = x.createLinearGradient(0,0,1080,1350);
+    g.addColorStop(0,'#101418'); g.addColorStop(1,'#0a1f18');
+    x.fillStyle=g; x.fillRect(0,0,1080,1350);
+    x.fillStyle='#5DCAA5'; x.font='800 44px system-ui,-apple-system,sans-serif';
+    x.textAlign='center'; x.fillText('BLEACHERS', 540, 110);
+    x.fillStyle='#8a93a3'; x.font='600 34px system-ui,-apple-system,sans-serif';
+    x.fillText(m.league+' · '+fmtDay(dayDate(m.day)), 540, 175);
+    cardTeam(x, m.home, 260, 420); cardTeam(x, m.away, 820, 420);
+    x.fillStyle='#eef1f5'; x.font='800 150px system-ui,-apple-system,sans-serif';
+    x.fillText(m.score.home+' : '+m.score.away, 540, 470);
+    x.font='700 40px system-ui,-apple-system,sans-serif';
+    x.fillText(m.home.name, 260, 580); x.fillText(m.away.name, 820, 580);
+    if(log){
+      x.fillStyle='#F2B14C'; x.font='400 84px system-ui,-apple-system,sans-serif';
+      x.fillText(starsGlyph(log.rating), 540, 730);
+      if(log.review && log.review.trim()){
+        x.fillStyle='#d6dbe3'; x.font='italic 500 44px Georgia,serif';
+        const words = log.review.trim().split(/\s+/); const lines=[]; let line='';
+        words.forEach(w=>{ if((line+' '+w).length>34){ lines.push(line.trim()); line=w; } else line+=' '+w; });
+        if(line.trim()) lines.push(line.trim());
+        const shown = lines.slice(0,3);
+        shown.forEach((ln,i)=>{
+          const txt = (i===0?'“':'') + ln + (i===shown.length-1?'”':'');
+          x.fillText(txt, 540, 830+i*62);
+        });
+      }
+      if(log.location==='stadium'){
+        roundRect(x, 380, 1040, 320, 74, 37); x.fillStyle='rgba(93,202,165,.18)'; x.fill();
+        x.strokeStyle='#5DCAA5'; x.lineWidth=3; roundRect(x, 380, 1040, 320, 74, 37); x.stroke();
+        x.fillStyle='#5DCAA5'; x.font='700 36px system-ui,-apple-system,sans-serif';
+        x.fillText('ΗΜΟΥΝ ΕΚΕΙ', 540, 1088);
+      }
+    }
+    x.fillStyle='#5b6472'; x.font='600 30px system-ui,-apple-system,sans-serif';
+    x.fillText('Το ημερολόγιο των αγώνων που ζεις', 540, 1270);
+    return c.toDataURL('image/png');
+  }catch(e){ return null; }
+}
+function downloadCard(dataUrl, name){
+  const a = document.createElement('a');
+  a.href = dataUrl; a.download = name; a.click();
+}
+function shareCard(id){
+  const m = matchById(id); if(!m) return;
+  const url = makeMatchCard(m, state.logs[id]);
+  if(!url){ toast('share','Η κάρτα δεν υποστηρίζεται εδώ'); return; }
+  downloadCard(url, 'bleachers-'+m.home.abbr+'-'+m.away.abbr+'.png');
+  toast('share','Η κάρτα του αγώνα κατέβηκε'); buzz(20);
+}
+function shareSeason(){
+  try{
+    const logs = logsArr();
+    const c = document.createElement('canvas');
+    if(!c.getContext) { toast('share','Δεν υποστηρίζεται εδώ'); return; }
+    c.width=1080; c.height=1350;
+    const x = c.getContext('2d');
+    const g = x.createLinearGradient(0,0,0,1350);
+    g.addColorStop(0,'#14532d'); g.addColorStop(1,'#0a0f0d');
+    x.fillStyle=g; x.fillRect(0,0,1080,1350);
+    x.textAlign='center';
+    x.fillStyle='#fff'; x.font='800 44px system-ui,sans-serif'; x.fillText('BLEACHERS REWIND', 540, 130);
+    x.fillStyle='#eef1f5'; x.font='800 260px system-ui,sans-serif'; x.fillText(String(logs.length), 540, 500);
+    x.font='700 48px system-ui,sans-serif'; x.fillText(logs.length===1?'αγώνας':'αγώνες', 540, 590);
+    const rated = ratedLogs();
+    x.fillStyle='#F2B14C'; x.font='700 54px system-ui,sans-serif';
+    if(rated.length) x.fillText('Μέσος όρος '+avgRating(logs).toFixed(1)+' ★', 540, 760);
+    x.fillStyle='#d6dbe3'; x.font='600 40px system-ui,sans-serif';
+    x.fillText('Γήπεδο: '+logs.filter(l=>l.location==='stadium').length+' φορές', 540, 860);
+    if(state.predStats.total) x.fillText('Προβλέψεις: '+Math.round(state.predStats.correct/state.predStats.total*100)+'% ακρίβεια', 540, 930);
+    x.fillStyle='#8ec9b0'; x.font='700 38px system-ui,sans-serif';
+    x.fillText(state.user.name||'', 540, 1080);   // canvas text, no HTML context
+    x.fillStyle='#5b6472'; x.font='600 30px system-ui,sans-serif';
+    x.fillText('Το ημερολόγιο των αγώνων που ζεις', 540, 1270);
+    downloadCard(c.toDataURL('image/png'), 'bleachers-rewind.png');
+    toast('share','Η κάρτα της σεζόν κατέβηκε'); buzz(20);
+  }catch(e){ toast('share','Η κάρτα δεν υποστηρίζεται εδώ'); }
+}
+
+/* =============================================================================
    (4) RENDER / SCREENS
 ============================================================================= */
 function textColorFor(hex){ const c=hex.replace('#',''); const r=parseInt(c.substr(0,2),16),g=parseInt(c.substr(2,2),16),b=parseInt(c.substr(4,2),16); return (0.299*r+0.587*g+0.114*b)>150?'#11110f':'#fff'; }
@@ -1383,6 +1717,9 @@ const ICONS = {
   pulse:'<path d="M3 12h4l2.5-6 4 12 2.5-6h5"/>',
   chat:'<path d="M21 12a8 8 0 0 1-8 8H4l2.3-2.9A8 8 0 1 1 21 12z"/><path d="M8.5 11h.01M12 11h.01M15.5 11h.01"/>',
   refresh:'<path d="M20 11a8 8 0 1 0-2.3 6.3"/><path d="M20 4v7h-7"/>',
+  news:'<rect x="3" y="5" width="15" height="15" rx="2"/><path d="M18 8h1.5a1.5 1.5 0 0 1 1.5 1.5V18a2 2 0 0 1-2 2H5"/><path d="M6.5 9h8M6.5 12.5h8M6.5 16h5"/>',
+  play:'<path d="M7 4.5l12 7.5-12 7.5z"/>',
+  share:'<circle cx="6" cy="12" r="2.6"/><circle cx="17.5" cy="5.5" r="2.6"/><circle cx="17.5" cy="18.5" r="2.6"/><path d="M8.3 10.8l6.9-4M8.3 13.2l6.9 4"/>',
   send:'<path d="M4 12l16-8-6 16-2.5-6.5z"/><path d="M11.5 13.5L20 4"/>',
   lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
 };
@@ -1822,8 +2159,12 @@ function tabSummary(d,m){
     yourLog = '<div class="your-log"><div class="between"><b>Η καταγραφή σου</b><span class="yl-stars">'+starsGlyph(log.rating)+'</span></div>'
       + (log.review&&log.review.trim()?'<div class="small mt8" style="font-style:italic;color:#d6dbe3">“'+esc(log.review.trim())+'”</div>':'')
       + (log.location?'<div class="tiny muted mt8">'+esc(LOCATIONS[log.location].label)+(log.potm?' · MVP: '+esc(log.potm):'')+'</div>':'')
+      + '<div class="mt12"><button class="share-btn" data-action="shareCard" data-id="'+m.id+'">'+icon('share',13)+'Κάρτα αγώνα</button></div>'
       + '</div>';
   }
+  const reportBtn = m.status==='ft'
+    ? '<button class="rep-cta" data-action="openReport" data-id="'+m.id+'">'+icon('news',16)+'Διάβασε την Ανταπόκριση του αγώνα</button>'
+    : '';
   /* live/finished event timeline (from the live engine) */
   let timeline='';
   if(m.events.length){
@@ -1857,7 +2198,7 @@ function tabSummary(d,m){
     ? '<div class="sec-title">Παίκτες-κλειδιά</div>'
       + '<div class="info-card">'+m.players.map(p=>'<div class="players-row"><span class="pdot"></span><span>'+esc(p)+'</span></div>').join('')+'</div>'
     : '';
-  return predCard(m) + hypeSparkCard(m) + yourLog + momentsCard(m) + reactionsCard(m) + timeline
+  return predCard(m) + hypeSparkCard(m) + reportBtn + yourLog + momentsCard(m) + reactionsCard(m) + timeline
     + '<div class="sec-title">Στοιχεία αγώνα</div>'
     + '<div class="info-card">'+info.map(r=>'<div class="info-row"><span class="k">'+r[0]+'</span><span class="v">'+esc(r[1])+'</span></div>').join('')+'</div>'
     + h2hHtml
@@ -1933,7 +2274,9 @@ function renderStats(){
   const donutParts=[{v:loc.stadium,c:'var(--ch1)',k:'Γήπεδο'},{v:loc.home,c:'var(--ch2)',k:'Σπίτι'},{v:loc.bar,c:'var(--ch3)',k:'Μπαρ'}];
 
   return '<h1>Στατιστικά</h1><p class="sub">Η σεζόν σου, διαβασμένη από το Bleachers IQ.</p>'
-    + '<div class="stat-hero"><div class="big">'+logs.length+'</div>'
+    + '<button class="rw-hero" data-action="openRewind"><span class="ic">'+icon('play',20)+'</span>'
+    + '<span><b style="font-size:15px">Το Rewind σου</b><br><span class="tiny muted">Η σεζόν σου σαν story, σε 30 δευτερόλεπτα</span></span></button>'
+    + '<div class="stat-hero" style="margin-top:12px"><div class="big">'+logs.length+'</div>'
     + '<div class="muted" style="margin-top:4px">αγώνες καταγεγραμμένοι</div></div>'
     + '<div class="mini-grid">'
     + '<div class="mini"><div class="v"><span style="color:var(--gold)">'+starIcon(true,15)+'</span>'+avgR.toFixed(1)+'</div><div class="k">Μ.Ο. βαθμ.</div></div>'
@@ -2131,9 +2474,11 @@ function render(){
     html = '<div class="shell">';
     if(ui.screen==='matchDetail') html += renderMatchDetail() + bottomNav(ui.screen);
     else if(ui.screen==='matchChat') html += renderMatchChat();   // chat owns the bottom edge
+    else if(ui.screen==='report') html += renderReport();         // full page reader
     else html += topBar() + '<div class="screen'+steadyCls+'">' + screenBody(ui.screen) + '</div>' + bottomNav(ui.screen);
     html += '</div>';
     if(ui.search!==null) html += renderSearch();
+    if(ui.rwSlides) html += renderRewind();
     if(ui.sheet) html += renderSheet();
     if(ui.modal) html += ui.modal;
   }
@@ -2214,6 +2559,27 @@ function toggleSection(key){
   App.ui.openSecs[key] = !App.ui.openSecs[key];   // default recorded at render time
   render();
 }
+function openReport(id){
+  const m = matchById(id);
+  if(!m || m.status!=='ft') return;
+  if(App.ui.screen!=='report') App.ui.backScreen = App.ui.screen==='matchDetail' ? 'matchDetail' : App.ui.screen;
+  App.ui.reportMatch = id;
+  App.ui.screen = 'report';
+  window.scrollTo(0,0);
+  render();
+}
+function openRewind(){
+  App.ui.rwSlides = computeRewind();
+  App.ui.rwIdx = 0;
+  render();
+}
+function closeRewind(){ App.ui.rwSlides = null; App.ui.rwIdx = 0; render(); }
+function rwNext(){
+  if(!App.ui.rwSlides) return;
+  if(App.ui.rwIdx >= App.ui.rwSlides.length-1){ closeRewind(); return; }
+  App.ui.rwIdx++; render();
+}
+function rwPrev(){ if(App.ui.rwSlides && App.ui.rwIdx>0){ App.ui.rwIdx--; render(); } }
 function openChat(id){
   if(App.ui.screen!=='matchChat') App.ui.backScreen = App.ui.screen==='matchDetail' ? 'matchDetail' : App.ui.screen;
   App.ui.chatMatch = id;
@@ -2347,6 +2713,13 @@ const ACTIONS = {
   openChat: el=>openChat(el.dataset.id),
   sendChat: ()=>sendChat(),
   refreshData: ()=>refreshData(true),
+  openReport: el=>openReport(el.dataset.id),
+  openRewind: ()=>openRewind(),
+  closeRewind: ()=>closeRewind(),
+  rwNext: ()=>rwNext(),
+  rwPrev: ()=>rwPrev(),
+  shareCard: el=>shareCard(el.dataset.id),
+  shareSeason: ()=>shareSeason(),
 };
 
 /* =============================================================================
@@ -2388,13 +2761,23 @@ document.addEventListener('keydown', e=>{
     const dx = e.changedTouches[0].clientX-x0, dy = e.changedTouches[0].clientY-y0;
     x0=null; y0=null;
     if(Math.abs(dx)<64 || Math.abs(dy)>Math.abs(dx)*0.7) return;
-    if(!state.onboarded || App.ui.modal || App.ui.sheet || App.ui.search!==null || App.ui.screen==='matchDetail' || App.ui.screen==='picker') return;
+    if(!state.onboarded || App.ui.modal || App.ui.sheet || App.ui.search!==null || App.ui.rwSlides
+      || App.ui.screen==='matchDetail' || App.ui.screen==='picker' || App.ui.screen==='matchChat' || App.ui.screen==='report') return;
     const i = order.indexOf(App.ui.screen);
     if(i<0) return;
     const next = dx<0 ? Math.min(order.length-1, i+1) : Math.max(0, i-1);
     if(next!==i) nav(order[next]);
   }, {passive:true});
 })();
+
+/* Browser tab icon: a tiny inline SVG stadium, no external file needed. */
+try{
+  const fav = document.createElement('link');
+  fav.rel = 'icon';
+  fav.href = 'data:image/svg+xml,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="%23101418"/><ellipse cx="16" cy="16" rx="11" ry="7.5" fill="none" stroke="%235DCAA5" stroke-width="2.4"/><ellipse cx="16" cy="16" rx="5" ry="3.2" fill="%235DCAA5"/></svg>'.replace(/%23/g,'#'));
+  document.head.appendChild(fav);
+}catch(e){}
 
 render();
 /* Preload crest art after the page has painted so a slow CDN never blocks first render. */
