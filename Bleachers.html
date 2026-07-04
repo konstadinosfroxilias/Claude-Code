@@ -379,6 +379,15 @@ textarea:focus,input[type=text]:focus{outline:none;border-color:var(--accent)}
 .sec-head.open .chev{transform:rotate(180deg)}
 .dom-tag{font-size:9.5px;color:var(--faint);font-weight:600;white-space:nowrap;background:var(--surface2);
   border:1px solid var(--border-soft);border-radius:5px;padding:1px 5px;flex-shrink:0}
+/* loading skeleton, refresh spinner, demo tag */
+.skel{height:56px;border-radius:13px;margin-bottom:10px;border:1px solid var(--border-soft);
+  background:linear-gradient(100deg,var(--surface) 30%,var(--surface2) 50%,var(--surface) 70%);
+  background-size:200% 100%;animation:skel 1.15s linear infinite}
+@keyframes skel{from{background-position:180% 0}to{background-position:-20% 0}}
+.spin{animation:spin 0.9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.demo-tag{font-size:8.5px;font-weight:800;letter-spacing:.08em;color:#2a1900;background:var(--gold);
+  border-radius:4px;padding:1px 5px;flex-shrink:0}
 /* competition logo on a small light chip so dark league art stays readable */
 .lg-badge{display:inline-flex;align-items:center;justify-content:center;background:#eef0ee;border-radius:6px;
   padding:2.5px;flex-shrink:0;vertical-align:middle}
@@ -459,8 +468,15 @@ textarea:focus,input[type=text]:focus{outline:none;border-color:var(--accent)}
    • LIVE ENGINE - in-play matches actually play out while the app is open:
      the clock ticks, goals/baskets land, events append to a timeline, matches
      go to full-time. Session-only by design (a refresh restarts the demo day).
-   • FIXTURE CALENDAR - matches are generated relative to the real "today"
-     across a 5-day strip (finished, live and upcoming), grouped by league.
+   • REAL MATCH DATA - results and fixtures come live from TheSportsDB's
+     free API (Premier League, La Liga, Bundesliga, EuroLeague, NBA), cached
+     in localStorage for 10 minutes, with a manual refresh button. The free
+     tier returns about one past and one next event per league and no live
+     scores, so two DEMO tagged in play matches remain to power the live
+     features. Fallback chain: fetch -> stale cache -> demo world; the app
+     never breaks offline.
+   • FIXTURE CALENDAR - the date strip adapts to the days that actually
+     have matches (nearest past and upcoming match days plus today).
    • MATCH LOGGING - rate (1-5), review, Player of the Match, and "The
      Experience" (stadium/home/bar, atmosphere, memory note). Editing updates
      in place. Upcoming matches cannot be logged.
@@ -548,10 +564,11 @@ const LEAGUE_META = {
   'Serie A':{ color:'#008FD7', region:'Italy', logo:LGF(135) },
   'Champions League':{ color:'#0A1E5C', region:'Europe', logo:LGF(2) },
   'EuroLeague':{ color:'#F36F21', region:'Europe', logo:'https://r2.thesportsdb.com/images/media/league/badge/7xjtuy1554397263.png' },
+  'NBA':{ color:'#1D428A', region:'North America', logo:'https://r2.thesportsdb.com/images/media/league/badge/frdjqy1536585083.png' },
 };
 const LEAGUE_ORDER = {
   football:['Champions League','Premier League','La Liga','Bundesliga','Serie A'],
-  basketball:['EuroLeague'],
+  basketball:['EuroLeague','NBA'],
 };
 
 /* --- Fixture templates. day: offset from real today. Legacy ids (f1..f3,
@@ -613,17 +630,27 @@ function dateStrOf(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.
 const TODAY = new Date();
 function dayDate(offset){ const d = new Date(TODAY); d.setDate(d.getDate()+offset); return d; }
 
-const MATCHES = FIXTURES.map(f => ({
-  id:f.id, sport:f.sport, league:f.league, day:f.day,
-  date:dateStrOf(dayDate(f.day)), time:f.time,
-  home:TEAMS[f.h], away:TEAMS[f.a], homeId:f.h, awayId:f.a,
-  score:{ home:f.hs, away:f.as },
-  status:f.st,                        // 'ft' | 'live' | 'ns'  (mutated by the live engine)
-  liveMin:f.liveMin||0, liveQ:f.liveQ||1, liveSec:f.liveSec||600,
-  derby:!!f.derby, euro:!!f.euro, venue:f.venue, players:f.players,
-  events:[],                          // live-engine timeline
-  hypeLog:[],                         // Παλμός history (session-only)
-}));
+function demoMatch(f){
+  return {
+    id:f.id, sport:f.sport, league:f.league, day:f.day,
+    date:dateStrOf(dayDate(f.day)), time:f.time,
+    home:TEAMS[f.h], away:TEAMS[f.a], homeId:f.h, awayId:f.a,
+    score:{ home:f.hs, away:f.as },
+    status:f.st,                        // 'ft' | 'live' | 'ns'  (mutated by the live engine)
+    liveMin:f.liveMin||0, liveQ:f.liveQ||1, liveSec:f.liveSec||600,
+    derby:!!f.derby, euro:!!f.euro, venue:f.venue, players:f.players,
+    events:[],                          // live-engine timeline
+    hypeLog:[],                         // Παλμός history (session-only)
+  };
+}
+function buildDemoMatches(){ return FIXTURES.map(demoMatch); }
+/* The two in-play demo fixtures stay even with real data (tagged DEMO): the
+   free API tier has no live scores, and they power the live engine, chat,
+   hype, predictions and moments so every feature stays experienceable. */
+function demoLiveMatches(){
+  return FIXTURES.filter(f=>f.st==='live').map(f=>{ const m=demoMatch(f); m.demo=true; return m; });
+}
+let MATCHES = buildDemoMatches();
 
 /* --- Default state + persistence. --- */
 function defaultState(){
@@ -668,6 +695,146 @@ function save(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); 
 
 let state = load();
 const App = { ui:{ screen:'feed', backScreen:'feed', draft:null, sheet:null, modal:null, search:null, obStep:0, obPick:{}, obName:'', toasts:[], openSecs:{} } };
+
+/* =============================================================================
+   (1b) LIVE DATA - TheSportsDB free API
+   -----------------------------------------------------------------------------
+   Real matches come from TheSportsDB's free, CORS friendly JSON endpoints:
+     eventspastleague.php?id={LEAGUE}   last result(s) of a league
+     eventsnextleague.php?id={LEAGUE}   next fixture(s) of a league
+   Notes on the FREE tier (key "3"): it returns roughly ONE past and ONE next
+   event per league, and has no live scores. So the feed shows the real latest
+   result + next fixture per league, while the two DEMO tagged in play matches
+   keep the live features alive.
+   Robustness rules:
+     • every network call is try/catch wrapped; the app NEVER breaks offline
+     • responses are cached in localStorage for 10 minutes (free tier respect)
+     • fallback chain: fresh fetch -> stale cache -> built in demo matches
+============================================================================= */
+const API_BASE   = 'https://www.thesportsdb.com/api/v1/json/3/';
+const API_CACHE  = 'bleachers_api_v1';
+const API_TTL_MS = 10*60*1000;
+const API_LEAGUES = [
+  { id:4328, name:'Premier League', sport:'football' },
+  { id:4335, name:'La Liga',        sport:'football' },
+  { id:4331, name:'Bundesliga',     sport:'football' },
+  { id:4546, name:'EuroLeague',     sport:'basketball' },
+  { id:4387, name:'NBA',            sport:'basketball' },
+];
+/* deterministic team colours: same club name, same colour, every time */
+const API_COLORS = ['#C8102E','#034694','#6CABDD','#FDE100','#0E7A3B','#A50044','#1D428A','#E2231A','#3D195B','#F36F21','#008FD7','#552583','#CE1141','#007A33'];
+
+function hashStr(s){ let h=0; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))|0; return Math.abs(h); }
+function abbrOf(name){
+  const words = String(name||'').split(/\s+/).filter(Boolean);
+  if(words.length>=2) return words.slice(0,3).map(w=>w[0]).join('').toUpperCase();
+  return String(name||'').replace(/[^A-Za-zΑ-Ωα-ωίόάέύήώ]/g,'').slice(0,3).toUpperCase() || '???';
+}
+function apiTeam(e, side, sport, league){
+  const name = e['str'+side+'Team'] || 'Άγνωστη';
+  return {
+    name, abbr:abbrOf(name),
+    color:API_COLORS[hashStr(name)%API_COLORS.length],
+    logo:e['str'+side+'TeamBadge'] || null,
+    sport, str:0.45 + (hashStr(name)%20)/100,
+    dom:league,                                  // own league: no origin tag
+  };
+}
+/* strTimestamp is UTC without a zone suffix; render in the viewer's local time */
+function apiKickTs(e){
+  const ts = e.strTimestamp;
+  if(ts){ const t = Date.parse(/[Z+]/.test(ts) ? ts : ts+'Z'); if(!isNaN(t)) return t; }
+  if(e.dateEvent){ const t = Date.parse(e.dateEvent+'T'+(e.strTime||'18:00:00')+'Z'); if(!isNaN(t)) return t; }
+  return Date.now();
+}
+function mapEvent(e, L, status){
+  const kick = apiKickTs(e);
+  const kickLocal = new Date(kick);
+  const kd = new Date(kick), td = new Date();
+  kd.setHours(0,0,0,0); td.setHours(0,0,0,0);
+  return {
+    id:String(e.idEvent), sport:L.sport, league:L.name,
+    day:Math.round((kd - td)/86400000),
+    date:dateStrOf(kickLocal), time:pad(kickLocal.getHours())+':'+pad(kickLocal.getMinutes()),
+    kickTs:kick,
+    home:apiTeam(e,'Home',L.sport,L.name), away:apiTeam(e,'Away',L.sport,L.name),
+    homeId:'t'+(e.idHomeTeam||hashStr(e.strHomeTeam||'h')), awayId:'t'+(e.idAwayTeam||hashStr(e.strAwayTeam||'a')),
+    score:{ home:+(e.intHomeScore||0), away:+(e.intAwayScore||0) },
+    status, liveMin:0, liveQ:1, liveSec:600,
+    derby:false, euro:L.name==='EuroLeague',
+    venue:e.strVenue||'', players:[],            // free tier has no lineups
+    events:[], hypeLog:[],
+  };
+}
+function buildFromApi(data){
+  const out=[], seen={};
+  API_LEAGUES.forEach(L=>{
+    const d = data[L.id]; if(!d) return;
+    (d.past||[]).forEach(e=>{ if(e && e.idEvent && !seen[e.idEvent]){ seen[e.idEvent]=1; out.push(mapEvent(e,L,'ft')); } });
+    (d.next||[]).forEach(e=>{ if(e && e.idEvent && !seen[e.idEvent]){ seen[e.idEvent]=1; out.push(mapEvent(e,L,'ns')); } });
+  });
+  return out;
+}
+function readApiCache(){
+  try{ const r = localStorage.getItem(API_CACHE); return r ? JSON.parse(r) : null; }catch(e){ return null; }
+}
+function writeApiCache(data){
+  try{ localStorage.setItem(API_CACHE, JSON.stringify({ ts:Date.now(), data })); }catch(e){}
+}
+function applyApi(data){
+  const real = buildFromApi(data);
+  if(!real.length) return false;
+  MATCHES = real.concat(demoLiveMatches());
+  return true;
+}
+async function fetchLeague(id){
+  const get = async u => {
+    const res = await fetch(API_BASE+u);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const j = await res.json();
+    return (j && j.events) || [];
+  };
+  const out = { past:[], next:[] };
+  try{ out.past = await get('eventspastleague.php?id='+id); }catch(e){}
+  try{ out.next = await get('eventsnextleague.php?id='+id); }catch(e){}
+  return out;
+}
+async function refreshData(force){
+  if(typeof fetch === 'undefined') return;           // non browser environment
+  if(App.ui.loading) return;                         // one fetch at a time
+  const cached = readApiCache();
+  if(!force && cached && cached.data && (Date.now()-cached.ts) < API_TTL_MS){
+    if(applyApi(cached.data)) App.ui.dataSource='cache';
+    if(safeToRerender()) render();
+    preloadLogos();
+    return;
+  }
+  App.ui.loading = true;
+  if(safeToRerender()) render();
+  try{
+    const results = await Promise.all(API_LEAGUES.map(L=>fetchLeague(L.id)));
+    const data = {}; API_LEAGUES.forEach((L,i)=>{ data[L.id]=results[i]; });
+    const total = API_LEAGUES.reduce((n,L)=>n+data[L.id].past.length+data[L.id].next.length, 0);
+    if(!total) throw new Error('empty response');
+    writeApiCache(data);
+    applyApi(data);
+    App.ui.dataSource='api';
+  }catch(err){
+    /* never break: stale cache first, then the built in demo world */
+    if(cached && cached.data && applyApi(cached.data)){
+      App.ui.dataSource='cache';
+      toast('clock','Χωρίς σύνδεση: εμφανίζονται αποθηκευμένοι αγώνες');
+    } else {
+      MATCHES = buildDemoMatches();
+      App.ui.dataSource='demo';
+      toast('clock','Χωρίς σύνδεση: εμφανίζονται demo αγώνες');
+    }
+  }finally{
+    App.ui.loading = false;
+    if(safeToRerender()) render();
+    preloadLogos();
+  }
+}
 
 /* =============================================================================
    (2) LIVE ENGINE - matches play out in real time while the app is open
@@ -733,6 +900,7 @@ function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.im
 function seedOf(id){ let h=0; for(let i=0;i<id.length;i++) h=(h*31+id.charCodeAt(i))|0; return h; }
 
 function kickoffMs(m){
+  if(m.kickTs) return m.kickTs;        // real matches carry the API timestamp
   const p = m.time.split(':');
   const d = dayDate(m.day);
   d.setHours(+p[0], +p[1], 0, 0);
@@ -1214,6 +1382,7 @@ const ICONS = {
   bookmark:'<path d="M7 3h10v18l-5-4-5 4z"/>',
   pulse:'<path d="M3 12h4l2.5-6 4 12 2.5-6h5"/>',
   chat:'<path d="M21 12a8 8 0 0 1-8 8H4l2.3-2.9A8 8 0 1 1 21 12z"/><path d="M8.5 11h.01M12 11h.01M15.5 11h.01"/>',
+  refresh:'<path d="M20 11a8 8 0 1 0-2.3 6.3"/><path d="M20 4v7h-7"/>',
   send:'<path d="M4 12l16-8-6 16-2.5-6.5z"/><path d="M11.5 13.5L20 4"/>',
   lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
 };
@@ -1239,23 +1408,30 @@ function logoRefresh(){
     render();
   }, 250);
 }
+let logoHolder = null;
 function preloadLogos(){
   if(!document.body || !document.body.appendChild) return;   // non-browser environment
   /* Real <img> nodes in a hidden holder OUTSIDE #app: innerHTML re-renders can't
-     abort them, and once loaded the visible crests hit the warm cache instantly. */
-  const holder = document.createElement('div');
-  holder.setAttribute('aria-hidden','true');
-  holder.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;visibility:hidden';
+     abort them, and once loaded the visible crests hit the warm cache instantly.
+     Idempotent: re-called whenever real data arrives with new badge URLs. */
+  if(!logoHolder){
+    logoHolder = document.createElement('div');
+    logoHolder.setAttribute('aria-hidden','true');
+    logoHolder.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;visibility:hidden';
+    document.body.appendChild(logoHolder);
+  }
   const urls = Object.values(TEAMS).map(t=>t.logo)
-    .concat(Object.values(LEAGUE_META).map(l=>l.logo));
+    .concat(Object.values(LEAGUE_META).map(l=>l.logo))
+    .concat(MATCHES.flatMap(m=>[m.home.logo, m.away.logo]));
   new Set(urls.filter(Boolean)).forEach(u=>{
+    if(LOGO_STATE[u]!==undefined || LOGO_STATE['~'+u]) return;   // already loaded or in flight
+    LOGO_STATE['~'+u] = true;
     const im = document.createElement('img');
-    im.onload  = ()=>{ LOGO_STATE[u]='ok'; logoRefresh(); };
-    im.onerror = ()=>{ LOGO_STATE[u]='fail'; };
+    im.onload  = ()=>{ delete LOGO_STATE['~'+u]; LOGO_STATE[u]='ok'; logoRefresh(); };
+    im.onerror = ()=>{ delete LOGO_STATE['~'+u]; LOGO_STATE[u]='fail'; };
     im.src = u;
-    holder.appendChild(im);
+    logoHolder.appendChild(im);
   });
-  document.body.appendChild(holder);
 }
 /* Flashscore-style crest: the transparent club logo floats on its own - no
    circle, no plate behind it. The coloured monogram appears ONLY while the
@@ -1319,6 +1495,7 @@ function matchRow(m){
     + '<div class="mstat">'+statusCol(m)+'</div>'
     + '<div class="mteams">'+teamLine(m,'home')+teamLine(m,'away')+'</div>'
     + '<div class="mside">'
+    + (m.demo?'<span class="demo-tag">DEMO</span>':'')
     + (m.status==='live'?'<span class="hype '+hypeCls(h)+'" title="Παλμός">'+icon('pulse',11)+'<span data-hype="'+m.id+'">'+h+'</span></span>':'')
     + (log?'<span class="rate-pill">★ '+log.rating+'</span>':'')
     + '<button class="starb '+(fol?'on':'')+'" data-action="toggleStar" data-id="'+m.id+'" aria-label="Παρακολούθηση">'+starIcon(fol,19)+'</button>'
@@ -1374,13 +1551,25 @@ function briefCard(){
     + (live.length?'<button class="fchip on" data-action="nav" data-screen="live" style="margin-top:11px">Δες τα live →</button>':'')
     + '</div>';
 }
+/* With real data the calendar adapts to the dates that actually have matches
+   (off season results can be weeks back, fixtures weeks ahead): up to two
+   nearest past match days, today, and the two nearest upcoming ones. */
+function stripDays(){
+  const days = new Set([0]);
+  MATCHES.forEach(m=>days.add(m.day));
+  const all = Array.from(days).sort((a,b)=>a-b);
+  const past = all.filter(d=>d<0).slice(-3);
+  const future = all.filter(d=>d>0).slice(0,3);
+  return past.concat([0], future);
+}
 function dateStrip(){
-  return '<div class="datestrip">'+[-2,-1,0,1,2].map(off=>{
+  return '<div class="datestrip">'+stripDays().map(off=>{
     const d = dayDate(off);
     const hasLive = off===0 && liveMatches().length>0;
     const lbl = off===0 ? 'Σήμερα' : GRDAYS[d.getDay()];
+    const num = Math.abs(off)>5 ? d.getDate()+'/'+(d.getMonth()+1) : String(d.getDate());
     return '<button class="dchip '+(state.activeDay===off?'on':'')+'" data-action="setDay" data-day="'+off+'">'
-      + '<span class="dw">'+lbl+'</span><span class="dn">'+d.getDate()+'</span>'
+      + '<span class="dw">'+lbl+'</span><span class="dn">'+num+'</span>'
       + (hasLive?'<span class="dot"></span>':'')
       + '</button>';
   }).join('')+'</div>';
@@ -1413,8 +1602,14 @@ function renderFeed(){
     + '<button class="'+(sport==='basketball'?'on':'')+'" data-action="setSport" data-sport="basketball">🏀 Μπάσκετ</button>'
     + '</div>'
     + dateStrip()
-    + '<div class="row gap8" style="padding:4px"><button class="fchip '+(state.mineOnly?'on':'')+'" data-action="toggleMine">★ Μόνο δικά μου</button></div>'
+    + '<div class="row gap8 between" style="padding:4px">'
+    + '<button class="fchip '+(state.mineOnly?'on':'')+'" data-action="toggleMine">★ Μόνο δικά μου</button>'
+    + '<button class="fchip" data-action="refreshData" aria-label="Ανανέωση αγώνων">'
+    + '<span style="display:inline-flex;vertical-align:middle" class="'+(App.ui.loading?'spin':'')+'">'+icon('refresh',13)+'</span> '
+    + (App.ui.loading?'Φόρτωση...':'Ανανέωση')+'</button>'
+    + '</div>'
     + briefCard()
+    + (App.ui.loading && !App.ui.dataSource ? '<div class="mt8"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>' : '')
     + '<div class="mt8">'+body+'</div>';
 }
 
@@ -1425,6 +1620,7 @@ function liveCard(m){
   const h = hypeOf(m);
   return '<div class="livecard" data-action="openMatch" data-id="'+m.id+'">'
     + '<div class="lc-top"><span class="lc-badge"><span class="ld"></span>LIVE</span>'
+    + (m.demo?'<span class="demo-tag">DEMO</span>':'')
     + '<span class="lc-clock" data-clock="'+m.id+'">'+esc(liveClock(m))+'</span>'
     + '<span class="hype '+hypeCls(h)+'" title="Παλμός" style="margin-left:2px">'+icon('pulse',11)+'<span data-hype="'+m.id+'">'+h+'</span></span>'
     + '<span class="lc-league">'+leagueBadge(m.league,16)+' '+esc(m.league)+'</span></div>'
@@ -1476,7 +1672,7 @@ function renderMatchDetail(){
     + '<div><div class="dt">'+esc(m.home.abbr)+(m.status==='ns'?' - ':' '+m.score.home+'-'+m.score.away+' ')+esc(m.away.abbr)+'</div>'
     + '<div class="tiny muted">'+esc(m.league)+' · '+fmtDay(dayDate(m.day))+'</div></div></div>'
     + '<div class="hero">'
-    + '<div class="hero-top">'+leagueBadge(m.league,18)+'<span>'+esc(m.league)+' · '+esc((LEAGUE_META[m.league]||{}).region||'')+'</span></div>'
+    + '<div class="hero-top">'+leagueBadge(m.league,18)+'<span>'+esc(m.league)+' · '+esc((LEAGUE_META[m.league]||{}).region||'')+'</span>'+(m.demo?'<span class="demo-tag">DEMO</span>':'')+'</div>'
     + '<div class="hero-main">'
     + '<div class="hero-team">'+crest(m.home,56)+'<span class="tn">'+esc(m.home.name)+'</span>'+(m.home.dom&&m.home.dom!==m.league?'<span class="dom-tag">'+esc(m.home.dom)+'</span>':'')+'</div>'
     + '<div class="hero-mid">'+scoreHtml+statusHtml+'</div>'
@@ -1657,12 +1853,15 @@ function tabSummary(d,m){
     ? '<div class="ns-note">Ο αγώνας δεν έχει αρχίσει ακόμη.<br>Πάτα το ⭐ για να τον παρακολουθείς, θα μπορείς να τον καταγράψεις μόλις τελειώσει.</div>'
       + '<button class="cta ghost" data-action="toggleStar" data-id="'+m.id+'">'+(state.followed[m.id]?'★ Το παρακολουθείς':'☆ Παρακολούθησέ το')+'</button>'
     : '<button class="cta" data-action="setTab" data-tab="rate">'+(log?'Επεξεργασία καταγραφής':'Βαθμολόγησε τον αγώνα')+'</button>';
+  const playersHtml = m.players.length
+    ? '<div class="sec-title">Παίκτες-κλειδιά</div>'
+      + '<div class="info-card">'+m.players.map(p=>'<div class="players-row"><span class="pdot"></span><span>'+esc(p)+'</span></div>').join('')+'</div>'
+    : '';
   return predCard(m) + hypeSparkCard(m) + yourLog + momentsCard(m) + reactionsCard(m) + timeline
     + '<div class="sec-title">Στοιχεία αγώνα</div>'
     + '<div class="info-card">'+info.map(r=>'<div class="info-row"><span class="k">'+r[0]+'</span><span class="v">'+esc(r[1])+'</span></div>').join('')+'</div>'
     + h2hHtml
-    + '<div class="sec-title">Παίκτες-κλειδιά</div>'
-    + '<div class="info-card">'+m.players.map(p=>'<div class="players-row"><span class="pdot"></span><span>'+esc(p)+'</span></div>').join('')+'</div>'
+    + playersHtml
     + cta;
 }
 function tabRate(d,m){
@@ -1672,7 +1871,7 @@ function tabRate(d,m){
     + '<div class="rate-label">'+(d.rating?esc(RATING_LABELS[d.rating]):'Πάτα τα αστέρια')+'</div>'
     + '<div class="label">Η κριτική σου</div>'
     + '<textarea data-field="review" placeholder="Πώς ήταν ο αγώνας; Φάσεις, ατμόσφαιρα, συναίσθημα…">'+esc(d.review)+'</textarea>'
-    + '<div class="label">Player of the Match</div><div class="pills">'+pills+'</div>'
+    + (m.players.length ? '<div class="label">Player of the Match</div><div class="pills">'+pills+'</div>' : '')
     + logButton(d);
 }
 function tabExperience(d,m){
@@ -1805,6 +2004,9 @@ function renderProfile(){
     + '<span class="linkish" data-action="importData">'+icon('up',18)+'</span></div>'
     + '<div class="set-row"><div><div style="font-weight:700">Διαγραφή δεδομένων</div><div class="tiny muted">Σβήνει όλες τις καταγραφές</div></div>'
     + '<span class="danger" data-action="confirmReset">Reset</span></div>'
+    + '<div class="set-row"><div><div style="font-weight:700">Δεδομένα αγώνων</div>'
+    + '<div class="tiny muted">Powered by <a href="https://www.thesportsdb.com" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none">TheSportsDB</a></div></div>'
+    + '<span class="tiny muted">'+(App.ui.dataSource==='api'?'ζωντανά':App.ui.dataSource==='cache'?'cache':'demo')+'</span></div>'
     + '</div>';
 }
 
@@ -2144,6 +2346,7 @@ const ACTIONS = {
   react: el=>react(+el.dataset.e),
   openChat: el=>openChat(el.dataset.id),
   sendChat: ()=>sendChat(),
+  refreshData: ()=>refreshData(true),
 };
 
 /* =============================================================================
@@ -2198,6 +2401,9 @@ render();
 if(document.readyState === 'complete') preloadLogos();
 else window.addEventListener('load', preloadLogos, { once:true });
 startSim();
+/* Pull real matches from TheSportsDB (respects the 10 minute cache; falls
+   back to cache or the demo world on any failure, so offline always works). */
+refreshData(false);
 </script>
 </body>
 </html>
