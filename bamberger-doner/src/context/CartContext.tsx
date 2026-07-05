@@ -6,8 +6,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import type { LocalizedText, MenuItem } from '../config/menu'
-import { business } from '../config/content'
+import { business, type LocalizedText, type MenuItem } from '../data/content'
 
 export interface CartOptions {
   meat?: string // option id

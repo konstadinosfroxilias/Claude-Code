@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { MapPin, Phone, Clock, Navigation } from 'lucide-react'
 import { useLang } from '../context/LanguageContext'
-import { business, type Location } from '../config/content'
+import { business, type Location } from '../data/content'
 
 /** A purely decorative, CSS-drawn "map" look — no real maps API is called. */
 function FauxMap({ label }: { label: string }) {
@@ -45,9 +45,7 @@ function FauxMap({ label }: { label: string }) {
 
 function LocationCard({ loc, i }: { loc: Location; i: number }) {
   const { t, pick } = useLang()
-  const mapsHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-    `Bamberger Döner, ${loc.address}, ${loc.city}`,
-  )}`
+  const mapsHref = loc.mapsUrl // Google-Maps link comes from the data file
 
   return (
     <motion.div
@@ -61,14 +59,14 @@ function LocationCard({ loc, i }: { loc: Location; i: number }) {
       <FauxMap label={`${loc.address}, ${loc.city}`} />
 
       <div className="p-5 sm:p-6">
-        <div className="flex items-start justify-between gap-3">
-          <div>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+          <div className="min-w-0">
             <h3 className="font-display text-2xl uppercase leading-tight text-charcoal">
               {pick(loc.name)}
             </h3>
             <p className="mt-1 text-sm text-charcoal/60">{pick(loc.note)}</p>
           </div>
-          <span className="badge shrink-0 bg-amber-brand/15 text-amber-brand-dark">
+          <span className="badge shrink-0 self-start bg-amber-brand/15 text-amber-brand-dark">
             {pick(loc.opened)}
           </span>
         </div>

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { useLang } from '../context/LanguageContext'
-import { images } from '../config/images'
+import { images } from '../data/content'
 import SmartImage from './SmartImage'
 
 // a few tiles get larger spans for a livelier, magazine-style grid

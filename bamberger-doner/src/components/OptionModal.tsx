@@ -6,7 +6,7 @@ import {
   sauceOptions,
   formatPrice,
   type MenuItem,
-} from '../config/menu'
+} from '../data/content'
 import type { CartOptions } from '../context/CartContext'
 import { useLang } from '../context/LanguageContext'
 import SmartImage from './SmartImage'

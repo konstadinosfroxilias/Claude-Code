@@ -1,6 +1,5 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react'
-import { strings, type Dict, type Lang } from '../config/content'
-import type { LocalizedText } from '../config/menu'
+import { strings, type Dict, type Lang, type LocalizedText } from '../data/content'
 
 interface LanguageContextValue {
   lang: Lang

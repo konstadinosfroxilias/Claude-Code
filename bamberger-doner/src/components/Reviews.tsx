@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { Star, Quote } from 'lucide-react'
 import { useLang } from '../context/LanguageContext'
-import { reviews, business } from '../config/content'
+import { reviews, business } from '../data/content'
 
 const avatarColors = [
   'bg-doner-red',

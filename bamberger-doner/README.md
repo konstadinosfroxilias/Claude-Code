@@ -10,23 +10,25 @@ realistic UI simulation that processes nothing and charges nothing.
 
 ---
 
-## ▶️ Run it locally
+## ▶️ Run & build
 
 ```bash
-npm install
-npm run dev
-```
-
-Then open the URL Vite prints (default **http://localhost:5173**).
-
-Other commands:
-
-```bash
-npm run build     # type-check + production build into /dist
-npm run preview   # preview the production build locally
+npm install        # once
+npm run dev        # (a) live preview at http://localhost:5173
+npm run build      # (b) rebuild the production site into /dist
 ```
 
 > Requires Node 18+.
+
+### Open the finished site without any tools
+
+The production build is **self-contained**: `npm run build` inlines all
+JavaScript and CSS into a single `dist/index.html`. You can just
+**double-click `dist/index.html`** and it opens in your browser — no server
+needed. (`npm run preview` also serves `/dist` at a local URL if you prefer.)
+
+> Keep the computer online the first time you open it — the food photos load
+> from the web until you swap in local photos.
 
 ---
 
@@ -44,34 +46,17 @@ npm run preview   # preview the production build locally
 
 ## ✏️ Where to edit things (for go-live)
 
-Everything a non-developer needs to change lives in **three files** under
-`src/config/`:
+**Everything lives in ONE file:** [`src/data/content.ts`](./src/data/content.ts)
 
-### 1. Photos → `src/config/images.ts`
+Every component reads its content from that single file, so you swap in all the
+client's real data by editing only it — menu items & prices, both shop
+locations (address, hours, phone, Google Maps link), business name & tagline,
+promo copy, reviews and all image slots.
 
-All image URLs are in **one object** with obvious keys (`hero`, `donerKebab`,
-`gallery`, …). The current photos are royalty-free Unsplash stand-ins.
+See **[`REPLACE_ME.md`](./REPLACE_ME.md)** for a field-by-field checklist.
 
-To use the restaurant's real photos:
-
-1. Drop the files into `public/photos/` (e.g. `doner-kebab.jpg`).
-2. Replace the matching URL with a path, e.g.
-   `donerKebab: '/photos/doner-kebab.jpg',`
-3. That's it — nothing else changes.
-
-### 2. Prices, dish names & descriptions → `src/config/menu.ts`
-
-Each menu item has a `price` (a number in euros), a `name` and a `desc`
-(both in German + English). Edit in place.
-
-> ⚠️ **The prices in this demo are estimates and must be confirmed with the
-> owner before go-live.** See the list at the bottom.
-
-### 3. Business facts & all UI text → `src/config/content.ts`
-
-- `business` → addresses, phone, opening hours, rating, locations.
-- `reviews` → the testimonial snippets.
-- `strings.de` / `strings.en` → every user-facing label, in both languages.
+> ⚠️ **All menu prices are estimates and must be confirmed with the owner
+> before go-live.** See the list at the bottom.
 
 ---
 
@@ -107,7 +92,7 @@ Each menu item has a `price` (a number in euros), a `name` and a `desc`
 - The newsletter and loyalty buttons show a friendly confirmation but **save
   nothing**.
 - Instagram/Facebook links point to `#` — swap in the real profile URLs in
-  `src/config/content.ts` (`business.instagram` / `business.facebook`).
+  `src/data/content.ts` (`business.instagram` / `business.facebook`).
 - We deliberately do **not** embed or hotlink the restaurant's Instagram photos.
 
 ---

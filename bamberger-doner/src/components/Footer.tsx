@@ -1,6 +1,6 @@
 import { Phone, Instagram, Facebook, MapPin, Clock } from 'lucide-react'
 import { useLang } from '../context/LanguageContext'
-import { business } from '../config/content'
+import { business } from '../data/content'
 import Wordmark from './Wordmark'
 import SkylineDivider from './SkylineDivider'
 

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { Flame, Trophy, Plus } from 'lucide-react'
-import { formatPrice, type MenuItem } from '../config/menu'
+import { formatPrice, type MenuItem } from '../data/content'
 import { useLang } from '../context/LanguageContext'
 import SmartImage from './SmartImage'
 

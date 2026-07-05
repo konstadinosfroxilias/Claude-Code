@@ -15,12 +15,7 @@ import {
 } from 'lucide-react'
 import { useCart, type CartLine } from '../context/CartContext'
 import { useLang } from '../context/LanguageContext'
-import {
-  formatPrice,
-  meatOptions,
-  sauceOptions,
-} from '../config/menu'
-import { business } from '../config/content'
+import { formatPrice, meatOptions, sauceOptions, business } from '../data/content'
 import SmartImage from './SmartImage'
 
 type Step = 'cart' | 'checkout' | 'success'

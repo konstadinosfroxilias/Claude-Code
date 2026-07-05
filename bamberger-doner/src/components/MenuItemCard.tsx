@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Plus, Check, Leaf, Settings2 } from 'lucide-react'
-import { formatPrice, type MenuItem } from '../config/menu'
+import { formatPrice, type MenuItem } from '../data/content'
 import { useLang } from '../context/LanguageContext'
 import SmartImage from './SmartImage'
 import TiltCard from './TiltCard'
