@@ -3,7 +3,7 @@ import { MapPin, Phone, Clock, Navigation } from 'lucide-react'
 import { useLang } from '../context/LanguageContext'
 import { business, type Location } from '../data/content'
 
-/** A purely decorative, CSS-drawn "map" look — no real maps API is called. */
+/** A purely decorative, CSS-drawn "map" look - no real maps API is called. */
 function FauxMap({ label }: { label: string }) {
   const { t } = useLang()
   return (

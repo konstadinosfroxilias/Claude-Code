@@ -66,7 +66,7 @@ export default function Hero() {
             {t.common.commissionFree}
           </motion.div>
 
-          {/* Slogan — word-by-word reveal, comfortable leading (no overlap) */}
+          {/* Slogan - word-by-word reveal, comfortable leading (no overlap) */}
           <motion.h1
             variants={container}
             initial="hidden"

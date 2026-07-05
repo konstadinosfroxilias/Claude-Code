@@ -35,7 +35,7 @@ export default function Gallery() {
             >
               <SmartImage
                 src={src}
-                alt={`Bamberger Döner – Galerie ${i + 1}`}
+                alt={`Bamberger Döner Galerie ${i + 1}`}
                 className="h-full w-full"
                 imgClassName="transition-transform duration-700 group-hover:scale-110"
               />

@@ -6,7 +6,7 @@ interface SkylineDividerProps {
 }
 
 /**
- * A faint Bamberg-meets-Berlin skyline silhouette — cathedral spires, a town
+ * A faint Bamberg-meets-Berlin skyline silhouette - cathedral spires, a town
  * hall, rooftops and a Berlin TV-tower nod. Drawn in SVG, no image needed.
  */
 export default function SkylineDivider({

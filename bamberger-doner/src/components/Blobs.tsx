@@ -6,7 +6,7 @@ interface BlobsProps {
 
 /**
  * Decorative animated gradient "blobs" that drift slowly in the background.
- * Purely cosmetic, non-interactive — gives sections a modern, alive feel.
+ * Purely cosmetic, non-interactive - gives sections a modern, alive feel.
  */
 export default function Blobs({ className = '', variant = 'light' }: BlobsProps) {
   const opacity = variant === 'dark' ? 'opacity-40' : 'opacity-[0.18]'

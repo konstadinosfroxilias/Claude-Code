@@ -47,7 +47,7 @@ export default function Navbar() {
     >
       <nav className="container-px flex h-16 items-center justify-between gap-3 sm:h-20">
         {/* Wordmark */}
-        <a href="#start" className="shrink-0" aria-label="Bamberger Döner – Start">
+        <a href="#start" className="shrink-0" aria-label="Bamberger Döner Startseite">
           <Wordmark className="text-lg sm:text-2xl" light={!solid} />
         </a>
 

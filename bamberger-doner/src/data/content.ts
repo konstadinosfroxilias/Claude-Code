@@ -1,7 +1,7 @@
-// PLACEHOLDER DATA — replace with real client data
+// PLACEHOLDER DATA - replace with real client data
 // ============================================================================
 //
-//  BAMBERGER DÖNER — SINGLE SOURCE OF CONTENT
+//  BAMBERGER DÖNER - SINGLE SOURCE OF CONTENT
 //
 //  This is the ONLY file you need to edit to swap in the client's real data.
 //  Every component on the site reads its content from here.
@@ -55,7 +55,7 @@ export interface MenuItem {
 }
 
 /* ========================================================================== */
-/*  3. IMAGES — every photo slot on the site                                  */
+/*  3. IMAGES - every photo slot on the site                                  */
 /* ==========================================================================
    PLACEHOLDER IMAGES: high-quality royalty-free Unsplash stand-ins.
    They are NOT the restaurant's real photos.
@@ -105,12 +105,12 @@ export const images = {
 
   /* ---- Gallery grid (9 tiles, order = layout order) ---- */
   gallery: [
-    ux('1633896949673-1eb9d131a9b4', 900), // 1 — large tile (top-left, 2×2)
+    ux('1633896949673-1eb9d131a9b4', 900), // 1 - large tile (top-left, 2×2)
     ux('1628294895950-9805252327bc', 900), // 2
     ux('1529006557810-274b9b2fc783', 900), // 3
     ux('1626074353765-517a681e40be', 900), // 4
     ux('1594007654729-407eedc4be65', 900), // 5
-    ux('1630384060421-cb20d0e0649d', 900), // 6 — wide tile
+    ux('1630384060421-cb20d0e0649d', 900), // 6 - wide tile
     ux('1610057099431-d73a1c9d2f2f', 900), // 7
     ux('1552566626-52f8b828add9', 900), // 8
     ux('1540420773420-3366772f4999', 900), // 9
@@ -122,15 +122,15 @@ export const images = {
 } as const
 
 /* ========================================================================== */
-/*  1. BUSINESS — name, slogan, phone, rating, socials                        */
-/*  2. LOCATIONS — both shops                                                 */
+/*  1. BUSINESS - name, slogan, phone, rating, socials                        */
+/*  2. LOCATIONS - both shops                                                 */
 /* ========================================================================== */
 
 export const business = {
   name: 'Bamberger Döner',
   slogan: {
     de: 'Dönergeschmack aus Berlin in Bamberg',
-    en: 'The taste of Berlin döner — now in Bamberg',
+    en: 'The taste of Berlin döner, now in Bamberg',
   } as LocalizedText,
 
   phoneDisplay: '+49 951 91700610', // shown to users
@@ -143,19 +143,19 @@ export const business = {
   instagram: '#', // ← replace with real Instagram profile URL
   facebook: '#', // ← replace with real Facebook page URL
 
-  /* Opening hours: Sun–Wed 10:30–23:00, Thu–Sat 10:30–00:00.
+  /* Opening hours: Sun-Wed 10:30-23:00, Thu-Sat 10:30-00:00.
      `weekdays` uses JS day indexes (0 = Sunday). `close` drives the
      live "open now" badge; "00:00" means midnight (end of that day). */
   hours: [
     {
-      days: { de: 'So – Mi', en: 'Sun – Wed' } as LocalizedText,
-      time: '10:30 – 23:00',
+      days: { de: 'So - Mi', en: 'Sun - Wed' } as LocalizedText,
+      time: '10:30 - 23:00',
       weekdays: [0, 1, 2, 3],
       close: '23:00',
     },
     {
-      days: { de: 'Do – Sa', en: 'Thu – Sat' } as LocalizedText,
-      time: '10:30 – 00:00',
+      days: { de: 'Do - Sa', en: 'Thu - Sat' } as LocalizedText,
+      time: '10:30 - 00:00',
       weekdays: [4, 5, 6],
       close: '00:00',
     },
@@ -205,9 +205,9 @@ export const business = {
 export type Location = (typeof business.locations)[number]
 
 /* ========================================================================== */
-/*  4. MENU — all dishes                                                      */
+/*  4. MENU - all dishes                                                      */
 /* ==========================================================================
-   ⚠️  ALL PRICES ARE ESTIMATES — confirm with the owner before launch.
+   ⚠️  ALL PRICES ARE ESTIMATES - confirm with the owner before launch.
    To edit a dish: change name/desc/price. To change its photo, edit the
    matching key in the IMAGES section above.                                  */
 
@@ -253,8 +253,8 @@ export const menu: MenuItem[] = [
     category: 'doener',
     name: { de: 'Dürüm Döner', en: 'Dürüm Wrap' },
     desc: {
-      de: 'Saftiges Fleisch im dünnen Yufka-Brot gerollt – perfekt für unterwegs.',
-      en: 'Juicy meat rolled in thin yufka bread – perfect on the go.',
+      de: 'Saftiges Fleisch im dünnen Yufka-Brot gerollt, perfekt für unterwegs.',
+      en: 'Juicy meat rolled in thin yufka bread, perfect on the go.',
     },
     price: 7.5,
     image: images.durumDoner,
@@ -266,8 +266,8 @@ export const menu: MenuItem[] = [
     category: 'doener',
     name: { de: 'Döner Box mit Pommes', en: 'Döner Box with Fries' },
     desc: {
-      de: 'Döner trifft knusprige Pommes – die handliche Box für den großen Hunger.',
-      en: 'Döner meets crispy fries – the handy box for a big appetite.',
+      de: 'Döner trifft knusprige Pommes, die handliche Box für den großen Hunger.',
+      en: 'Döner meets crispy fries, the handy box for a big appetite.',
     },
     price: 6.0,
     image: images.donerBox,
@@ -352,8 +352,8 @@ export const menu: MenuItem[] = [
     category: 'snacks',
     name: { de: 'Lahmacun', en: 'Lahmacun' },
     desc: {
-      de: 'Dünn ausgerollter Teig, würzig belegt – türkische Pizza, frisch gebacken.',
-      en: 'Thin rolled dough, savoury topping – Turkish-style pizza, freshly baked.',
+      de: 'Dünn ausgerollter Teig, würzig belegt. Türkische Pizza, frisch gebacken.',
+      en: 'Thin rolled dough, savoury topping. Turkish-style pizza, freshly baked.',
     },
     price: 4.5,
     image: images.lahmacun,
@@ -389,8 +389,8 @@ export const menu: MenuItem[] = [
     category: 'getraenke',
     name: { de: 'Ayran', en: 'Ayran' },
     desc: {
-      de: 'Erfrischendes Joghurtgetränk – der perfekte Begleiter zum Döner.',
-      en: 'Refreshing yoghurt drink – the perfect partner to your döner.',
+      de: 'Erfrischendes Joghurtgetränk, der perfekte Begleiter zum Döner.',
+      en: 'Refreshing yoghurt drink, the perfect partner to your döner.',
     },
     price: 2.0,
     image: images.ayran,
@@ -423,7 +423,7 @@ export const menu: MenuItem[] = [
 ]
 
 /* ========================================================================== */
-/*  5. REVIEWS — the 4 testimonial cards                                      */
+/*  5. REVIEWS - the 4 testimonial cards                                      */
 /* ========================================================================== */
 
 export const reviews: {
@@ -471,10 +471,10 @@ export const reviews: {
 ]
 
 /* ========================================================================== */
-/*  6. UI TEXT — every interface string (German first, English toggle)        */
+/*  6. UI TEXT - every interface string (German first, English toggle)        */
 /* ==========================================================================
    The important marketing copy to review with the client:
-     hero.subline, about.p1–p3, loyalty.*, newsletter.*, footer.tagline       */
+     hero.subline, about.p1-p3, loyalty.*, newsletter.*, footer.tagline       */
 
 const de = {
   nav: {
@@ -491,13 +491,13 @@ const de = {
     ctaOrder: 'Jetzt bestellen',
     ctaMenu: 'Speisekarte ansehen',
     subline:
-      'Echter Berliner Döner – frisch vom Drehspieß, mit Liebe gemacht. Jetzt zweimal in Bamberg.',
+      'Echter Berliner Döner, frisch vom Drehspieß und mit Liebe gemacht. Jetzt zweimal in Bamberg.',
     openNow: 'Jetzt geöffnet',
     closedNow: 'Gerade geschlossen',
   },
   highlights: {
     fresh: { title: 'Frisch vom Drehspieß', sub: 'Jeden Tag frisch zubereitet' },
-    direct: { title: 'Direkt bestellen – keine Gebühren', sub: 'Ohne Lieferando & Co.' },
+    direct: { title: 'Direkt bestellen, keine Gebühren', sub: 'Ohne Lieferando & Co.' },
     two: { title: '2× in Bamberg', sub: 'Luitpoldstraße & Innenstadt' },
     since: { title: 'Seit 2023', sub: 'Mit Herz gegründet' },
   },
@@ -505,7 +505,7 @@ const de = {
     eyebrow: 'Unsere Speisekarte',
     title: 'Frisch gemacht, fair im Preis',
     subtitle:
-      'Alles frisch zubereitet – wähle deine Kategorie und leg los. Tippe auf „+“, um in den Warenkorb zu legen.',
+      'Alles frisch zubereitet. Wähle deine Kategorie und leg los. Tippe auf „+“, um in den Warenkorb zu legen.',
     all: 'Alle',
     add: 'Hinzufügen',
     vegetarian: 'Vegetarisch',
@@ -545,7 +545,7 @@ const de = {
     pay: 'Mit Karte bezahlen',
     paying: 'Zahlung wird verarbeitet …',
     secure: 'Sichere Zahlung',
-    demoNote: 'Demo – keine echte Zahlung',
+    demoNote: 'Demo, keine echte Zahlung',
     back: 'Zurück',
   },
   success: {
@@ -553,15 +553,15 @@ const de = {
     message: 'Vielen Dank! Deine Bestellung ist bei uns eingegangen und wird frisch zubereitet.',
     orderNo: 'Bestellnummer',
     pickupInfo: 'Du bekommst eine SMS, sobald alles fertig ist.',
-    demoNote: 'Demo – es wurde keine echte Bestellung ausgelöst und nichts berechnet.',
+    demoNote: 'Demo: es wurde keine echte Bestellung ausgelöst und nichts berechnet.',
     done: 'Fertig',
   },
   about: {
     eyebrow: 'Unsere Geschichte',
     title: 'Berliner Döner-Liebe in Bamberg',
     p1: 'Bamberger Döner ist aus einer einfachen Idee entstanden: den echten, ehrlichen Geschmack des Berliner Straßen-Döners nach Bamberg zu bringen. Großzügige Portionen, frische Zutaten und Fleisch, das den ganzen Tag frisch vom Drehspieß geschnitten wird.',
-    p2: 'Seit Dezember 2023 stehen wir in der Luitpoldstraße – direkt am Hauptbahnhof. Aus einem Laden wurden schnell viele Stammgäste und 2026 ein zweiter Standort mitten in der Innenstadt. Familiär geführt, mit viel Herz und noch mehr Soße. ❤️',
-    p3: 'Unser Versprechen bleibt: frisch, fair und freundlich. Bestell direkt bei uns – ohne Gebühren, ohne Umwege.',
+    p2: 'Seit Dezember 2023 stehen wir in der Luitpoldstraße, direkt am Hauptbahnhof. Aus einem Laden wurden schnell viele Stammgäste und 2026 ein zweiter Standort mitten in der Innenstadt. Familiär geführt, mit viel Herz und noch mehr Soße. ❤️',
+    p3: 'Unser Versprechen bleibt: frisch, fair und freundlich. Bestell direkt bei uns, ganz ohne Gebühren und Umwege.',
     statRating: 'Google-Bewertung',
     statShops: 'Standorte in Bamberg',
     statSince: 'Im Herzen Bambergs',
@@ -596,23 +596,23 @@ const de = {
   },
   newsletter: {
     title: 'Bleib auf dem Laufenden',
-    subtitle: 'Neue Aktionen, Gratis-Döner-Gewinnspiele und Neuigkeiten – direkt in dein Postfach.',
+    subtitle: 'Neue Aktionen, Gratis-Döner-Gewinnspiele und Neuigkeiten, direkt in dein Postfach.',
     placeholder: 'Deine E-Mail-Adresse',
     button: 'Anmelden',
     success: 'Danke fürs Anmelden! ❤️',
     successHint: 'Wir melden uns mit leckeren Neuigkeiten.',
   },
   footer: {
-    tagline: 'Echter Berliner Döner, frisch vom Drehspieß – jetzt zweimal in Bamberg.',
+    tagline: 'Echter Berliner Döner, frisch vom Drehspieß, jetzt zweimal in Bamberg.',
     contact: 'Kontakt',
     hours: 'Öffnungszeiten',
     locations: 'Standorte',
     follow: 'Folge uns',
     rights: 'Alle Rechte vorbehalten.',
-    demo: 'Demo-Website – zur Veranschaulichung erstellt. Keine echten Bestellungen oder Zahlungen.',
+    demo: 'Demo-Website, nur zur Veranschaulichung erstellt. Keine echten Bestellungen oder Zahlungen.',
   },
   common: {
-    commissionFree: 'Bestell direkt bei uns – ohne Gebühren',
+    commissionFree: 'Bestell direkt bei uns, ohne Gebühren',
     close: 'Schließen',
   },
 }
@@ -632,20 +632,20 @@ const en: typeof de = {
     ctaOrder: 'Order now',
     ctaMenu: 'View the menu',
     subline:
-      'Authentic Berlin-style döner – fresh off the spit, made with love. Now twice in Bamberg.',
+      'Authentic Berlin-style döner, fresh off the spit and made with love. Now twice in Bamberg.',
     openNow: 'Open now',
     closedNow: 'Currently closed',
   },
   highlights: {
     fresh: { title: 'Fresh off the spit', sub: 'Prepared fresh every day' },
-    direct: { title: 'Order direct – no fees', sub: 'No Lieferando & co.' },
+    direct: { title: 'Order direct, no fees', sub: 'No Lieferando & co.' },
     two: { title: '2× in Bamberg', sub: 'Luitpoldstraße & city centre' },
     since: { title: 'Since 2023', sub: 'Founded with heart' },
   },
   menu: {
     eyebrow: 'Our menu',
     title: 'Freshly made, fairly priced',
-    subtitle: 'Everything made fresh – pick a category and dig in. Tap “+” to add to your cart.',
+    subtitle: 'Everything made fresh. Pick a category and dig in. Tap “+” to add to your cart.',
     all: 'All',
     add: 'Add',
     vegetarian: 'Vegetarian',
@@ -685,7 +685,7 @@ const en: typeof de = {
     pay: 'Pay by card',
     paying: 'Processing payment …',
     secure: 'Secure payment',
-    demoNote: 'Demo – no real payment',
+    demoNote: 'Demo, no real payment',
     back: 'Back',
   },
   success: {
@@ -693,15 +693,15 @@ const en: typeof de = {
     message: 'Thank you! Your order has reached us and is being freshly prepared.',
     orderNo: 'Order number',
     pickupInfo: 'You’ll get a text as soon as everything is ready.',
-    demoNote: 'Demo – no real order was placed and nothing was charged.',
+    demoNote: 'Demo: no real order was placed and nothing was charged.',
     done: 'Done',
   },
   about: {
     eyebrow: 'Our story',
     title: 'Berlin döner love in Bamberg',
     p1: 'Bamberger Döner grew from one simple idea: to bring the real, honest taste of Berlin street döner to Bamberg. Generous portions, fresh ingredients and meat sliced fresh off the spit all day long.',
-    p2: 'Since December 2023 we’ve been on Luitpoldstraße – right by the main station. One shop quickly turned into a crowd of regulars and, in 2026, a second shop in the heart of the city. Family-run, with lots of heart and even more sauce. ❤️',
-    p3: 'Our promise stays the same: fresh, fair and friendly. Order directly with us – no fees, no detours.',
+    p2: 'Since December 2023 we’ve been on Luitpoldstraße, right by the main station. One shop quickly turned into a crowd of regulars and, in 2026, a second shop in the heart of the city. Family-run, with lots of heart and even more sauce. ❤️',
+    p3: 'Our promise stays the same: fresh, fair and friendly. Order directly with us, with no fees and no detours.',
     statRating: 'Google rating',
     statShops: 'shops in Bamberg',
     statSince: 'in the heart of Bamberg',
@@ -736,23 +736,23 @@ const en: typeof de = {
   },
   newsletter: {
     title: 'Stay in the loop',
-    subtitle: 'New deals, free-döner giveaways and news – straight to your inbox.',
+    subtitle: 'New deals, free-döner giveaways and news, straight to your inbox.',
     placeholder: 'Your email address',
     button: 'Sign up',
     success: 'Thanks for signing up! ❤️',
     successHint: 'We’ll be in touch with tasty news.',
   },
   footer: {
-    tagline: 'Authentic Berlin döner, fresh off the spit – now twice in Bamberg.',
+    tagline: 'Authentic Berlin döner, fresh off the spit, now twice in Bamberg.',
     contact: 'Contact',
     hours: 'Opening hours',
     locations: 'Locations',
     follow: 'Follow us',
     rights: 'All rights reserved.',
-    demo: 'Demo website – built for illustration. No real orders or payments.',
+    demo: 'Demo website, built for illustration. No real orders or payments.',
   },
   common: {
-    commissionFree: 'Order directly with us – no fees',
+    commissionFree: 'Order directly with us, no fees',
     close: 'Close',
   },
 }

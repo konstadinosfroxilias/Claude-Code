@@ -11,7 +11,7 @@ export default function Newsletter() {
   const onSubmit = (e: FormEvent) => {
     e.preventDefault()
     if (email.trim().length < 4) return
-    setSubmitted(true) // saves nothing — purely a demo confirmation
+    setSubmitted(true) // saves nothing - purely a demo confirmation
   }
 
   return (

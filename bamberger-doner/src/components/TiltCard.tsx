@@ -10,7 +10,7 @@ interface TiltCardProps {
 
 /**
  * Subtle 3D tilt-on-hover wrapper (pointer-driven, spring-smoothed).
- * Falls back gracefully — no tilt on touch since there's no hover.
+ * Falls back gracefully - no tilt on touch since there's no hover.
  */
 export default function TiltCard({ children, className = '', intensity = 6 }: TiltCardProps) {
   const ref = useRef<HTMLDivElement>(null)
