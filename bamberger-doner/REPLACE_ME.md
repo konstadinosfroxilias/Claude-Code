@@ -17,7 +17,7 @@ npm run build      # regenerates dist/index.html
 
 ### 1. Business (section `business` in content.ts)
 - [ ] `name` — business name (currently "Bamberger Döner")
-- [ ] `slogan.de` / `slogan.en` — tagline
+- [ ] `slogan.de` / `slogan.en` / `slogan.tr` — tagline
 - [ ] `phoneDisplay` — phone as shown to users
 - [ ] `phoneHref` — same number for the call button, format `tel:+49...` (no spaces)
 - [ ] `rating` — Google star rating (e.g. `4.7`)
@@ -28,17 +28,17 @@ npm run build      # regenerates dist/index.html
 
 ### 2. Opening hours (section `business.hours`)
 - [ ] `time` for each block (e.g. `10:30 – 23:00`)
-- [ ] `days.de` / `days.en` labels (e.g. `So – Mi`)
+- [ ] `days.de` / `days.en` / `days.tr` labels (e.g. `So – Mi`)
 - [ ] `weekdays` — day numbers each block covers (0 = Sun … 6 = Sat)
 - [ ] `close` — closing time, drives the live "open now" badge (`23:00` or `00:00`)
 
 ### 3. Both shop locations (section `business.locations`)
 For **each** of the two shops:
-- [ ] `name.de` / `name.en`
+- [ ] `name.de` / `name.en` / `name.tr`
 - [ ] `address` (street + number)
 - [ ] `city` (postcode + city)
-- [ ] `note.de` / `note.en` — short descriptor line
-- [ ] `opened.de` / `opened.en` — the little "since …" badge
+- [ ] `note.de` / `note.en` / `note.tr` — short descriptor line
+- [ ] `opened.de` / `opened.en` / `opened.tr` — the little "since …" badge
 - [ ] `mapsUrl` — **Google Maps link** ("Route anzeigen" button)
 - [ ] `image` — location photo (see Images below)
 
@@ -46,13 +46,13 @@ For **each** of the two shops:
 > ⚠️ All prices are **estimates** — confirm every one with the owner.
 
 For **each** dish:
-- [ ] `name.de` / `name.en`
-- [ ] `desc.de` / `desc.en` — short description
+- [ ] `name.de` / `name.en` / `name.tr`
+- [ ] `desc.de` / `desc.en` / `desc.tr` — short description
 - [ ] `price` — number in euros (e.g. `6.5` → shows "6,50 €")
 - [ ] `category` — one of: `doener`, `teller`, `vegetarisch`, `snacks`, `getraenke`
 - [ ] `image` — dish photo (see Images below)
 - [ ] `vegetarian` — `true` to show the green veg badge
-- [ ] `tag.de` / `tag.en` — optional ribbon (e.g. "Bestseller")
+- [ ] `tag.de` / `tag.en` / `tag.tr` — optional ribbon (e.g. "Bestseller")
 
 Add or remove dishes by adding/removing entries in the `menu` array.
 Meat/sauce choices live in `meatOptions` / `sauceOptions`.
@@ -72,7 +72,7 @@ Named slots to replace:
 ### 6. Reviews (section `reviews`)
 For each of the 4 testimonials:
 - [ ] `name`, `initials`, `location`
-- [ ] `text.de` / `text.en`
+- [ ] `text.de` / `text.en` / `text.tr`
 
 ### 7. Marketing / UI copy (section `strings`)
 Most important to review with the client:
@@ -83,7 +83,8 @@ Most important to review with the client:
 - [ ] `footer.tagline`
 
 Everything else in `strings` is standard interface wording (buttons, labels)
-and rarely needs changing. German (`de`) and English (`en`) must stay in sync.
+and rarely needs changing. German (`de`), English (`en`) and Turkish (`tr`)
+must stay in sync: every text needs all three variants.
 
 ---
 

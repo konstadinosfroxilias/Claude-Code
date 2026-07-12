@@ -15,13 +15,20 @@ import {
 } from 'lucide-react'
 import { useCart, type CartLine } from '../context/CartContext'
 import { useLang } from '../context/LanguageContext'
-import { formatPrice, meatOptions, sauceOptions, business } from '../data/content'
+import {
+  formatPrice,
+  meatOptions,
+  sauceOptions,
+  business,
+  type Lang,
+  type LocalizedText,
+} from '../data/content'
 import SmartImage from './SmartImage'
 
 type Step = 'cart' | 'checkout' | 'success'
 type Mode = 'pickup' | 'delivery'
 
-const optionLabel = (group: { id: string; label: { de: string; en: string } }[], id: string | undefined, lang: 'de' | 'en') =>
+const optionLabel = (group: { id: string; label: LocalizedText }[], id: string | undefined, lang: Lang) =>
   id ? group.find((o) => o.id === id)?.label[lang] : undefined
 
 export default function CartDrawer() {
@@ -427,12 +434,12 @@ function CheckoutStep({
           />
         </Field>
         {mode === 'delivery' && (
-          <Field label={lang === 'de' ? 'Lieferadresse' : 'Delivery address'}>
+          <Field label={t.checkout.addressLabel}>
             <input
               type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              placeholder={lang === 'de' ? 'Straße, Hausnr., PLZ' : 'Street, no., postcode'}
+              placeholder={t.checkout.addressPlaceholder}
               autoComplete="street-address"
               className="input"
             />
@@ -443,7 +450,7 @@ function CheckoutStep({
       {/* Stripe-style card field (visual mock) */}
       <div>
         <label className="mb-2 block font-heading text-xs font-bold uppercase tracking-[0.18em] text-charcoal/60">
-          {lang === 'de' ? 'Kartendaten' : 'Card details'}
+          {t.checkout.cardDetails}
         </label>
         <div className="rounded-2xl border border-black/10 bg-white p-3 shadow-sm">
           <div className="flex items-center justify-between gap-2 rounded-xl bg-cream-deep px-3 py-2.5 text-sm text-charcoal/50">
@@ -500,7 +507,7 @@ function SuccessStep({
   mode: Mode
   location: string
 }) {
-  const { t, lang } = useLang()
+  const { t } = useLang()
 
   return (
     <div className="flex h-full flex-col items-center justify-center px-8 py-10 text-center">
@@ -560,8 +567,7 @@ function SuccessStep({
 
       <p className="mt-4 text-xs text-charcoal/50">{t.success.pickupInfo}</p>
       <p className="mt-4 rounded-full bg-amber-brand/15 px-3 py-1 text-[0.7rem] font-semibold text-amber-brand-dark">
-        {lang === 'de' ? '⚠️ ' : '⚠️ '}
-        {t.success.demoNote}
+        ⚠️ {t.success.demoNote}
       </p>
     </div>
   )

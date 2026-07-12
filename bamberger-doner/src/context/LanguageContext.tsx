@@ -1,4 +1,11 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react'
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react'
 import { strings, type Dict, type Lang, type LocalizedText } from '../data/content'
 
 interface LanguageContextValue {
@@ -7,7 +14,7 @@ interface LanguageContextValue {
   toggle: () => void
   /** translated UI string tree for the current language */
   t: Dict
-  /** pick the right side of a { de, en } object */
+  /** pick the right variant of a { de, en, tr } object */
   pick: (text: LocalizedText) => string
 }
 
@@ -16,11 +23,18 @@ const LanguageContext = createContext<LanguageContextValue | null>(null)
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLang] = useState<Lang>('de')
 
+  // keep <html lang> in sync: gives correct Turkish uppercasing (i → İ)
+  // for CSS text-transform and better screen-reader pronunciation
+  useEffect(() => {
+    document.documentElement.lang = lang
+  }, [lang])
+
   const value = useMemo<LanguageContextValue>(
     () => ({
       lang,
       setLang,
-      toggle: () => setLang((l) => (l === 'de' ? 'en' : 'de')),
+      // cycle DE → EN → TR → DE
+      toggle: () => setLang((l) => (l === 'de' ? 'en' : l === 'en' ? 'tr' : 'de')),
       t: strings[lang],
       pick: (text: LocalizedText) => text[lang],
     }),

@@ -134,7 +134,7 @@ export default function Hero() {
 
             <div className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/20 backdrop-blur">
               <Star className="h-4 w-4 fill-amber-brand text-amber-brand" aria-hidden />
-              {business.rating.toLocaleString(lang === 'de' ? 'de-DE' : 'en-US')}★
+              {business.rating.toLocaleString(lang === 'en' ? 'en-US' : 'de-DE')}★
               <span className="font-normal text-white/80">{t.hero.ratingSuffix}</span>
             </div>
           </motion.div>

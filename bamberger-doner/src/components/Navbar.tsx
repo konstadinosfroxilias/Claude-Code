@@ -45,10 +45,10 @@ export default function Navbar() {
           : 'bg-transparent'
       }`}
     >
-      <nav className="container-px flex h-16 items-center justify-between gap-3 sm:h-20">
+      <nav className="container-px flex h-16 items-center justify-between gap-2 sm:h-20 sm:gap-3">
         {/* Wordmark */}
         <a href="#start" className="shrink-0" aria-label="Bamberger Döner Startseite">
-          <Wordmark className="text-lg sm:text-2xl" light={!solid} />
+          <Wordmark className="text-base sm:text-2xl" light={!solid} />
         </a>
 
         {/* Desktop links */}
@@ -69,21 +69,21 @@ export default function Navbar() {
         </div>
 
         {/* Right cluster */}
-        <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
-          {/* DE / EN toggle */}
+        <div className="flex shrink-0 items-center gap-1 sm:gap-3">
+          {/* DE / EN / TR toggle */}
           <div
-            className={`flex items-center rounded-full p-0.5 text-xs font-bold ${
+            className={`flex items-center rounded-full p-0.5 text-[0.65rem] font-bold sm:text-xs ${
               solid ? 'bg-black/5' : 'bg-white/15'
             }`}
             role="group"
             aria-label={t.nav.langLabel}
           >
-            {(['de', 'en'] as const).map((code) => (
+            {(['de', 'en', 'tr'] as const).map((code) => (
               <button
                 key={code}
                 onClick={() => setLang(code)}
                 aria-pressed={lang === code}
-                className={`rounded-full px-2 py-1 uppercase transition-colors sm:px-2.5 ${
+                className={`rounded-full px-1 py-1 uppercase transition-colors sm:px-2.5 ${
                   lang === code
                     ? 'bg-doner-red text-white shadow'
                     : solid
@@ -106,7 +106,7 @@ export default function Navbar() {
             animate={controls}
             onClick={openCart}
             aria-label={`${t.nav.openCart} (${count})`}
-            className={`relative grid h-9 w-9 place-items-center rounded-full transition-colors sm:h-10 sm:w-10 ${
+            className={`relative grid h-8 w-8 place-items-center rounded-full transition-colors sm:h-10 sm:w-10 ${
               solid ? 'bg-charcoal text-white hover:bg-charcoal-soft' : 'bg-white text-charcoal'
             }`}
           >
@@ -131,7 +131,7 @@ export default function Navbar() {
             onClick={() => setMobileOpen((o) => !o)}
             aria-label="Menu"
             aria-expanded={mobileOpen}
-            className={`grid h-9 w-9 place-items-center rounded-full sm:h-10 sm:w-10 lg:hidden ${
+            className={`grid h-8 w-8 place-items-center rounded-full sm:h-10 sm:w-10 lg:hidden ${
               solid ? 'text-charcoal hover:bg-black/5' : 'text-white hover:bg-white/10'
             }`}
           >

@@ -144,6 +144,7 @@ export default function Menu() {
           {pick({
             de: 'Alle Preise inkl. MwSt. Abbildungen ähnlich.',
             en: 'All prices incl. VAT. Images for illustration.',
+            tr: 'Tüm fiyatlara KDV dahildir. Görseller temsilidir.',
           })}
         </p>
       </div>

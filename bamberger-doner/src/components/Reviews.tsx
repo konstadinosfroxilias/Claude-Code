@@ -39,7 +39,7 @@ export default function Reviews() {
           {/* Google rating badge */}
           <div className="inline-flex items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-soft ring-1 ring-black/5">
             <span className="font-display text-3xl text-charcoal">
-              {business.rating.toLocaleString(lang === 'de' ? 'de-DE' : 'en-US')}
+              {business.rating.toLocaleString(lang === 'en' ? 'en-US' : 'de-DE')}
             </span>
             <div>
               <Stars />

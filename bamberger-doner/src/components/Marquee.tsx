@@ -7,24 +7,33 @@ const icons = [Flame, Star, Heart, MapPin]
 export default function Marquee() {
   const { lang } = useLang()
 
-  const phrases =
-    lang === 'de'
-      ? [
-          'Frisch vom Drehspieß',
-          'Ohne Gebühren bestellen',
-          'Dönergeschmack aus Berlin',
-          '4,7★ auf Google',
-          '2× in Bamberg',
-          'Seit 2023 mit Herz',
-        ]
-      : [
-          'Fresh off the spit',
-          'Order with no fees',
-          'Berlin-style döner',
-          '4.7★ on Google',
-          '2× in Bamberg',
-          'Made with heart since 2023',
-        ]
+  const phrasesByLang = {
+    de: [
+      'Frisch vom Drehspieß',
+      'Ohne Gebühren bestellen',
+      'Dönergeschmack aus Berlin',
+      '4,7★ auf Google',
+      '2× in Bamberg',
+      'Seit 2023 mit Herz',
+    ],
+    en: [
+      'Fresh off the spit',
+      'Order with no fees',
+      'Berlin-style döner',
+      '4.7★ on Google',
+      '2× in Bamberg',
+      'Made with heart since 2023',
+    ],
+    tr: [
+      'Şişten taze',
+      'Komisyonsuz sipariş',
+      'Berlin usulü döner',
+      "4,7★ Google'da",
+      "2× Bamberg'de",
+      "2023'ten beri yürekten",
+    ],
+  } as const
+  const phrases = phrasesByLang[lang]
 
   // duplicate the list so the loop is seamless
   const items = [...phrases, ...phrases]

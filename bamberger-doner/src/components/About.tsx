@@ -9,7 +9,8 @@ import Blobs from './Blobs'
 
 export default function About() {
   const { t, lang } = useLang()
-  const locale = lang === 'de' ? 'de-DE' : 'en-US'
+  // Turkish formats decimals like German (comma), so it shares de-DE
+  const locale = lang === 'en' ? 'en-US' : 'de-DE'
 
   const stats = [
     { icon: Star, node: <CountUp value={business.rating} decimals={1} suffix="★" locale={locale} />, label: t.about.statRating },

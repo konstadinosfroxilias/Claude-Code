@@ -40,7 +40,7 @@ needed. (`npm run preview` also serves `/dist` at a local URL if you prefer.)
 - **framer-motion** for the micro-interactions (cart slide-in, add-to-cart bump,
   animated success checkmark, hover/scroll reveals)
 - Google Fonts: **Anton** / **Oswald** (display) + **Inter** (body)
-- Single-page app, mobile-first, German-first with a **DE / EN** toggle
+- Single-page app, mobile-first, German-first with a **DE / EN / TR** toggle
 
 ---
 

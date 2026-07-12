@@ -12,7 +12,7 @@
 //    3. IMAGES     → every photo slot on the site (clearly named)
 //    4. MENU       → all dishes: name, description, price (€), category
 //    5. REVIEWS    → the 4 testimonial cards
-//    6. UI TEXT    → every interface string, German + English
+//    6. UI TEXT    → every interface string, German + English + Turkish
 //    7. HELPERS    → types & small functions (no need to edit these)
 //
 //  See REPLACE_ME.md in the project root for a field-by-field checklist.
@@ -22,12 +22,13 @@
 /*  7a. TYPES (no need to edit)                                               */
 /* ========================================================================== */
 
-export type Lang = 'de' | 'en'
+export type Lang = 'de' | 'en' | 'tr'
 
-/** Every user-facing text exists in German and English. */
+/** Every user-facing text exists in German, English and Turkish. */
 export interface LocalizedText {
   de: string
   en: string
+  tr: string
 }
 
 export type CategoryId = 'doener' | 'teller' | 'vegetarisch' | 'snacks' | 'getraenke'
@@ -131,6 +132,7 @@ export const business = {
   slogan: {
     de: 'Dönergeschmack aus Berlin in Bamberg',
     en: 'The taste of Berlin döner, now in Bamberg',
+    tr: "Berlin döner lezzeti şimdi Bamberg'de",
   } as LocalizedText,
 
   phoneDisplay: '+49 951 91700610', // shown to users
@@ -148,13 +150,13 @@ export const business = {
      live "open now" badge; "00:00" means midnight (end of that day). */
   hours: [
     {
-      days: { de: 'So - Mi', en: 'Sun - Wed' } as LocalizedText,
+      days: { de: 'So - Mi', en: 'Sun - Wed', tr: 'Paz - Çar' } as LocalizedText,
       time: '10:30 - 23:00',
       weekdays: [0, 1, 2, 3],
       close: '23:00',
     },
     {
-      days: { de: 'Do - Sa', en: 'Thu - Sat' } as LocalizedText,
+      days: { de: 'Do - Sa', en: 'Thu - Sat', tr: 'Per - Cmt' } as LocalizedText,
       time: '10:30 - 00:00',
       weekdays: [4, 5, 6],
       close: '00:00',
@@ -164,16 +166,18 @@ export const business = {
   locations: [
     {
       id: 'luitpold',
-      name: { de: 'Luitpoldstraße', en: 'Luitpoldstraße' } as LocalizedText,
+      name: { de: 'Luitpoldstraße', en: 'Luitpoldstraße', tr: 'Luitpoldstraße' } as LocalizedText,
       address: 'Luitpoldstraße 39',
       city: '96052 Bamberg',
       note: {
         de: 'Hauptfiliale · direkt am Hauptbahnhof / S-Bahn',
         en: 'Main shop · right by the main station / S-Bahn',
+        tr: 'Ana şube · tren garının hemen yanında / S-Bahn',
       } as LocalizedText,
       opened: {
         de: 'Seit Dezember 2023',
         en: 'Open since December 2023',
+        tr: "Aralık 2023'ten beri",
       } as LocalizedText,
       /** "Route anzeigen" button opens this link */
       mapsUrl:
@@ -183,16 +187,18 @@ export const business = {
     },
     {
       id: 'franz-ludwig',
-      name: { de: 'Franz-Ludwig-Straße', en: 'Franz-Ludwig-Straße' } as LocalizedText,
+      name: { de: 'Franz-Ludwig-Straße', en: 'Franz-Ludwig-Straße', tr: 'Franz-Ludwig-Straße' } as LocalizedText,
       address: 'Franz-Ludwig-Straße',
       city: 'Bamberg',
       note: {
         de: 'Neue Filiale · mitten in der Innenstadt',
         en: 'New shop · right in the city centre',
+        tr: 'Yeni şube · şehir merkezinde',
       } as LocalizedText,
       opened: {
         de: 'Neu eröffnet · Januar 2026',
         en: 'Newly opened · January 2026',
+        tr: 'Yeni açıldı · Ocak 2026',
       } as LocalizedText,
       mapsUrl:
         'https://www.google.com/maps/search/?api=1&query=' +
@@ -212,25 +218,25 @@ export type Location = (typeof business.locations)[number]
    matching key in the IMAGES section above.                                  */
 
 export const categories: { id: CategoryId; label: LocalizedText }[] = [
-  { id: 'doener', label: { de: 'Döner & Dürüm', en: 'Döner & Wraps' } },
-  { id: 'teller', label: { de: 'Teller', en: 'Plates' } },
-  { id: 'vegetarisch', label: { de: 'Vegetarisch', en: 'Vegetarian' } },
-  { id: 'snacks', label: { de: 'Snacks & Beilagen', en: 'Snacks & Sides' } },
-  { id: 'getraenke', label: { de: 'Getränke', en: 'Drinks' } },
+  { id: 'doener', label: { de: 'Döner & Dürüm', en: 'Döner & Wraps', tr: 'Döner & Dürüm' } },
+  { id: 'teller', label: { de: 'Teller', en: 'Plates', tr: 'Tabaklar' } },
+  { id: 'vegetarisch', label: { de: 'Vegetarisch', en: 'Vegetarian', tr: 'Vejetaryen' } },
+  { id: 'snacks', label: { de: 'Snacks & Beilagen', en: 'Snacks & Sides', tr: 'Atıştırmalıklar' } },
+  { id: 'getraenke', label: { de: 'Getränke', en: 'Drinks', tr: 'İçecekler' } },
 ]
 
 /** Meat choices offered on customizable items */
 export const meatOptions: Option[] = [
-  { id: 'pute', label: { de: 'Pute', en: 'Turkey' } },
-  { id: 'rind', label: { de: 'Rind', en: 'Beef' } },
-  { id: 'haehnchen', label: { de: 'Hähnchen', en: 'Chicken' } },
+  { id: 'pute', label: { de: 'Pute', en: 'Turkey', tr: 'Hindi' } },
+  { id: 'rind', label: { de: 'Rind', en: 'Beef', tr: 'Dana' } },
+  { id: 'haehnchen', label: { de: 'Hähnchen', en: 'Chicken', tr: 'Tavuk' } },
 ]
 
 /** Sauce choices offered on customizable items */
 export const sauceOptions: Option[] = [
-  { id: 'kraeuter', label: { de: 'Kräuter', en: 'Herb' } },
-  { id: 'knoblauch', label: { de: 'Knoblauch', en: 'Garlic' } },
-  { id: 'scharf', label: { de: 'Scharf', en: 'Spicy' } },
+  { id: 'kraeuter', label: { de: 'Kräuter', en: 'Herb', tr: 'Otlu' } },
+  { id: 'knoblauch', label: { de: 'Knoblauch', en: 'Garlic', tr: 'Sarımsaklı' } },
+  { id: 'scharf', label: { de: 'Scharf', en: 'Spicy', tr: 'Acılı' } },
 ]
 
 export const menu: MenuItem[] = [
@@ -238,36 +244,39 @@ export const menu: MenuItem[] = [
   {
     id: 'doner-kebab',
     category: 'doener',
-    name: { de: 'Döner Kebab', en: 'Döner Kebab' },
+    name: { de: 'Döner Kebab', en: 'Döner Kebab', tr: 'Döner Kebap' },
     desc: {
       de: 'Frisch vom Drehspieß, knuspriges Fladenbrot, knackiger Salat und unsere hausgemachte Soße.',
       en: 'Fresh from the spit, crispy flatbread, crunchy salad and our house-made sauce.',
+      tr: 'Şişten taze, çıtır pide ekmeği, taze salata ve ev yapımı sosumuzla.',
     },
     price: 6.5,
     image: images.donerKebab,
     customizable: true,
-    tag: { de: 'Bestseller', en: 'Bestseller' },
+    tag: { de: 'Bestseller', en: 'Bestseller', tr: 'Çok satan' },
   },
   {
     id: 'durum-doner',
     category: 'doener',
-    name: { de: 'Dürüm Döner', en: 'Dürüm Wrap' },
+    name: { de: 'Dürüm Döner', en: 'Dürüm Wrap', tr: 'Dürüm Döner' },
     desc: {
       de: 'Saftiges Fleisch im dünnen Yufka-Brot gerollt, perfekt für unterwegs.',
       en: 'Juicy meat rolled in thin yufka bread, perfect on the go.',
+      tr: 'İnce yufkaya sarılı sulu et, yolda yemek için birebir.',
     },
     price: 7.5,
     image: images.durumDoner,
     customizable: true,
-    tag: { de: 'Beliebt', en: 'Popular' },
+    tag: { de: 'Beliebt', en: 'Popular', tr: 'Popüler' },
   },
   {
     id: 'doner-box',
     category: 'doener',
-    name: { de: 'Döner Box mit Pommes', en: 'Döner Box with Fries' },
+    name: { de: 'Döner Box mit Pommes', en: 'Döner Box with Fries', tr: 'Patates Kızartmalı Döner Box' },
     desc: {
       de: 'Döner trifft knusprige Pommes, die handliche Box für den großen Hunger.',
       en: 'Döner meets crispy fries, the handy box for a big appetite.',
+      tr: 'Döner ve çıtır patates bir arada, büyük açlıklar için pratik kutu.',
     },
     price: 6.0,
     image: images.donerBox,
@@ -276,16 +285,17 @@ export const menu: MenuItem[] = [
   {
     id: 'big-doner-challenge',
     category: 'doener',
-    name: { de: 'Big Döner Challenge', en: 'Big Döner Challenge' },
+    name: { de: 'Big Döner Challenge', en: 'Big Döner Challenge', tr: 'Big Döner Challenge' },
     desc: {
       de: 'Unser legendärer XXL-Döner mit doppelter Portion Fleisch. Schaffst du ihn allein? Wer ihn leert, kommt an unsere Wand der Helden. ❤️',
       en: 'Our legendary XXL döner with a double portion of meat. Can you finish it solo? Empty the box and you make our Wall of Heroes. ❤️',
+      tr: 'Efsanevi XXL dönerimiz, duble et porsiyonuyla. Tek başına bitirebilir misin? Bitirenler Kahramanlar Duvarımıza giriyor. ❤️',
     },
     price: 15.0,
     image: images.bigDonerChallenge,
     customizable: true,
     featured: true,
-    tag: { de: 'XXL', en: 'XXL' },
+    tag: { de: 'XXL', en: 'XXL', tr: 'XXL' },
   },
 
   /* -------------------------------- Teller ------------------------------- */
@@ -295,10 +305,12 @@ export const menu: MenuItem[] = [
     name: {
       de: 'Döner Teller mit Pommes oder Reis',
       en: 'Döner Plate with Fries or Rice',
+      tr: 'Patates veya Pilavlı Döner Tabağı',
     },
     desc: {
       de: 'Großzügige Portion Dönerfleisch mit Pommes oder Reis, frischem Salat und Soße.',
       en: 'A generous portion of döner meat with fries or rice, fresh salad and sauce.',
+      tr: 'Bol döner eti, yanında patates veya pilav, taze salata ve sos.',
     },
     price: 11.0,
     image: images.donerTeller,
@@ -310,10 +322,12 @@ export const menu: MenuItem[] = [
     name: {
       de: 'Gemischter Salatteller mit Döner',
       en: 'Mixed Salad Plate with Döner',
+      tr: 'Dönerli Karışık Salata Tabağı',
     },
     desc: {
       de: 'Knackiger frischer Salat mit zartem Dönerfleisch und cremigem Dressing.',
       en: 'Crunchy fresh salad with tender döner meat and a creamy dressing.',
+      tr: 'Çıtır taze salata, yumuşacık döner eti ve kremalı sos ile.',
     },
     price: 9.5,
     image: images.salatTeller,
@@ -324,10 +338,11 @@ export const menu: MenuItem[] = [
   {
     id: 'falafel-durum',
     category: 'vegetarisch',
-    name: { de: 'Falafel Dürüm', en: 'Falafel Wrap' },
+    name: { de: 'Falafel Dürüm', en: 'Falafel Wrap', tr: 'Falafel Dürüm' },
     desc: {
       de: 'Hausgemachte Falafel, frischer Salat und Sesam-Soße im Yufka gerollt.',
       en: 'House-made falafel, fresh salad and sesame sauce rolled in yufka.',
+      tr: 'Ev yapımı falafel, taze salata ve susam sosu, yufkaya sarılı.',
     },
     price: 6.5,
     image: images.falafelDurum,
@@ -336,10 +351,11 @@ export const menu: MenuItem[] = [
   {
     id: 'falafel-teller',
     category: 'vegetarisch',
-    name: { de: 'Falafel Teller', en: 'Falafel Plate' },
+    name: { de: 'Falafel Teller', en: 'Falafel Plate', tr: 'Falafel Tabağı' },
     desc: {
       de: 'Goldene Falafel mit cremigem Hummus, buntem Salat und warmem Fladenbrot.',
       en: 'Golden falafel with creamy hummus, colourful salad and warm flatbread.',
+      tr: 'Altın sarısı falafel, kremalı humus, renkli salata ve sıcak pide ile.',
     },
     price: 9.0,
     image: images.falafelTeller,
@@ -350,10 +366,11 @@ export const menu: MenuItem[] = [
   {
     id: 'lahmacun',
     category: 'snacks',
-    name: { de: 'Lahmacun', en: 'Lahmacun' },
+    name: { de: 'Lahmacun', en: 'Lahmacun', tr: 'Lahmacun' },
     desc: {
       de: 'Dünn ausgerollter Teig, würzig belegt. Türkische Pizza, frisch gebacken.',
       en: 'Thin rolled dough, savoury topping. Turkish-style pizza, freshly baked.',
+      tr: 'İncecik hamur, bol malzemeli harç. Taş fırından taze taze.',
     },
     price: 4.5,
     image: images.lahmacun,
@@ -361,10 +378,11 @@ export const menu: MenuItem[] = [
   {
     id: 'lahmacun-doner',
     category: 'snacks',
-    name: { de: 'Lahmacun mit Döner', en: 'Lahmacun with Döner' },
+    name: { de: 'Lahmacun mit Döner', en: 'Lahmacun with Döner', tr: 'Dönerli Lahmacun' },
     desc: {
       de: 'Unser Klassiker mit extra Dönerfleisch, frischem Salat und Soße gerollt.',
       en: 'Our classic rolled with extra döner meat, fresh salad and sauce.',
+      tr: 'Klasiğimiz; ekstra döner eti, taze salata ve sos ile sarılı.',
     },
     price: 8.0,
     image: images.lahmacunDoner,
@@ -373,10 +391,11 @@ export const menu: MenuItem[] = [
   {
     id: 'pommes',
     category: 'snacks',
-    name: { de: 'Pommes', en: 'Fries' },
+    name: { de: 'Pommes', en: 'Fries', tr: 'Patates Kızartması' },
     desc: {
       de: 'Goldgelb, knusprig und frisch frittiert. Mit Ketchup oder Mayo.',
       en: 'Golden, crispy and freshly fried. With ketchup or mayo.',
+      tr: 'Altın sarısı, çıtır çıtır ve taze kızarmış. Ketçap veya mayonezle.',
     },
     price: 3.5,
     image: images.pommes,
@@ -387,10 +406,11 @@ export const menu: MenuItem[] = [
   {
     id: 'ayran',
     category: 'getraenke',
-    name: { de: 'Ayran', en: 'Ayran' },
+    name: { de: 'Ayran', en: 'Ayran', tr: 'Ayran' },
     desc: {
       de: 'Erfrischendes Joghurtgetränk, der perfekte Begleiter zum Döner.',
       en: 'Refreshing yoghurt drink, the perfect partner to your döner.',
+      tr: 'Ferahlatan yoğurt içeceği, dönerin yanına birebir.',
     },
     price: 2.0,
     image: images.ayran,
@@ -399,10 +419,11 @@ export const menu: MenuItem[] = [
   {
     id: 'fritz-kola',
     category: 'getraenke',
-    name: { de: 'Fritz-Kola', en: 'Fritz-Kola' },
+    name: { de: 'Fritz-Kola', en: 'Fritz-Kola', tr: 'Fritz-Kola' },
     desc: {
       de: 'Eiskalt serviert, mit ordentlich Koffein und Kult-Faktor.',
       en: 'Served ice-cold, with plenty of caffeine and cult status.',
+      tr: 'Buz gibi servis edilir, bol kafeinli ve efsane tadında.',
     },
     price: 2.5,
     image: images.fritzKola,
@@ -411,10 +432,11 @@ export const menu: MenuItem[] = [
   {
     id: 'tuerkischer-tee',
     category: 'getraenke',
-    name: { de: 'Türkischer Tee', en: 'Turkish Tea' },
+    name: { de: 'Türkischer Tee', en: 'Turkish Tea', tr: 'Türk Çayı' },
     desc: {
       de: 'Traditionell aufgebrüht und im klassischen kleinen Glas serviert.',
       en: 'Traditionally brewed and served in the classic small glass.',
+      tr: 'Geleneksel demleme, klasik ince belli bardakta servis edilir.',
     },
     price: 1.5,
     image: images.tee,
@@ -439,6 +461,7 @@ export const reviews: {
     text: {
       de: 'Der beste Döner in Bamberg, kein Scherz! Die Kräutersoße ist ein Traum und die Portionen sind riesig. Schmeckt wirklich wie in Berlin. ❤️',
       en: 'The best döner in Bamberg, no joke! The herb sauce is a dream and the portions are huge. Really tastes like Berlin. ❤️',
+      tr: "Bamberg'in en iyi döneri, şaka değil! Otlu sos bir harika, porsiyonlar kocaman. Gerçekten Berlin tadında. ❤️",
     },
   },
   {
@@ -448,6 +471,7 @@ export const reviews: {
     text: {
       de: 'Frisch, schnell und super freundlich. Das Fleisch kommt direkt vom Spieß und ist immer saftig. Mein fester Spot nach der Vorlesung.',
       en: 'Fresh, fast and super friendly. The meat comes straight off the spit and is always juicy. My go-to spot after lectures.',
+      tr: 'Taze, hızlı ve çok güler yüzlü. Et doğrudan şişten geliyor ve hep sulu. Dersten sonra değişmez adresim.',
     },
   },
   {
@@ -457,6 +481,7 @@ export const reviews: {
     text: {
       de: 'Endlich echter Berliner Döner in Bamberg! Faire Preise, top Qualität und das Team ist mega herzlich. Klare Empfehlung.',
       en: 'Finally real Berlin döner in Bamberg! Fair prices, top quality and the team is so warm. Highly recommend.',
+      tr: "Sonunda Bamberg'de gerçek Berlin döneri! Uygun fiyat, süper kalite ve ekip çok samimi. Kesinlikle tavsiye ederim.",
     },
   },
   {
@@ -466,6 +491,7 @@ export const reviews: {
     text: {
       de: 'Die Big Döner Challenge habe ich (knapp) geschafft 😅 Riesige Portion, klasse Geschmack. Hier stimmt einfach alles.',
       en: 'I (barely) finished the Big Döner Challenge 😅 Massive portion, great taste. Everything here is just right.',
+      tr: "Big Döner Challenge'ı (ucu ucuna) bitirdim 😅 Dev porsiyon, harika lezzet. Burada her şey tam yerinde.",
     },
   },
 ]
@@ -547,6 +573,9 @@ const de = {
     secure: 'Sichere Zahlung',
     demoNote: 'Demo, keine echte Zahlung',
     back: 'Zurück',
+    addressLabel: 'Lieferadresse',
+    addressPlaceholder: 'Straße, Hausnr., PLZ',
+    cardDetails: 'Kartendaten',
   },
   success: {
     title: 'Bestellung bestätigt!',
@@ -687,6 +716,9 @@ const en: typeof de = {
     secure: 'Secure payment',
     demoNote: 'Demo, no real payment',
     back: 'Back',
+    addressLabel: 'Delivery address',
+    addressPlaceholder: 'Street, no., postcode',
+    cardDetails: 'Card details',
   },
   success: {
     title: 'Order confirmed!',
@@ -757,16 +789,159 @@ const en: typeof de = {
   },
 }
 
-export const strings: Record<Lang, typeof de> = { de, en }
+const tr: typeof de = {
+  nav: {
+    menu: 'Menü',
+    locations: 'Şubeler',
+    about: 'Hakkımızda',
+    gallery: 'Galeri',
+    order: 'Şimdi sipariş ver',
+    openCart: 'Sepeti aç',
+    langLabel: 'Dil',
+  },
+  hero: {
+    ratingSuffix: "Google'da",
+    ctaOrder: 'Şimdi sipariş ver',
+    ctaMenu: 'Menüye göz at',
+    subline:
+      "Berlin usulü gerçek döner, şişten taze ve sevgiyle hazırlanır. Artık Bamberg'de iki şubede.",
+    openNow: 'Şu an açık',
+    closedNow: 'Şu an kapalı',
+  },
+  highlights: {
+    fresh: { title: 'Şişten taze', sub: 'Her gün taze hazırlanır' },
+    direct: { title: 'Doğrudan sipariş, komisyon yok', sub: 'Lieferando vb. olmadan' },
+    two: { title: "2× Bamberg'de", sub: 'Luitpoldstraße & şehir merkezi' },
+    since: { title: "2023'ten beri", sub: 'Yürekten kurulduk' },
+  },
+  menu: {
+    eyebrow: 'Menümüz',
+    title: 'Taze yapılır, fiyatı uygun',
+    subtitle: 'Her şey taze hazırlanır. Kategorini seç ve başla. Sepete eklemek için „+" simgesine dokun.',
+    all: 'Hepsi',
+    add: 'Ekle',
+    vegetarian: 'Vejetaryen',
+    from: 'başlangıç',
+    challengeCta: 'Meydan okumayı kabul et',
+    popular: 'Popüler',
+  },
+  options: {
+    title: 'Seçimini yap',
+    meat: 'Et',
+    sauce: 'Sos',
+    addToCart: 'Sepete ekle',
+    cancel: 'Vazgeç',
+  },
+  cart: {
+    title: 'Sepetin',
+    empty: 'Sepetin henüz boş.',
+    emptyHint: 'Menüden birkaç lezzet ekle.',
+    subtotal: 'Ara toplam',
+    checkout: 'Ödemeye geç',
+    remove: 'Kaldır',
+    items: 'ürün',
+    continue: 'Alışverişe devam et',
+  },
+  checkout: {
+    title: 'Ödeme',
+    pickup: 'Gel al',
+    delivery: 'Teslimat',
+    pickupAt: 'Şubeden teslim',
+    name: 'İsim',
+    namePlaceholder: 'Ali Yılmaz',
+    phone: 'Telefon',
+    phonePlaceholder: '0151 23456789',
+    location: 'Şube seç',
+    summary: 'Sipariş özeti',
+    total: 'Toplam',
+    pay: 'Kartla öde',
+    paying: 'Ödeme işleniyor …',
+    secure: 'Güvenli ödeme',
+    demoNote: 'Demo, gerçek ödeme yok',
+    back: 'Geri',
+    addressLabel: 'Teslimat adresi',
+    addressPlaceholder: 'Cadde, no, posta kodu',
+    cardDetails: 'Kart bilgileri',
+  },
+  success: {
+    title: 'Sipariş onaylandı!',
+    message: 'Teşekkürler! Siparişin bize ulaştı ve taptaze hazırlanıyor.',
+    orderNo: 'Sipariş numarası',
+    pickupInfo: 'Her şey hazır olunca SMS alacaksın.',
+    demoNote: 'Demo: gerçek bir sipariş oluşturulmadı ve ücret alınmadı.',
+    done: 'Tamam',
+  },
+  about: {
+    eyebrow: 'Hikayemiz',
+    title: "Berlin döner aşkı Bamberg'de",
+    p1: "Bamberger Döner basit bir fikirden doğdu: Berlin sokak dönerinin gerçek, dürüst lezzetini Bamberg'e getirmek. Bol porsiyonlar, taze malzemeler ve gün boyu şişten taze kesilen et.",
+    p2: "Aralık 2023'ten beri Luitpoldstraße'deyiz, tren garının hemen yanında. Tek dükkan kısa sürede kalabalık bir müdavim kitlesine, 2026'da ise şehir merkezinde ikinci bir şubeye dönüştü. Aile işletmesi; bol sevgi, daha da bol sos. ❤️",
+    p3: 'Sözümüz aynı: taze, dürüst ve güler yüzlü. Siparişini doğrudan bizden ver; komisyon yok, aracı yok.',
+    statRating: 'Google puanı',
+    statShops: "Bamberg'de şube",
+    statSince: "Bamberg'in kalbinde",
+  },
+  gallery: {
+    eyebrow: 'Galeri',
+    title: 'İştah açan kareler',
+    subtitle: 'Seni nelerin beklediğine dair küçük bir tadımlık.',
+  },
+  reviews: {
+    eyebrow: 'Yorumlar',
+    title: 'Misafirlerimiz ne diyor',
+    googleBadge: "Google'da",
+    reviewsWord: 'yorum',
+  },
+  loyalty: {
+    eyebrow: 'Sadakat programı',
+    title: 'Damga topla, bedava döner kazan',
+    subtitle: '10 damga topla, 1 döner bedava. Her sipariş seni hedefe yaklaştırır.',
+    progress: 'damga toplandı',
+    reward: 'Bedava döner',
+    cta: 'Dijital damga kartını etkinleştir',
+    almost: 'Bedava dönerine sadece {n} sipariş kaldı!',
+  },
+  locations: {
+    eyebrow: 'Şubeler',
+    title: "Bamberg'de iki adreste yanındayız",
+    call: 'Ara',
+    directions: 'Yol tarifi',
+    hours: 'Çalışma saatleri',
+    mapHint: 'Harita görünümü',
+  },
+  newsletter: {
+    title: 'Haberdar ol',
+    subtitle: 'Yeni kampanyalar, bedava döner çekilişleri ve haberler, doğrudan e-postana.',
+    placeholder: 'E-posta adresin',
+    button: 'Kayıt ol',
+    success: 'Kaydolduğun için teşekkürler! ❤️',
+    successHint: 'Lezzetli haberlerle döneceğiz.',
+  },
+  footer: {
+    tagline: "Şişten taze, Berlin usulü gerçek döner; şimdi Bamberg'de iki şubede.",
+    contact: 'İletişim',
+    hours: 'Çalışma saatleri',
+    locations: 'Şubeler',
+    follow: 'Bizi takip et',
+    rights: 'Tüm hakları saklıdır.',
+    demo: 'Demo web sitesi, yalnızca tanıtım amaçlıdır. Gerçek sipariş veya ödeme yoktur.',
+  },
+  common: {
+    commissionFree: 'Doğrudan bizden sipariş ver, komisyon yok',
+    close: 'Kapat',
+  },
+}
+
+export const strings: Record<Lang, typeof de> = { de, en, tr }
 export type Dict = typeof de
 
 /* ========================================================================== */
 /*  7b. HELPERS (no need to edit)                                             */
 /* ========================================================================== */
 
-/** German-style currency formatting (e.g. "6,50 €"). */
+/** German-style currency formatting (e.g. "6,50 €"); Turkish shares it. */
 export const formatPrice = (value: number, lang: Lang): string =>
-  new Intl.NumberFormat(lang === 'de' ? 'de-DE' : 'en-IE', {
+  new Intl.NumberFormat(lang === 'en' ? 'en-IE' : 'de-DE', {
     style: 'currency',
     currency: 'EUR',
   }).format(value)
@@ -780,6 +955,6 @@ export function getTodayHours(lang: Lang): { label: string; open: boolean } {
   const openFrom = 10 * 60 + 30
   const closeAt = block.close === '00:00' ? 24 * 60 : 23 * 60
   const open = minutes >= openFrom && minutes < closeAt
-  const prefix = lang === 'de' ? 'Heute' : 'Today'
+  const prefix = lang === 'de' ? 'Heute' : lang === 'tr' ? 'Bugün' : 'Today'
   return { label: `${prefix} ${block.time}`, open }
 }
