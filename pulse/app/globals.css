@@ -1,0 +1,175 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* ---------------------------------------------------------------------------
+   PULSE design system — dark-first, editorial, one volt accent.
+   All tokens live here; components consume them via Tailwind utilities.
+--------------------------------------------------------------------------- */
+
+@theme {
+  /* Surfaces */
+  --color-bg: #0a0b0e;
+  --color-surface: #12141a;
+  --color-surface-2: #191c24;
+  --color-surface-3: #21252f;
+  --color-line: #232733;
+  --color-line-strong: #303543;
+
+  /* Text */
+  --color-hi: #f2f3f5;
+  --color-mid: #9aa1ad;
+  --color-low: #5d6470;
+
+  /* Accent — volt */
+  --color-volt: #c8f13f;
+  --color-volt-bright: #daff55;
+  --color-volt-dim: #94b32c;
+  --color-volt-ink: #0c0e07;
+
+  /* Semantic */
+  --color-good: #46d6a5;
+  --color-warn: #ffb454;
+  --color-bad: #ff6265;
+  --color-info: #7aa7ff;
+
+  /* Type */
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: var(--font-disp), var(--font-body), ui-sans-serif, system-ui,
+    sans-serif;
+
+  /* Radii */
+  --radius-xs: 0.5rem;
+  --radius-sm: 0.75rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.75rem;
+
+  /* Shadows */
+  --shadow-card: 0 1px 0 0 rgb(255 255 255 / 0.03) inset,
+    0 12px 32px -16px rgb(0 0 0 / 0.55);
+  --shadow-pop: 0 24px 64px -24px rgb(0 0 0 / 0.7);
+  --shadow-volt: 0 0 0 1px rgb(200 241 63 / 0.35),
+    0 8px 32px -8px rgb(200 241 63 / 0.25);
+
+  /* Motion */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+
+  @keyframes pulse-dot {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.55;
+      transform: scale(0.82);
+    }
+  }
+  @keyframes shimmer {
+    0% {
+      background-position: -400px 0;
+    }
+    100% {
+      background-position: 400px 0;
+    }
+  }
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-hi);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-volt);
+  color: var(--color-volt-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-volt);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+
+/* Numbers align in ledgers/tables */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Display type — tight, confident headings */
+.display {
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+  font-weight: 700;
+}
+
+/* Subtle film-grain overlay for hero/cover imagery */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Leaflet dark treatment */
+.leaflet-container {
+  background: var(--color-bg);
+  font-family: var(--font-sans);
+}
+.leaflet-tile {
+  filter: grayscale(1) invert(1) brightness(0.72) contrast(1.15)
+    hue-rotate(180deg) saturate(0.35);
+}
+.leaflet-control-attribution {
+  background: rgb(10 11 14 / 0.8) !important;
+  color: var(--color-low) !important;
+  font-size: 10px;
+}
+.leaflet-control-attribution a {
+  color: var(--color-mid) !important;
+}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: var(--color-surface-2);
+  color: var(--color-hi);
+  box-shadow: var(--shadow-pop);
+}
+.leaflet-popup-content {
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
