@@ -77,6 +77,21 @@
       background-position: 400px 0;
     }
   }
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+.marquee {
+  animation: marquee 28s linear infinite;
+}
+.marquee-slow {
+  animation: marquee 36s linear infinite reverse;
 }
 
 html {
