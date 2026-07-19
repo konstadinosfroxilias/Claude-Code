@@ -30,8 +30,12 @@ export function useLiveQuery<T>(
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<unknown>(undefined);
   const fetcherRef = useRef(fetcher);
-  fetcherRef.current = fetcher;
   const seqRef = useRef(0);
+
+  // Keep the latest fetcher without re-subscribing (updated post-render).
+  useEffect(() => {
+    fetcherRef.current = fetcher;
+  });
 
   const run = useCallback(async (initial: boolean) => {
     const seq = ++seqRef.current;

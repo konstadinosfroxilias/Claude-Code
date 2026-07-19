@@ -6,7 +6,6 @@
  */
 import type {
   AppNotification,
-  Booking,
   BookingEligibility,
   BookingView,
   CancellationQuote,

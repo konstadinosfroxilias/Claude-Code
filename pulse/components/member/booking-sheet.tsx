@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { animate, motion } from "framer-motion";
 import { AlertTriangle, Check, ShieldAlert, Zap } from "lucide-react";
@@ -51,7 +51,8 @@ export function BookingSheet({
   );
   const [busy, setBusy] = useState(false);
   const [booked, setBooked] = useState(false);
-  const balanceAtBooking = useRef(balance);
+  // Balance snapshot taken at confirm time — drives the deduction animation.
+  const [roll, setRoll] = useState<{ from: number; to: number } | null>(null);
 
   const sessionId = view?.session.id;
   useEffect(() => {
@@ -76,9 +77,10 @@ export function BookingSheet({
   const confirm = async () => {
     if (!view || !eligibility?.ok) return;
     setBusy(true);
-    balanceAtBooking.current = balance;
+    const from = balance;
     try {
       await getServices().booking.reserve(userId, view.session.id);
+      setRoll({ from, to: from - view.creditCost });
       setBooked(true);
     } catch (e) {
       const code = e instanceof ServiceError ? e.code : "unknown";
@@ -135,10 +137,7 @@ export function BookingSheet({
                 </span>
                 <span className="display flex items-center gap-1.5 text-xl text-volt">
                   <Zap className="size-4 fill-current" />
-                  <NumberRoll
-                    from={balanceAtBooking.current}
-                    to={balanceAtBooking.current - creditCost}
-                  />
+                  {roll && <NumberRoll from={roll.from} to={roll.to} />}
                 </span>
               </div>
             </div>

@@ -23,7 +23,7 @@ import type {
   User,
 } from "@/lib/types";
 import { computeCreditCost, isPeakHour } from "@/lib/rules/pricing";
-import { addDays, startOfDay, uid } from "@/lib/utils";
+import { addDays, startOfDay } from "@/lib/utils";
 import { createRng, type Rng } from "./random";
 
 export interface DBState {
@@ -729,12 +729,21 @@ export function buildSeed(now: Date = new Date()): DBState {
   for (const studio of studios) {
     const slots = hourSlotsFor(studio.categoryIds[0], rng);
     const studioClasses = classTypes.filter((c) => c.studioId === studio.id);
+    // Sundays: only "recovery" categories (yoga/pilates/EMS) and the demo
+    // studio open, on a reduced schedule — keeps every demo day alive.
+    const opensSunday =
+      studio.id === DEMO_STUDIO_ID ||
+      studio.categoryIds.some((c) =>
+        ["yoga", "pilates", "ems"].includes(c),
+      );
     for (let d = -DAYS_BACK; d <= DAYS_FWD; d++) {
       const day = addDays(today, d);
       const dow = day.getDay();
-      if (dow === 0) continue; // closed Sundays
+      if (dow === 0 && !opensSunday) continue;
       const daySlots =
-        dow === 6 ? slots.filter((_, idx) => idx % 2 === 0) : slots;
+        dow === 6 || dow === 0
+          ? slots.filter((_, idx) => idx % 2 === 0)
+          : slots;
       for (const hour of daySlots) {
         if (rng.chance(0.15)) continue; // realistic gaps
         const ct = rng.pick(studioClasses);
@@ -802,8 +811,15 @@ export function buildSeed(now: Date = new Date()): DBState {
     const who = rng.shuffle(memberPool).slice(0, count);
     for (const userId of who) {
       const cost = creditCostOf(s);
+      // Bookings are always created in the past — for future sessions clamp
+      // the creation time to before "now".
       const createdAt = iso(
-        new Date(start.getTime() - rng.int(6, 96) * 3_600_000),
+        new Date(
+          Math.min(
+            start.getTime() - rng.int(6, 96) * 3_600_000,
+            now.getTime() - rng.int(1, 72) * 3_600_000,
+          ),
+        ),
       );
       if (isPast) {
         const roll = rng.next();

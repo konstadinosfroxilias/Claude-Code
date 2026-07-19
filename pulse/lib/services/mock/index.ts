@@ -21,18 +21,15 @@ import type {
   MemberStats,
   PayoutEntry,
   PayoutStatement,
-  Plan,
   Role,
   RosterEntry,
   Session,
-  SessionCreateInput,
   SessionView,
   Studio,
   StudioAnalytics,
   StudioFilter,
   Subscription,
   TimeSeriesPoint,
-  User,
   VisitCapStatus,
 } from "@/lib/types";
 import { addDays, monthKey, startOfDay, uid } from "@/lib/utils";
@@ -724,7 +721,12 @@ const payouts: Services["payouts"] = {
           sessionStartsAt: session?.startsAt ?? entry.createdAt,
         };
       })
-      .sort((a, b) => b.sessionStartsAt.localeCompare(a.sessionStartsAt));
+      // Most recent activity first — a fresh check-in bubbles straight to the top.
+      .sort((a, b) =>
+        (b.entry.confirmedAt ?? b.entry.createdAt).localeCompare(
+          a.entry.confirmedAt ?? a.entry.createdAt,
+        ),
+      );
     return opts?.limit ? views.slice(0, opts.limit) : views;
   },
   async listStatements(studioId) {

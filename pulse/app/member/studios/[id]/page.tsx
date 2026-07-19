@@ -17,7 +17,7 @@ import { useCurrentUser } from "@/lib/hooks/use-session";
 import { useLiveQuery } from "@/lib/hooks/use-live-query";
 import { getServices } from "@/lib/services";
 import type { SessionView } from "@/lib/types";
-import { addDays, cn, formatDay, formatEUR, isSameDay, startOfDay } from "@/lib/utils";
+import { addDays, cn, formatDay, formatEUR, startOfDay } from "@/lib/utils";
 import { CoverArt } from "@/components/shared/cover-art";
 import { MapView } from "@/components/shared/map-view";
 import { Avatar } from "@/components/shared/avatar";
