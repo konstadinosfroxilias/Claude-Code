@@ -703,19 +703,29 @@ const payouts: Services["payouts"] = {
   },
   async listEntries(studioId, opts) {
     await simulate(READ_MS);
-    return db
-      .get()
-      .payoutEntries.filter(
+    const state = db.get();
+    const views = state.payoutEntries
+      .filter(
         (p) =>
           p.studioId === studioId &&
           (!opts?.month ||
             monthKey(p.confirmedAt ?? p.createdAt) === opts.month),
       )
-      .sort((a, b) =>
-        (b.confirmedAt ?? b.createdAt).localeCompare(
-          a.confirmedAt ?? a.createdAt,
-        ),
-      );
+      .map((entry) => {
+        const member = state.users.find((u) => u.id === entry.userId);
+        const session = state.sessions.find((s) => s.id === entry.sessionId);
+        const ct = state.classTypes.find(
+          (c) => c.id === session?.classTypeId,
+        );
+        return {
+          entry,
+          memberName: member?.name ?? "Member",
+          className: ct?.name ?? "",
+          sessionStartsAt: session?.startsAt ?? entry.createdAt,
+        };
+      })
+      .sort((a, b) => b.sessionStartsAt.localeCompare(a.sessionStartsAt));
+    return opts?.limit ? views.slice(0, opts.limit) : views;
   },
   async listStatements(studioId) {
     await simulate(READ_MS);

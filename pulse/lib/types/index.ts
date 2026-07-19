@@ -324,6 +324,14 @@ export interface PayoutStatement {
   entries: PayoutEntry[];
 }
 
+/** Payout accrual enriched for the transparent per-attendance breakdown. */
+export interface PayoutEntryView {
+  entry: PayoutEntry;
+  memberName: string;
+  className: string;
+  sessionStartsAt: string;
+}
+
 export interface Invoice {
   id: string;
   userId: string;

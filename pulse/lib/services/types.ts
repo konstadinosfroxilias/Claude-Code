@@ -17,7 +17,7 @@ import type {
   Invoice,
   LanguageCode,
   MemberStats,
-  PayoutEntry,
+  PayoutEntryView,
   PayoutStatement,
   PayoutSummary,
   Plan,
@@ -95,7 +95,10 @@ export interface SubscriptionService {
 
 export interface PayoutService {
   getSummary(studioId: string): Promise<PayoutSummary>;
-  listEntries(studioId: string, opts?: { month?: string }): Promise<PayoutEntry[]>;
+  listEntries(
+    studioId: string,
+    opts?: { month?: string; limit?: number },
+  ): Promise<PayoutEntryView[]>;
   listStatements(studioId: string): Promise<PayoutStatement[]>;
 }
 
