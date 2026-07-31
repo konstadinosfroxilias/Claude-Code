@@ -477,6 +477,9 @@ const STUDIO_SPECS: StudioSpec[] = [
   },
 ];
 
+/** Every studio id in the catalog — used to pre-render pages for static export. */
+export const STUDIO_IDS: string[] = STUDIO_SPECS.map((s) => s.id);
+
 /** Class-type templates per category: [name, duration, level]. */
 const CLASS_TEMPLATES: Record<
   string,

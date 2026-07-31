@@ -1,0 +1,13 @@
+# Netlify config for PULSE.
+#
+# The app is a static export (see next.config.ts → output: "export"), so this
+# just builds and serves the `out/` folder — no Next.js runtime or functions.
+# Works whether you connect the Git repo or drag-and-drop the `out/` folder.
+
+[build]
+  base = "pulse"
+  command = "npm run build"
+  publish = "out"
+
+[build.environment]
+  NEXT_TELEMETRY_DISABLED = "1"
