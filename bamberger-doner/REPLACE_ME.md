@@ -55,7 +55,16 @@ For **each** dish:
 - [ ] `tag.de` / `tag.en` / `tag.tr` — optional ribbon (e.g. "Bestseller")
 
 Add or remove dishes by adding/removing entries in the `menu` array.
-Meat/sauce choices live in `meatOptions` / `sauceOptions`.
+
+Product-page options (shown when a customer taps a food item):
+- [ ] `meatOptions` / `sauceOptions` — the meat & sauce choices
+- [ ] `ingredientOptions` — salad ingredients included by default that the
+      customer can leave out (döner/wrap/plate items)
+- [ ] `extraOptions` — paid extras the customer can add (each has a `price` —
+      ⚠️ estimate, confirm with the owner; `meatOnly: true` hides it on
+      vegetarian dishes)
+
+Drinks (category `getraenke`) are added straight to the cart with no options.
 
 ### 5. Images (section `images`)
 Currently royalty-free stock stand-ins. To use real photos:

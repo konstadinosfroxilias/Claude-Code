@@ -6,7 +6,7 @@ import { useLang } from '../context/LanguageContext'
 import { useCart, type CartOptions } from '../context/CartContext'
 import MenuItemCard from './MenuItemCard'
 import BigDonerCard from './BigDonerCard'
-import OptionModal from './OptionModal'
+import ProductDetail from './ProductDetail'
 import Blobs from './Blobs'
 
 type Filter = 'all' | CategoryId
@@ -15,7 +15,7 @@ export default function Menu() {
   const { t, pick } = useLang()
   const { add, locationId, setLocationId } = useCart()
   const [filter, setFilter] = useState<Filter>('all')
-  const [optionItem, setOptionItem] = useState<MenuItem | null>(null)
+  const [detailItem, setDetailItem] = useState<MenuItem | null>(null)
 
   const featured = useMemo(() => menu.find((m) => m.featured), [])
 
@@ -29,17 +29,22 @@ export default function Menu() {
 
   const showFeatured = featured && (filter === 'all' || filter === featured.category)
 
-  const handleAdd = (item: MenuItem) => {
-    if (item.customizable) {
-      setOptionItem(item)
-    } else {
+  // Food → open the product page. Drinks → straight into the cart (no options).
+  const handleSelect = (item: MenuItem) => {
+    if (item.category === 'getraenke') {
       add(item)
+    } else {
+      setDetailItem(item)
     }
   }
 
-  const handleConfirmOptions = (options: CartOptions) => {
-    if (optionItem) add(optionItem, options)
-    setOptionItem(null)
+  const handleAddFromDetail = (
+    item: MenuItem,
+    options: CartOptions,
+    qty: number,
+    unitPrice: number,
+  ) => {
+    add(item, options, qty, unitPrice)
   }
 
   const tabs: { id: Filter; label: string }[] = [
@@ -123,19 +128,19 @@ export default function Menu() {
               exit={{ opacity: 0 }}
               className="mt-8"
             >
-              <BigDonerCard item={featured} onAdd={handleAdd} />
+              <BigDonerCard item={featured} onAdd={handleSelect} />
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* grid */}
+        {/* grid — 2 columns on phones (smaller pictures), more on larger screens */}
         <motion.div
           layout
-          className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3"
+          className="mt-8 grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3"
         >
           <AnimatePresence mode="popLayout">
             {visibleItems.map((item) => (
-              <MenuItemCard key={item.id} item={item} onAdd={handleAdd} />
+              <MenuItemCard key={item.id} item={item} onSelect={handleSelect} />
             ))}
           </AnimatePresence>
         </motion.div>
@@ -149,8 +154,12 @@ export default function Menu() {
         </p>
       </div>
 
-      {/* meat + sauce modal */}
-      <OptionModal item={optionItem} onClose={() => setOptionItem(null)} onConfirm={handleConfirmOptions} />
+      {/* full product page (food only) */}
+      <ProductDetail
+        item={detailItem}
+        onClose={() => setDetailItem(null)}
+        onAdd={handleAddFromDetail}
+      />
     </section>
   )
 }

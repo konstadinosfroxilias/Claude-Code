@@ -19,6 +19,8 @@ import {
   formatPrice,
   meatOptions,
   sauceOptions,
+  ingredientOptions,
+  extraOptions,
   business,
   type Lang,
   type LocalizedText,
@@ -265,7 +267,16 @@ function CartStep({
         {lines.map((line) => {
           const meat = optionLabel(meatOptions, line.options?.meat, lang)
           const sauce = optionLabel(sauceOptions, line.options?.sauce, lang)
-          const opts = [meat, sauce].filter(Boolean).join(' · ')
+          const removedLabels = (line.options?.removed ?? [])
+            .map((id) => optionLabel(ingredientOptions, id, lang))
+            .filter(Boolean)
+          const extraLabels = (line.options?.extras ?? [])
+            .map((id) => optionLabel(extraOptions, id, lang))
+            .filter(Boolean)
+          const parts = [meat, sauce].filter(Boolean) as string[]
+          if (removedLabels.length) parts.push(`${t.product.without} ${removedLabels.join(', ')}`)
+          if (extraLabels.length) parts.push(`+ ${extraLabels.join(', ')}`)
+          const opts = parts.join(' · ')
           return (
             <motion.li
               key={line.lineId}
@@ -293,7 +304,7 @@ function CartStep({
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
-                {opts && <p className="mt-0.5 truncate text-xs text-charcoal/50 dark:text-cream/50">{opts}</p>}
+                {opts && <p className="mt-0.5 line-clamp-2 text-xs text-charcoal/50 dark:text-cream/50">{opts}</p>}
                 <div className="mt-auto flex items-center justify-between pt-2">
                   <div className="inline-flex items-center rounded-full bg-cream-deep dark:bg-white/5">
                     <button

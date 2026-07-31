@@ -239,6 +239,26 @@ export const sauceOptions: Option[] = [
   { id: 'scharf', label: { de: 'Scharf', en: 'Spicy', tr: 'Acılı' } },
 ]
 
+/** Salad ingredients included by default — customers can REMOVE these on the
+ *  product page (döner/wrap/plate items only). */
+export const ingredientOptions: Option[] = [
+  { id: 'salat', label: { de: 'Salat', en: 'Salad', tr: 'Salata' } },
+  { id: 'zwiebeln', label: { de: 'Zwiebeln', en: 'Onions', tr: 'Soğan' } },
+  { id: 'tomaten', label: { de: 'Tomaten', en: 'Tomato', tr: 'Domates' } },
+  { id: 'rotkohl', label: { de: 'Rotkohl', en: 'Red cabbage', tr: 'Kırmızı lahana' } },
+  { id: 'gurke', label: { de: 'Gurke', en: 'Cucumber', tr: 'Salatalık' } },
+]
+
+/** Optional paid extras customers can ADD on the product page.
+ *  ⚠️ prices are estimates — confirm with the owner. `meatOnly` extras are
+ *  hidden on vegetarian items. */
+export const extraOptions: { id: string; label: LocalizedText; price: number; meatOnly?: boolean }[] = [
+  { id: 'extra-fleisch', label: { de: 'Extra Fleisch', en: 'Extra meat', tr: 'Ekstra et' }, price: 2.0, meatOnly: true },
+  { id: 'extra-kaese', label: { de: 'Extra Käse', en: 'Extra cheese', tr: 'Ekstra peynir' }, price: 1.0 },
+  { id: 'extra-sosse', label: { de: 'Extra Soße', en: 'Extra sauce', tr: 'Ekstra sos' }, price: 0.5 },
+  { id: 'jalapenos', label: { de: 'Jalapeños', en: 'Jalapeños', tr: 'Jalapeño' }, price: 0.5 },
+]
+
 export const menu: MenuItem[] = [
   /* ---------------------------- Döner & Dürüm ---------------------------- */
   {
@@ -546,6 +566,15 @@ const de = {
     addToCart: 'In den Warenkorb',
     cancel: 'Abbrechen',
   },
+  product: {
+    ingredients: 'Zutaten',
+    ingredientsHint: 'Tippe, um etwas wegzulassen',
+    extras: 'Extras',
+    extrasHint: 'Nach Wunsch dazu',
+    quantity: 'Menge',
+    without: 'ohne',
+    add: 'In den Warenkorb',
+  },
   cart: {
     title: 'Dein Warenkorb',
     empty: 'Dein Warenkorb ist noch leer.',
@@ -689,6 +718,15 @@ const en: typeof de = {
     addToCart: 'Add to cart',
     cancel: 'Cancel',
   },
+  product: {
+    ingredients: 'Ingredients',
+    ingredientsHint: 'Tap to leave something out',
+    extras: 'Extras',
+    extrasHint: 'Add if you like',
+    quantity: 'Quantity',
+    without: 'no',
+    add: 'Add to cart',
+  },
   cart: {
     title: 'Your cart',
     empty: 'Your cart is still empty.',
@@ -831,6 +869,15 @@ const tr: typeof de = {
     sauce: 'Sos',
     addToCart: 'Sepete ekle',
     cancel: 'Vazgeç',
+  },
+  product: {
+    ingredients: 'Malzemeler',
+    ingredientsHint: 'Çıkarmak için dokun',
+    extras: 'Ekstralar',
+    extrasHint: 'İstersen ekle',
+    quantity: 'Adet',
+    without: 'olmadan',
+    add: 'Sepete ekle',
   },
   cart: {
     title: 'Sepetin',

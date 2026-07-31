@@ -11,6 +11,8 @@ import { business, type LocalizedText, type MenuItem } from '../data/content'
 export interface CartOptions {
   meat?: string // option id
   sauce?: string // option id
+  removed?: string[] // ingredient ids the customer left out
+  extras?: string[] // extra ids the customer added
 }
 
 export interface CartLine {
@@ -33,7 +35,7 @@ interface CartContextValue {
   closeCart: () => void
   locationId: string
   setLocationId: (id: string) => void
-  add: (item: MenuItem, options?: CartOptions, qty?: number) => void
+  add: (item: MenuItem, options?: CartOptions, qty?: number, unitPrice?: number) => void
   setQty: (lineId: string, qty: number) => void
   remove: (lineId: string) => void
   clear: () => void
@@ -42,7 +44,13 @@ interface CartContextValue {
 const CartContext = createContext<CartContextValue | null>(null)
 
 const lineKey = (itemId: string, options?: CartOptions) =>
-  [itemId, options?.meat ?? '', options?.sauce ?? ''].join('::')
+  [
+    itemId,
+    options?.meat ?? '',
+    options?.sauce ?? '',
+    [...(options?.removed ?? [])].sort().join(','),
+    [...(options?.extras ?? [])].sort().join(','),
+  ].join('::')
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>([])
@@ -50,30 +58,33 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [pulse, setPulse] = useState(0)
   const [locationId, setLocationId] = useState<string>(business.locations[0].id)
 
-  const add = useCallback((item: MenuItem, options?: CartOptions, qty = 1) => {
-    const lineId = lineKey(item.id, options)
-    setLines((prev) => {
-      const existing = prev.find((l) => l.lineId === lineId)
-      if (existing) {
-        return prev.map((l) =>
-          l.lineId === lineId ? { ...l, qty: l.qty + qty } : l,
-        )
-      }
-      return [
-        ...prev,
-        {
-          lineId,
-          itemId: item.id,
-          name: item.name,
-          price: item.price,
-          image: item.image,
-          qty,
-          options,
-        },
-      ]
-    })
-    setPulse((p) => p + 1)
-  }, [])
+  const add = useCallback(
+    (item: MenuItem, options?: CartOptions, qty = 1, unitPrice?: number) => {
+      const lineId = lineKey(item.id, options)
+      setLines((prev) => {
+        const existing = prev.find((l) => l.lineId === lineId)
+        if (existing) {
+          return prev.map((l) =>
+            l.lineId === lineId ? { ...l, qty: l.qty + qty } : l,
+          )
+        }
+        return [
+          ...prev,
+          {
+            lineId,
+            itemId: item.id,
+            name: item.name,
+            price: unitPrice ?? item.price, // includes any paid extras
+            image: item.image,
+            qty,
+            options,
+          },
+        ]
+      })
+      setPulse((p) => p + 1)
+    },
+    [],
+  )
 
   const setQty = useCallback((lineId: string, qty: number) => {
     setLines((prev) =>
