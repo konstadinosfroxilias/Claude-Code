@@ -4,13 +4,16 @@ import App from './App.tsx'
 import './index.css'
 import { LanguageProvider } from './context/LanguageContext.tsx'
 import { CartProvider } from './context/CartContext.tsx'
+import { ThemeProvider } from './context/ThemeContext.tsx'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <LanguageProvider>
-      <CartProvider>
-        <App />
-      </CartProvider>
-    </LanguageProvider>
+    <ThemeProvider>
+      <LanguageProvider>
+        <CartProvider>
+          <App />
+        </CartProvider>
+      </LanguageProvider>
+    </ThemeProvider>
   </React.StrictMode>,
 )

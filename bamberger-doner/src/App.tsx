@@ -12,6 +12,7 @@ import Newsletter from './components/Newsletter'
 import Footer from './components/Footer'
 import CartDrawer from './components/CartDrawer'
 import ScrollProgress from './components/ScrollProgress'
+import MobileOrderBar from './components/MobileOrderBar'
 
 export default function App() {
   return (
@@ -42,6 +43,9 @@ export default function App() {
         <Newsletter />
       </main>
       <Footer />
+
+      {/* Sticky mobile "order" bar (phones only, appears when cart has items) */}
+      <MobileOrderBar />
 
       {/* Global order overlay (cart → checkout → success) */}
       <CartDrawer />

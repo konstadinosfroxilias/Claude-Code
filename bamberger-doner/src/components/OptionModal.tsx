@@ -60,7 +60,7 @@ export default function OptionModal({ item, onClose, onConfirm }: OptionModalPro
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0.6 }}
             transition={{ type: 'spring', damping: 30, stiffness: 320 }}
-            className="relative z-10 w-full max-w-md overflow-hidden rounded-t-4xl bg-cream shadow-card sm:rounded-4xl"
+            className="relative z-10 w-full max-w-md overflow-hidden rounded-t-4xl bg-cream shadow-card dark:bg-charcoal sm:rounded-4xl"
           >
             {/* header image */}
             <div className="relative h-36 w-full sm:h-40">
@@ -81,7 +81,7 @@ export default function OptionModal({ item, onClose, onConfirm }: OptionModalPro
             </div>
 
             <div className="max-h-[55vh] overflow-y-auto p-5">
-              <p className="text-sm text-charcoal/70">{pick(item.desc)}</p>
+              <p className="text-sm text-charcoal/70 dark:text-cream/70">{pick(item.desc)}</p>
 
               {/* meat */}
               <OptionGroup
@@ -101,7 +101,7 @@ export default function OptionModal({ item, onClose, onConfirm }: OptionModalPro
             </div>
 
             {/* footer */}
-            <div className="flex items-center gap-3 border-t border-black/5 bg-white p-4">
+            <div className="flex items-center gap-3 border-t border-black/5 bg-white p-4 dark:border-white/10 dark:bg-charcoal-soft">
               <button onClick={onClose} className="btn-ghost flex-1">
                 {t.options.cancel}
               </button>
@@ -133,7 +133,7 @@ function OptionGroup({
 }) {
   return (
     <div className="mt-5">
-      <div className="mb-2 font-heading text-xs font-bold uppercase tracking-[0.18em] text-charcoal/60">
+      <div className="mb-2 font-heading text-xs font-bold uppercase tracking-[0.18em] text-charcoal/60 dark:text-cream/60">
         {label}
       </div>
       <div className="grid grid-cols-3 gap-2">
@@ -147,7 +147,7 @@ function OptionGroup({
               className={`relative flex items-center justify-center gap-1 rounded-2xl border px-2 py-2.5 text-sm font-semibold transition-all ${
                 active
                   ? 'border-doner-red bg-doner-red text-white shadow-soft'
-                  : 'border-black/10 bg-white text-charcoal hover:border-doner-red/40'
+                  : 'border-black/10 bg-white text-charcoal hover:border-doner-red/40 dark:border-white/10 dark:bg-charcoal-soft dark:text-cream dark:hover:border-doner-red/60'
               }`}
             >
               {active && <Check className="h-4 w-4" aria-hidden />}

@@ -61,10 +61,10 @@ function LocationCard({ loc, i }: { loc: Location; i: number }) {
       <div className="p-5 sm:p-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
           <div className="min-w-0">
-            <h3 className="font-display text-2xl uppercase leading-tight text-charcoal">
+            <h3 className="font-display text-2xl uppercase leading-tight text-charcoal dark:text-cream">
               {pick(loc.name)}
             </h3>
-            <p className="mt-1 text-sm text-charcoal/60">{pick(loc.note)}</p>
+            <p className="mt-1 text-sm text-charcoal/60 dark:text-cream/60">{pick(loc.note)}</p>
           </div>
           <span className="badge shrink-0 self-start bg-amber-brand/15 text-amber-brand-dark">
             {pick(loc.opened)}
@@ -74,7 +74,7 @@ function LocationCard({ loc, i }: { loc: Location; i: number }) {
         <div className="mt-4 space-y-2.5 text-sm">
           <div className="flex items-start gap-2.5">
             <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-doner-red" aria-hidden />
-            <span className="text-charcoal/80">
+            <span className="text-charcoal/80 dark:text-cream/80">
               {loc.address}
               <br />
               {loc.city}
@@ -82,17 +82,17 @@ function LocationCard({ loc, i }: { loc: Location; i: number }) {
           </div>
           <div className="flex items-start gap-2.5">
             <Clock className="mt-0.5 h-4 w-4 shrink-0 text-doner-red" aria-hidden />
-            <div className="text-charcoal/80">
-              <div className="mb-0.5 font-semibold text-charcoal">{t.locations.hours}</div>
+            <div className="text-charcoal/80 dark:text-cream/80">
+              <div className="mb-0.5 font-semibold text-charcoal dark:text-cream">{t.locations.hours}</div>
               {business.hours.map((h) => (
                 <div key={h.time} className="flex gap-2">
-                  <span className="w-16 text-charcoal/60">{pick(h.days)}</span>
+                  <span className="w-16 text-charcoal/60 dark:text-cream/60">{pick(h.days)}</span>
                   <span>{h.time}</span>
                 </div>
               ))}
             </div>
           </div>
-          <a href={business.phoneHref} className="flex items-center gap-2.5 text-charcoal/80 hover:text-doner-red">
+          <a href={business.phoneHref} className="flex items-center gap-2.5 text-charcoal/80 hover:text-doner-red dark:text-cream/80">
             <Phone className="h-4 w-4 shrink-0 text-doner-red" aria-hidden />
             {business.phoneDisplay}
           </a>
@@ -121,7 +121,7 @@ function LocationCard({ loc, i }: { loc: Location; i: number }) {
 export default function Locations() {
   const { t } = useLang()
   return (
-    <section id="standorte" className="scroll-mt-20 bg-cream py-16 sm:py-24">
+    <section id="standorte" className="scroll-mt-20 bg-cream py-16 dark:bg-charcoal sm:py-24">
       <div className="container-px">
         <div className="max-w-2xl">
           <span className="eyebrow">{t.locations.eyebrow}</span>

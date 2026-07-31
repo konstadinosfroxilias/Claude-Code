@@ -19,17 +19,17 @@ export default function About() {
   ]
 
   return (
-    <section id="ueber-uns" className="grain relative scroll-mt-20 overflow-hidden bg-cream-deep py-16 sm:py-24">
+    <section id="ueber-uns" className="grain relative scroll-mt-20 overflow-hidden bg-cream-deep py-16 dark:bg-charcoal sm:py-24">
       <Blobs />
       <div className="container-px relative grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
         {/* text */}
         <div>
           <span className="eyebrow">{t.about.eyebrow}</span>
           <h2 className="section-title mt-3 text-balance">{t.about.title}</h2>
-          <div className="mt-5 space-y-4 text-pretty text-charcoal/75">
+          <div className="mt-5 space-y-4 text-pretty text-charcoal/75 dark:text-cream/75">
             <p>{t.about.p1}</p>
             <p>{t.about.p2}</p>
-            <p className="font-medium text-charcoal">{t.about.p3}</p>
+            <p className="font-medium text-charcoal dark:text-cream">{t.about.p3}</p>
           </div>
 
           {/* stats */}
@@ -47,8 +47,8 @@ export default function About() {
                   className="card p-4 text-center"
                 >
                   <Icon className="mx-auto h-5 w-5 text-doner-red" aria-hidden />
-                  <div className="mt-1.5 font-display text-2xl text-charcoal sm:text-3xl">{s.node}</div>
-                  <div className="mt-0.5 text-xs leading-tight text-charcoal/55">{s.label}</div>
+                  <div className="mt-1.5 font-display text-2xl text-charcoal dark:text-cream sm:text-3xl">{s.node}</div>
+                  <div className="mt-0.5 text-xs leading-tight text-charcoal/55 dark:text-cream/55">{s.label}</div>
                 </motion.div>
               )
             })}

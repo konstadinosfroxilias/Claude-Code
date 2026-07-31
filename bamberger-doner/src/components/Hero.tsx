@@ -5,6 +5,7 @@ import { business, getTodayHours, images } from '../data/content'
 import SmartImage from './SmartImage'
 import Stamp from './Stamp'
 import SkylineDivider from './SkylineDivider'
+import FloatingHearts from './FloatingHearts'
 
 const container = {
   hidden: {},
@@ -52,6 +53,9 @@ export default function Hero() {
           style={{ animationDelay: '4s' }}
         />
       </div>
+
+      {/* gentle floating hearts */}
+      <FloatingHearts />
 
       <div className="container-px relative flex min-h-[92svh] flex-col justify-center pb-28 pt-28 sm:min-h-[90vh]">
         <div className="max-w-2xl">

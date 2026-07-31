@@ -16,7 +16,9 @@
 
   body {
     @apply bg-cream text-charcoal font-sans antialiased;
+    @apply dark:bg-charcoal dark:text-cream;
     overflow-x: hidden;
+    transition: background-color 0.4s ease, color 0.4s ease;
   }
 
   h1,
@@ -29,6 +31,7 @@
   /* Visible, branded focus states for accessibility */
   :focus-visible {
     @apply outline-none ring-2 ring-amber-brand ring-offset-2 ring-offset-cream rounded;
+    @apply dark:ring-offset-charcoal;
   }
 }
 
@@ -39,6 +42,7 @@
 
   .section-title {
     @apply font-display text-3xl sm:text-4xl md:text-5xl text-charcoal uppercase tracking-wide;
+    @apply dark:text-cream;
   }
 
   .eyebrow {
@@ -72,18 +76,22 @@
 
   .btn-secondary {
     @apply btn bg-charcoal text-white px-6 py-3 hover:-translate-y-0.5 hover:bg-charcoal-soft active:translate-y-0;
+    @apply dark:bg-cream dark:text-charcoal dark:hover:bg-white;
   }
 
   .btn-ghost {
     @apply btn bg-white/80 text-charcoal px-6 py-3 ring-1 ring-black/10 backdrop-blur hover:-translate-y-0.5 hover:bg-white active:translate-y-0;
+    @apply dark:bg-white/10 dark:text-cream dark:ring-white/15 dark:hover:bg-white/20;
   }
 
   .card {
     @apply rounded-3xl bg-white shadow-card ring-1 ring-black/5;
+    @apply dark:bg-charcoal-soft dark:ring-white/10;
   }
 
   .glass {
     @apply bg-white/70 ring-1 ring-white/40 backdrop-blur-xl;
+    @apply dark:bg-charcoal-soft/70 dark:ring-white/10;
   }
 
   .badge {
@@ -92,6 +100,7 @@
 
   .input {
     @apply w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-charcoal placeholder:text-charcoal/35 focus:border-doner-red focus:outline-none focus:ring-2 focus:ring-doner-red/20;
+    @apply dark:border-white/10 dark:bg-charcoal dark:text-cream dark:placeholder:text-cream/35;
   }
 }
 

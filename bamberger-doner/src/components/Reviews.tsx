@@ -28,7 +28,7 @@ export default function Reviews() {
   const { t, lang, pick } = useLang()
 
   return (
-    <section className="bg-cream-deep py-16 sm:py-24">
+    <section className="bg-cream-deep py-16 dark:bg-charcoal sm:py-24">
       <div className="container-px">
         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
           <div className="max-w-xl">
@@ -37,13 +37,13 @@ export default function Reviews() {
           </div>
 
           {/* Google rating badge */}
-          <div className="inline-flex items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-soft ring-1 ring-black/5">
-            <span className="font-display text-3xl text-charcoal">
+          <div className="inline-flex items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-soft ring-1 ring-black/5 dark:bg-charcoal-soft dark:ring-white/10">
+            <span className="font-display text-3xl text-charcoal dark:text-cream">
               {business.rating.toLocaleString(lang === 'en' ? 'en-US' : 'de-DE')}
             </span>
             <div>
               <Stars />
-              <div className="mt-0.5 text-xs text-charcoal/60">
+              <div className="mt-0.5 text-xs text-charcoal/60 dark:text-cream/60">
                 <span className="font-bold text-[#4285F4]">G</span>
                 <span className="font-bold text-[#EA4335]">o</span>
                 <span className="font-bold text-[#FBBC05]">o</span>
@@ -70,7 +70,7 @@ export default function Reviews() {
             >
               <Quote className="absolute right-4 top-4 h-7 w-7 text-doner-red/10" aria-hidden />
               <Stars />
-              <blockquote className="mt-3 flex-1 text-sm leading-relaxed text-charcoal/80">
+              <blockquote className="mt-3 flex-1 text-sm leading-relaxed text-charcoal/80 dark:text-cream/80">
                 “{pick(r.text)}”
               </blockquote>
               <figcaption className="mt-4 flex items-center gap-3">
@@ -82,8 +82,8 @@ export default function Reviews() {
                   {r.initials}
                 </span>
                 <span>
-                  <span className="block text-sm font-bold text-charcoal">{r.name}</span>
-                  <span className="block text-xs text-charcoal/50">{r.location}</span>
+                  <span className="block text-sm font-bold text-charcoal dark:text-cream">{r.name}</span>
+                  <span className="block text-xs text-charcoal/50 dark:text-cream/50">{r.location}</span>
                 </span>
               </figcaption>
             </motion.figure>

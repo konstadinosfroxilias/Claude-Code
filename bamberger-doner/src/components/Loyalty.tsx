@@ -12,9 +12,9 @@ export default function Loyalty() {
   const remaining = TOTAL - FILLED
 
   return (
-    <section className="bg-cream py-16 sm:py-24">
+    <section className="bg-cream py-16 dark:bg-charcoal sm:py-24">
       <div className="container-px">
-        <div className="overflow-hidden rounded-4xl bg-charcoal text-white shadow-card">
+        <div className="overflow-hidden rounded-4xl bg-charcoal text-white shadow-card ring-1 ring-white/5">
           <div className="grid gap-8 p-7 sm:p-10 lg:grid-cols-2 lg:items-center lg:gap-12">
             {/* copy */}
             <div>

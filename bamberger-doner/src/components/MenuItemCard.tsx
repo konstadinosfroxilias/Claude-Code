@@ -60,10 +60,10 @@ export default function MenuItemCard({ item, onAdd }: MenuItemCardProps) {
 
         {/* body */}
         <div className="flex flex-1 flex-col p-4" style={{ transform: 'translateZ(30px)' }}>
-          <h3 className="font-heading text-base font-bold uppercase leading-tight tracking-wide text-charcoal transition-colors group-hover:text-doner-red sm:text-lg">
+          <h3 className="font-heading text-base font-bold uppercase leading-tight tracking-wide text-charcoal transition-colors group-hover:text-doner-red dark:text-cream sm:text-lg">
             {pick(item.name)}
           </h3>
-          <p className="mt-1 line-clamp-2 text-sm text-charcoal/60">{pick(item.desc)}</p>
+          <p className="mt-1 line-clamp-2 text-sm text-charcoal/60 dark:text-cream/60">{pick(item.desc)}</p>
 
           <div className="mt-4 flex items-center justify-between">
             <span className="font-display text-xl text-doner-red sm:text-2xl">

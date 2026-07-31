@@ -15,12 +15,12 @@ export default function Gallery() {
   const { t } = useLang()
 
   return (
-    <section id="galerie" className="scroll-mt-20 bg-cream py-16 sm:py-24">
+    <section id="galerie" className="scroll-mt-20 bg-cream py-16 dark:bg-charcoal sm:py-24">
       <div className="container-px">
         <div className="max-w-2xl">
           <span className="eyebrow">{t.gallery.eyebrow}</span>
           <h2 className="section-title mt-3">{t.gallery.title}</h2>
-          <p className="mt-3 text-charcoal/70">{t.gallery.subtitle}</p>
+          <p className="mt-3 text-charcoal/70 dark:text-cream/70">{t.gallery.subtitle}</p>
         </div>
 
         <div className="mt-8 grid auto-rows-[120px] grid-cols-2 gap-2.5 sm:auto-rows-[160px] sm:gap-4 md:grid-cols-4">

@@ -48,23 +48,23 @@ export default function Menu() {
   ]
 
   return (
-    <section id="menu" className="grain relative scroll-mt-20 overflow-hidden bg-cream py-16 sm:py-24">
+    <section id="menu" className="grain relative scroll-mt-20 overflow-hidden bg-cream py-16 dark:bg-charcoal sm:py-24">
       <Blobs />
       <div className="container-px relative">
         {/* header */}
         <div className="max-w-2xl">
           <span className="eyebrow">🔥 {t.menu.eyebrow}</span>
           <h2 className="section-title mt-3 text-balance">{t.menu.title}</h2>
-          <p className="mt-3 text-pretty text-charcoal/70">{t.menu.subtitle}</p>
+          <p className="mt-3 text-pretty text-charcoal/70 dark:text-cream/70">{t.menu.subtitle}</p>
         </div>
 
         {/* location switcher */}
         <div className="mt-7 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-charcoal/70">
+          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-charcoal/70 dark:text-cream/70">
             <MapPin className="h-4 w-4 text-doner-red" aria-hidden />
             {t.checkout.pickupAt}:
           </span>
-          <div className="inline-flex rounded-full bg-white p-1 shadow-soft ring-1 ring-black/5">
+          <div className="inline-flex rounded-full bg-white p-1 shadow-soft ring-1 ring-black/5 dark:bg-charcoal-soft dark:ring-white/10">
             {business.locations.map((loc) => {
               const active = loc.id === locationId
               return (
@@ -75,7 +75,7 @@ export default function Menu() {
                   className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors sm:text-sm ${
                     active
                       ? 'bg-doner-red text-white shadow'
-                      : 'text-charcoal/70 hover:text-charcoal'
+                      : 'text-charcoal/70 hover:text-charcoal dark:text-cream/70 dark:hover:text-cream'
                   }`}
                 >
                   {pick(loc.name)}
@@ -96,15 +96,15 @@ export default function Menu() {
                 aria-pressed={active}
                 className={`relative whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
                   active
-                    ? 'text-white'
-                    : 'bg-white text-charcoal/70 ring-1 ring-black/5 hover:text-charcoal'
+                    ? 'text-white dark:text-charcoal'
+                    : 'bg-white text-charcoal/70 ring-1 ring-black/5 hover:text-charcoal dark:bg-charcoal-soft dark:text-cream/70 dark:ring-white/10 dark:hover:text-cream'
                 }`}
               >
                 {active && (
                   <motion.span
                     layoutId="menuTabPill"
                     transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                    className="absolute inset-0 rounded-full bg-charcoal shadow-soft"
+                    className="absolute inset-0 rounded-full bg-charcoal shadow-soft dark:bg-cream"
                   />
                 )}
                 <span className="relative z-10">{tab.label}</span>
@@ -140,7 +140,7 @@ export default function Menu() {
           </AnimatePresence>
         </motion.div>
 
-        <p className="mt-6 text-center text-xs text-charcoal/45">
+        <p className="mt-6 text-center text-xs text-charcoal/45 dark:text-cream/45">
           {pick({
             de: 'Alle Preise inkl. MwSt. Abbildungen ähnlich.',
             en: 'All prices incl. VAT. Images for illustration.',

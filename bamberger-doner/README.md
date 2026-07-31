@@ -41,6 +41,12 @@ needed. (`npm run preview` also serves `/dist` at a local URL if you prefer.)
   animated success checkmark, hover/scroll reveals)
 - Google Fonts: **Anton** / **Oswald** (display) + **Inter** (body)
 - Single-page app, mobile-first, German-first with a **DE / EN / TR** toggle
+- **Light / dark ("night mode") theme** toggle (sun/moon in the header;
+  remembers the choice)
+- **Sticky mobile order bar** — a floating cart total + "Zur Kasse" button that
+  appears on phones once the cart has items
+- Playful touches: confetti burst on a confirmed order, floating ❤️ in the hero,
+  a slowly rotating "Drehspieß" ring on the freshness badge
 
 ---
 

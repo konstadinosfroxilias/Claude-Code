@@ -24,6 +24,7 @@ import {
   type LocalizedText,
 } from '../data/content'
 import SmartImage from './SmartImage'
+import Confetti from './Confetti'
 
 type Step = 'cart' | 'checkout' | 'success'
 type Mode = 'pickup' | 'delivery'
@@ -106,21 +107,21 @@ export default function CartDrawer() {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 32, stiffness: 320 }}
-            className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-cream shadow-card"
+            className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-cream dark:bg-charcoal shadow-card"
           >
             {/* header */}
-            <div className="flex items-center justify-between border-b border-black/5 px-5 py-4">
+            <div className="flex items-center justify-between border-b border-black/5 dark:border-white/10 px-5 py-4">
               <div className="flex items-center gap-2">
                 {step === 'checkout' && (
                   <button
                     onClick={() => setStep('cart')}
                     aria-label={t.checkout.back}
-                    className="grid h-9 w-9 place-items-center rounded-full hover:bg-black/5"
+                    className="grid h-9 w-9 place-items-center rounded-full hover:bg-black/5 dark:hover:bg-white/10"
                   >
                     <ArrowLeft className="h-5 w-5" />
                   </button>
                 )}
-                <h2 className="font-display text-2xl uppercase text-charcoal">
+                <h2 className="font-display text-2xl uppercase text-charcoal dark:text-cream">
                   {step === 'cart' && t.cart.title}
                   {step === 'checkout' && t.checkout.title}
                   {step === 'success' && t.success.title}
@@ -129,7 +130,7 @@ export default function CartDrawer() {
               <button
                 onClick={closeCart}
                 aria-label={t.common.close}
-                className="grid h-9 w-9 place-items-center rounded-full hover:bg-black/5"
+                className="grid h-9 w-9 place-items-center rounded-full hover:bg-black/5 dark:hover:bg-white/10"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -163,16 +164,16 @@ export default function CartDrawer() {
 
             {/* footer / actions */}
             {step === 'cart' && lines.length > 0 && (
-              <div className="border-t border-black/5 bg-white p-5">
+              <div className="border-t border-black/5 dark:border-white/10 bg-white dark:bg-charcoal-soft p-5">
                 <div className="mb-2 flex items-center justify-center gap-1.5 text-xs font-semibold text-green-700">
                   <ShieldCheck className="h-4 w-4" aria-hidden />
                   {t.common.commissionFree}
                 </div>
                 <div className="mb-3 flex items-center justify-between">
-                  <span className="text-sm text-charcoal/60">
+                  <span className="text-sm text-charcoal/60 dark:text-cream/60">
                     {t.cart.subtotal} · {count} {t.cart.items}
                   </span>
-                  <span className="font-display text-2xl text-charcoal">
+                  <span className="font-display text-2xl text-charcoal dark:text-cream">
                     {formatPrice(subtotal, lang)}
                   </span>
                 </div>
@@ -183,10 +184,10 @@ export default function CartDrawer() {
             )}
 
             {step === 'checkout' && (
-              <div className="border-t border-black/5 bg-white p-5">
+              <div className="border-t border-black/5 dark:border-white/10 bg-white dark:bg-charcoal-soft p-5">
                 <div className="mb-3 flex items-center justify-between">
-                  <span className="text-sm text-charcoal/60">{t.checkout.total}</span>
-                  <span className="font-display text-2xl text-charcoal">
+                  <span className="text-sm text-charcoal/60 dark:text-cream/60">{t.checkout.total}</span>
+                  <span className="font-display text-2xl text-charcoal dark:text-cream">
                     {formatPrice(subtotal, lang)}
                   </span>
                 </div>
@@ -207,7 +208,7 @@ export default function CartDrawer() {
                     </>
                   )}
                 </button>
-                <div className="mt-2.5 flex items-center justify-center gap-2 text-[0.7rem] text-charcoal/40">
+                <div className="mt-2.5 flex items-center justify-center gap-2 text-[0.7rem] text-charcoal/40 dark:text-cream/40">
                   <span>{t.checkout.secure}</span>
                   <span>·</span>
                   <span className="font-semibold tracking-tight">VISA</span>
@@ -221,7 +222,7 @@ export default function CartDrawer() {
             )}
 
             {step === 'success' && (
-              <div className="border-t border-black/5 bg-white p-5">
+              <div className="border-t border-black/5 dark:border-white/10 bg-white dark:bg-charcoal-soft p-5">
                 <button onClick={handleFinish} className="btn-primary w-full text-base">
                   {t.success.done}
                 </button>
@@ -252,8 +253,8 @@ function CartStep({
         <div className="grid h-20 w-20 place-items-center rounded-full bg-doner-red/10 text-doner-red">
           <ShoppingBag className="h-9 w-9" aria-hidden />
         </div>
-        <p className="mt-5 font-heading text-lg font-bold text-charcoal">{t.cart.empty}</p>
-        <p className="mt-1 text-sm text-charcoal/60">{t.cart.emptyHint}</p>
+        <p className="mt-5 font-heading text-lg font-bold text-charcoal dark:text-cream">{t.cart.empty}</p>
+        <p className="mt-1 text-sm text-charcoal/60 dark:text-cream/60">{t.cart.emptyHint}</p>
       </div>
     )
   }
@@ -281,24 +282,24 @@ function CartStep({
               />
               <div className="flex min-w-0 flex-1 flex-col">
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-heading text-sm font-bold uppercase leading-tight text-charcoal">
+                  <h3 className="font-heading text-sm font-bold uppercase leading-tight text-charcoal dark:text-cream">
                     {pick(line.name)}
                   </h3>
                   <button
                     onClick={() => remove(line.lineId)}
                     aria-label={t.cart.remove}
-                    className="shrink-0 text-charcoal/40 transition-colors hover:text-doner-red"
+                    className="shrink-0 text-charcoal/40 dark:text-cream/40 transition-colors hover:text-doner-red"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
-                {opts && <p className="mt-0.5 truncate text-xs text-charcoal/50">{opts}</p>}
+                {opts && <p className="mt-0.5 truncate text-xs text-charcoal/50 dark:text-cream/50">{opts}</p>}
                 <div className="mt-auto flex items-center justify-between pt-2">
-                  <div className="inline-flex items-center rounded-full bg-cream-deep">
+                  <div className="inline-flex items-center rounded-full bg-cream-deep dark:bg-white/5">
                     <button
                       onClick={() => setQty(line.lineId, line.qty - 1)}
                       aria-label="-"
-                      className="grid h-8 w-8 place-items-center rounded-full text-charcoal hover:bg-black/5"
+                      className="grid h-8 w-8 place-items-center rounded-full text-charcoal dark:text-cream hover:bg-black/5 dark:hover:bg-white/10"
                     >
                       <Minus className="h-4 w-4" />
                     </button>
@@ -306,7 +307,7 @@ function CartStep({
                     <button
                       onClick={() => setQty(line.lineId, line.qty + 1)}
                       aria-label="+"
-                      className="grid h-8 w-8 place-items-center rounded-full text-charcoal hover:bg-black/5"
+                      className="grid h-8 w-8 place-items-center rounded-full text-charcoal dark:text-cream hover:bg-black/5 dark:hover:bg-white/10"
                     >
                       <Plus className="h-4 w-4" />
                     </button>
@@ -354,7 +355,7 @@ function CheckoutStep({
   return (
     <div className="space-y-6 p-5">
       {/* mode toggle */}
-      <div className="grid grid-cols-2 gap-2 rounded-2xl bg-cream-deep p-1">
+      <div className="grid grid-cols-2 gap-2 rounded-2xl bg-cream-deep dark:bg-white/5 p-1">
         {(
           [
             { id: 'pickup' as Mode, label: t.checkout.pickup, icon: Store },
@@ -369,7 +370,7 @@ function CheckoutStep({
               onClick={() => setMode(m.id)}
               aria-pressed={active}
               className={`flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all ${
-                active ? 'bg-white text-charcoal shadow-soft' : 'text-charcoal/60'
+                active ? 'bg-white dark:bg-charcoal-soft text-charcoal dark:text-cream shadow-soft' : 'text-charcoal/60 dark:text-cream/60'
               }`}
             >
               <Icon className="h-4 w-4" aria-hidden />
@@ -382,7 +383,7 @@ function CheckoutStep({
       {/* pickup location */}
       {mode === 'pickup' && (
         <div>
-          <label className="mb-2 block font-heading text-xs font-bold uppercase tracking-[0.18em] text-charcoal/60">
+          <label className="mb-2 block font-heading text-xs font-bold uppercase tracking-[0.18em] text-charcoal/60 dark:text-cream/60">
             {t.checkout.location}
           </label>
           <div className="grid gap-2">
@@ -394,13 +395,13 @@ function CheckoutStep({
                   onClick={() => setLocationId(loc.id)}
                   aria-pressed={active}
                   className={`flex items-center gap-3 rounded-2xl border p-3 text-left transition-all ${
-                    active ? 'border-doner-red bg-doner-red/5' : 'border-black/10 bg-white'
+                    active ? 'border-doner-red bg-doner-red/5' : 'border-black/10 dark:border-white/10 bg-white dark:bg-charcoal-soft'
                   }`}
                 >
-                  <Store className={`h-5 w-5 ${active ? 'text-doner-red' : 'text-charcoal/40'}`} aria-hidden />
+                  <Store className={`h-5 w-5 ${active ? 'text-doner-red' : 'text-charcoal/40 dark:text-cream/40'}`} aria-hidden />
                   <div className="min-w-0">
-                    <div className="text-sm font-bold text-charcoal">{pick(loc.name)}</div>
-                    <div className="truncate text-xs text-charcoal/50">
+                    <div className="text-sm font-bold text-charcoal dark:text-cream">{pick(loc.name)}</div>
+                    <div className="truncate text-xs text-charcoal/50 dark:text-cream/50">
                       {loc.address}, {loc.city}
                     </div>
                   </div>
@@ -449,15 +450,15 @@ function CheckoutStep({
 
       {/* Stripe-style card field (visual mock) */}
       <div>
-        <label className="mb-2 block font-heading text-xs font-bold uppercase tracking-[0.18em] text-charcoal/60">
+        <label className="mb-2 block font-heading text-xs font-bold uppercase tracking-[0.18em] text-charcoal/60 dark:text-cream/60">
           {t.checkout.cardDetails}
         </label>
-        <div className="rounded-2xl border border-black/10 bg-white p-3 shadow-sm">
-          <div className="flex items-center justify-between gap-2 rounded-xl bg-cream-deep px-3 py-2.5 text-sm text-charcoal/50">
+        <div className="rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-charcoal-soft p-3 shadow-sm">
+          <div className="flex items-center justify-between gap-2 rounded-xl bg-cream-deep dark:bg-white/5 px-3 py-2.5 text-sm text-charcoal/50 dark:text-cream/50">
             <span className="tracking-[0.2em]">•••• •••• •••• 4242</span>
             <span className="text-xs">12 / 28 · CVC •••</span>
           </div>
-          <div className="mt-2 flex items-center gap-1.5 text-[0.7rem] text-charcoal/40">
+          <div className="mt-2 flex items-center gap-1.5 text-[0.7rem] text-charcoal/40 dark:text-cream/40">
             <Lock className="h-3 w-3" aria-hidden />
             {t.checkout.demoNote}
           </div>
@@ -465,17 +466,17 @@ function CheckoutStep({
       </div>
 
       {/* order summary */}
-      <div className="rounded-2xl bg-white p-4 ring-1 ring-black/5">
-        <div className="mb-2 font-heading text-xs font-bold uppercase tracking-[0.18em] text-charcoal/60">
+      <div className="rounded-2xl bg-white dark:bg-charcoal-soft p-4 ring-1 ring-black/5">
+        <div className="mb-2 font-heading text-xs font-bold uppercase tracking-[0.18em] text-charcoal/60 dark:text-cream/60">
           {t.checkout.summary}
         </div>
         <ul className="space-y-1.5">
           {lines.map((l) => (
             <li key={l.lineId} className="flex justify-between text-sm">
-              <span className="text-charcoal/70">
+              <span className="text-charcoal/70 dark:text-cream/70">
                 {l.qty}× {pick(l.name)}
               </span>
-              <span className="font-semibold text-charcoal">
+              <span className="font-semibold text-charcoal dark:text-cream">
                 {formatPrice(l.price * l.qty, lang)}
               </span>
             </li>
@@ -489,7 +490,7 @@ function CheckoutStep({
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block font-heading text-xs font-bold uppercase tracking-[0.18em] text-charcoal/60">
+      <span className="mb-1.5 block font-heading text-xs font-bold uppercase tracking-[0.18em] text-charcoal/60 dark:text-cream/60">
         {label}
       </span>
       {children}
@@ -510,12 +511,13 @@ function SuccessStep({
   const { t } = useLang()
 
   return (
-    <div className="flex h-full flex-col items-center justify-center px-8 py-10 text-center">
+    <div className="relative flex h-full flex-col items-center justify-center px-8 py-10 text-center">
+      <Confetti />
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: 'spring', damping: 12, stiffness: 200, delay: 0.05 }}
-        className="grid h-24 w-24 place-items-center rounded-full bg-green-100"
+        className="grid h-24 w-24 place-items-center rounded-full bg-green-100 dark:bg-green-500/20"
       >
         <svg viewBox="0 0 52 52" className="h-14 w-14">
           <motion.circle
@@ -547,25 +549,25 @@ function SuccessStep({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="mt-6 inline-flex items-center gap-2 font-display text-3xl uppercase text-charcoal"
+        className="mt-6 inline-flex items-center gap-2 font-display text-3xl uppercase text-charcoal dark:text-cream"
       >
         {t.success.title}
         <PartyPopper className="h-7 w-7 text-amber-brand" aria-hidden />
       </motion.h3>
 
-      <p className="mt-3 max-w-xs text-sm text-charcoal/70">{t.success.message}</p>
+      <p className="mt-3 max-w-xs text-sm text-charcoal/70 dark:text-cream/70">{t.success.message}</p>
 
-      <div className="mt-6 w-full max-w-xs rounded-2xl bg-white p-4 text-left shadow-soft ring-1 ring-black/5">
+      <div className="mt-6 w-full max-w-xs rounded-2xl bg-white dark:bg-charcoal-soft p-4 text-left shadow-soft ring-1 ring-black/5">
         <div className="flex items-center justify-between">
-          <span className="text-xs uppercase tracking-wide text-charcoal/50">{t.success.orderNo}</span>
+          <span className="text-xs uppercase tracking-wide text-charcoal/50 dark:text-cream/50">{t.success.orderNo}</span>
           <span className="font-display text-xl text-doner-red">{orderNo}</span>
         </div>
-        <div className="mt-2 border-t border-black/5 pt-2 text-sm text-charcoal/70">
+        <div className="mt-2 border-t border-black/5 dark:border-white/10 pt-2 text-sm text-charcoal/70 dark:text-cream/70">
           {mode === 'pickup' ? `${t.checkout.pickup} · ${location}` : t.checkout.delivery}
         </div>
       </div>
 
-      <p className="mt-4 text-xs text-charcoal/50">{t.success.pickupInfo}</p>
+      <p className="mt-4 text-xs text-charcoal/50 dark:text-cream/50">{t.success.pickupInfo}</p>
       <p className="mt-4 rounded-full bg-amber-brand/15 px-3 py-1 text-[0.7rem] font-semibold text-amber-brand-dark">
         ⚠️ {t.success.demoNote}
       </p>
