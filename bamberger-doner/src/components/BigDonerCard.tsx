@@ -49,7 +49,7 @@ export default function BigDonerCard({
               <Trophy className="h-4 w-4" aria-hidden />
               Challenge
             </div>
-            <h3 className="mt-3 font-display text-3xl uppercase leading-[1.02] sm:text-4xl lg:text-5xl">
+            <h3 className="mt-3 font-display text-3xl uppercase leading-[1.12] sm:text-4xl lg:text-5xl">
               {pick(item.name)}
             </h3>
             <p className="mt-3 max-w-md text-pretty text-sm text-cream/80 sm:text-base">

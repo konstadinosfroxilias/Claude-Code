@@ -42,7 +42,7 @@
 
   .section-title {
     @apply font-display text-3xl sm:text-4xl md:text-5xl text-charcoal uppercase tracking-wide;
-    @apply dark:text-cream;
+    @apply leading-[1.15] dark:text-cream;
   }
 
   .eyebrow {

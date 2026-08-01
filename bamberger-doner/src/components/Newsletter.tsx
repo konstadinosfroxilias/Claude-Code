@@ -21,7 +21,7 @@ export default function Newsletter() {
           <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-white/15">
             <Mail className="h-7 w-7" aria-hidden />
           </div>
-          <h2 className="font-display text-3xl uppercase sm:text-4xl">{t.newsletter.title}</h2>
+          <h2 className="font-display text-3xl uppercase leading-[1.15] sm:text-4xl">{t.newsletter.title}</h2>
           <p className="mx-auto mt-3 max-w-md text-white/85">{t.newsletter.subtitle}</p>
 
           <div className="mt-7">

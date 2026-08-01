@@ -22,7 +22,7 @@ export default function Loyalty() {
                 <Sparkles className="h-4 w-4" aria-hidden />
                 {t.loyalty.eyebrow}
               </span>
-              <h2 className="mt-3 font-display text-3xl uppercase leading-[0.95] sm:text-4xl lg:text-5xl">
+              <h2 className="mt-3 font-display text-3xl uppercase leading-[1.15] sm:text-4xl lg:text-5xl">
                 {t.loyalty.title}
               </h2>
               <p className="mt-4 max-w-md text-cream/75">{t.loyalty.subtitle}</p>

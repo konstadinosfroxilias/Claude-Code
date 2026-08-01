@@ -75,7 +75,7 @@ export default function Hero() {
             variants={container}
             initial="hidden"
             animate="show"
-            className="font-display text-[clamp(2.1rem,8.5vw,4.6rem)] uppercase leading-[1.06] text-white [text-shadow:0_2px_28px_rgba(0,0,0,0.45)]"
+            className="font-display text-[clamp(2.1rem,8.5vw,4.6rem)] uppercase leading-[1.12] text-white [text-shadow:0_2px_28px_rgba(0,0,0,0.45)]"
           >
             {words.map((w, i) => (
               <motion.span key={`${w}-${i}`} variants={word} className="mr-[0.28em] inline-block">

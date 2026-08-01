@@ -560,10 +560,10 @@ function SuccessStep({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="mt-6 inline-flex items-center gap-2 font-display text-3xl uppercase text-charcoal dark:text-cream"
+        className="mt-6 font-display text-3xl uppercase leading-[1.15] text-charcoal dark:text-cream"
       >
         {t.success.title}
-        <PartyPopper className="h-7 w-7 text-amber-brand" aria-hidden />
+        <PartyPopper className="ml-2 inline-block h-7 w-7 -translate-y-0.5 text-amber-brand" aria-hidden />
       </motion.h3>
 
       <p className="mt-3 max-w-xs text-sm text-charcoal/70 dark:text-cream/70">{t.success.message}</p>
