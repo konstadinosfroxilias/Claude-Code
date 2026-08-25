@@ -104,7 +104,7 @@ export function RemindersPanel({ userId }: { userId: string }) {
             type="button"
             onClick={dismissPrimer}
             aria-label={t("reminder.optInNotNow")}
-            className="absolute right-2 top-2 flex size-9 items-center justify-center rounded-lg text-low transition-colors hover:bg-surface-2 hover:text-hi"
+            className="absolute right-1 top-1 flex size-11 items-center justify-center rounded-lg text-low transition-colors hover:bg-surface-2 hover:text-hi sm:right-2 sm:top-2 sm:size-9"
           >
             <X className="size-4" />
           </button>

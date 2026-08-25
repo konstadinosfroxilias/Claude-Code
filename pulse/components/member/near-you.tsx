@@ -106,7 +106,7 @@ export function NearYouSection({
         </div>
         <Link
           href="/member/explore?today=1"
-          className="-mr-2 inline-flex h-11 shrink-0 items-center gap-1 px-2 text-sm font-medium text-volt hover:text-volt-bright sm:mr-0 sm:h-auto sm:px-0"
+          className="inline-flex h-11 shrink-0 items-center gap-1 pl-2 text-sm font-medium text-volt hover:text-volt-bright sm:h-auto sm:pl-0"
         >
           {t("common.seeAll")} <ArrowRight className="size-3.5" />
         </Link>
@@ -126,19 +126,22 @@ export function NearYouSection({
           className="py-8"
         />
       ) : (
-        <motion.div
-          initial="hidden"
-          animate="show"
-          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.06 } } }}
+        <div
           className="no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 pb-1"
+          /*
+           * contain: paint is load-bearing. The cards keep a framer-motion
+           * transform after their entrance animation settles, and transformed
+           * descendants escape a scroll container's clip — without this the
+           * rail's full width leaks out and the whole page scrolls sideways.
+           */
+          style={{ contain: "paint" }}
         >
-          {ranked.map((view) => (
+          {ranked.map((view, i) => (
             <motion.div
               key={view.session.id}
-              variants={{
-                hidden: { opacity: 0, y: 14 },
-                show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-              }}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: i * 0.06 }}
               className="w-64 shrink-0"
             >
               <SoonCard
@@ -148,7 +151,7 @@ export function NearYouSection({
               />
             </motion.div>
           ))}
-        </motion.div>
+        </div>
       )}
     </section>
   );

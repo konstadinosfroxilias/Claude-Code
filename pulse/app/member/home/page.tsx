@@ -266,7 +266,7 @@ function SectionHead({
       {href && (
         <Link
           href={href}
-          className="-mr-2 inline-flex h-11 items-center gap-1 px-2 text-sm font-medium text-volt hover:text-volt-bright sm:mr-0 sm:h-auto sm:px-0"
+          className="inline-flex h-11 shrink-0 items-center gap-1 pl-2 text-sm font-medium text-volt hover:text-volt-bright sm:h-auto sm:pl-0"
         >
           {hrefLabel} <ArrowRight className="size-3.5" />
         </Link>

@@ -62,6 +62,33 @@ These aren't copy — they're enforced in code:
 - **Flexibility.** No lock-in, instant plan switches, in-app-only
   notifications.
 
+## Discovery, waitlist & reminders
+
+- **Location, asked for properly.** A soft primer explains the value first;
+  `navigator.geolocation.getCurrentPosition` is *never* called cold, and
+  "Not now" is remembered. Granted → every studio card, session row and the
+  studio header shows walk/drive time + distance. Denied or unavailable →
+  **no distance is shown anywhere**, with no placeholder and no estimate.
+- **"Near you, starting soon"** on the member home aggregates classes
+  starting within the next 6 hours. With location it ranks on a blend of
+  urgency and travel time (penalising classes you couldn't physically reach);
+  without it, purely by start time. Capped studios appear disabled with the
+  cap explainer rather than vanishing.
+- **Waitlist with auto-book.** A full class offers "Join waitlist" — no
+  credits are charged, just a soft hold verified against your balance. When a
+  spot frees (member cancels, studio marks a no-show), position #1 is booked
+  automatically: the hold becomes a pending spend, a pending payout accrues,
+  and both member and studio are notified. Promotion re-checks the visit cap
+  and balance — anyone who no longer qualifies is skipped, told why, and the
+  next in queue is tried. Studios see waitlist counts on the overview,
+  schedule and roster.
+- **Reminders & calendar.** Every upcoming booking exports a real `.ics`
+  (RFC 5545, with a 30-minute `VALARM`) or opens a Google Calendar template —
+  both entirely client-side. In-app reminders fire at 2 h and 30 min before
+  class while a PULSE tab is open, optionally as real browser notifications
+  behind an opt-in primer. **Background push is not faked** — see
+  [Where to plug in real push](#where-to-plug-in-real-push).
+
 ## Core business logic
 
 All rules live in `lib/rules/` — one module each, config-first:
@@ -84,6 +111,14 @@ All rules live in `lib/rules/` — one module each, config-first:
 - **Wallet** — balance = Σ signed ledger deltas (pending spends already
   reduce it). Subscription cycles self-roll and grant `creditsPerCycle` on
   renewal (`ensureCycleCurrent`).
+- **Visit-cap window** — `countVisitsInWindow` opens the rolling window
+  `rollingWindowDays` before the *earlier* of now and the session being
+  attempted, and leaves it open, so every active booking counts: past visits
+  in the rolling month **and** all upcoming holds. Anchoring this way is what
+  keeps the "x/4 used this month" meter and the actual enforcement identical —
+  if the window merely ended at the attempted session's start, a member could
+  hold a 5th visit by queuing an early class and then booking four later ones.
+  The same function backs display, booking and waitlist promotion.
 
 ## Architecture
 
@@ -97,6 +132,9 @@ lib/
   config.ts               APP_NAME (single rename point), USE_MOCK flag, storage keys
   types/                  the entire domain model + service DTOs
   rules/                  pricing.ts (credit costs) · policy.ts (caps, fees, cutoffs)
+  geo/                    haversine + walk/drive travel estimates (pure)
+  calendar/               .ics builder + Google Calendar url (pure, client-side)
+  reminders/              opt-in store, Notification helpers, PUSH SEAM (TODO)
   i18n/                   el.ts (master) · en.ts (parity typechecked) · useI18n()
   services/
     types.ts              ★ THE SEAM — typed async interfaces for every domain
@@ -104,7 +142,7 @@ lib/
     mock/                 the only current implementation (swap target)
   mock/                   seed.ts (Greek catalog generator) · db.ts (localStorage store)
   hooks/                  useLiveQuery (fetch + subscribe to service change feed)
-  stores/                 zustand: session (persisted), language prefs
+  stores/                 zustand: session, language prefs, geo (all persisted)
 ```
 
 **Data flow:** UI component → `useLiveQuery(svc => svc.x.y())` →
@@ -143,6 +181,42 @@ The UI depends on nothing else.
 6. **Live updates** — map `Services.subscribe` to your websocket/SSE/poll;
    `useLiveQuery` needs nothing else.
 7. Delete `lib/mock/` when done. No component changes.
+
+### Where to plug in real geolocation persistence
+
+Coordinates live only in the browser (`lib/stores/geo.ts`, persisted to
+localStorage) and are never sent anywhere — distance is computed client-side
+against catalog coordinates the app already has. If you want a member's last
+known location server-side (e.g. to rank "near you" on the API):
+
+1. Add `updateLastLocation(userId, coords)` to a service interface in
+   `lib/services/types.ts`; the mock can no-op.
+2. Call it from `useGeoStore.request()` right after a successful fix.
+3. Move the ranking in `components/member/near-you.tsx` (`score()`) server-side
+   and have `listStartingSoon` accept optional coords. Keep the client
+   fallback so the feature still works when permission is denied.
+
+Keep the primer contract intact: never call `getCurrentPosition` without an
+explicit opt-in tap.
+
+### Where to plug in real push
+
+In-tab reminders are real; background delivery is deliberately not simulated.
+`lib/reminders/index.ts` carries the full TODO at the top of the file:
+
+1. Register a service worker (`public/sw.js`) and subscribe via
+   `pushManager.subscribe({ userVisibleOnly: true, applicationServerKey })`
+   with your VAPID public key.
+2. Add `registerPushSubscription(userId, subscription)` to
+   `NotificationService` in `lib/services/types.ts` and send it up.
+3. Server-side, enqueue jobs at start−2 h and start−30 min when a booking is
+   created; reschedule on cancellation and on waitlist promotion; deliver with
+   `web-push`.
+4. Leave `components/member/reminder-scheduler.tsx` mounted as the in-tab
+   fallback.
+
+Note that `lib/reminders` also fires `Notification` directly, which works only
+while the tab is open — the service worker path replaces that in production.
 
 ## Extending the catalog
 

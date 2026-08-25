@@ -990,11 +990,17 @@ export function buildSeed(now: Date = new Date()): DBState {
   };
 
   // Previous-cycle history (5 completed visits, spends confirmed, total 22).
+  //
+  // Day offsets matter: the visit cap counts every active booking from 30 days
+  // back onward, so these must sit OUTSIDE that window or they eat into the
+  // demo member's CORE allowance. Two recent CORE visits (-10, -5) plus one
+  // upcoming (+3) put them at exactly 3/4 — one bookable visit left, then the
+  // cap blocks, which is the story the demo is meant to tell.
   const prevSpends: [string, number][] = [
-    ["st_core", -40],
+    ["st_core", -48],
     ["st_loft", -36],
-    ["st_northside", -30],
-    ["st_core", -24],
+    ["st_northside", -33],
+    ["st_core", -34],
     ["st_volt", -16],
   ];
   const prevCosts = [5, 4, 5, 4, 4];
