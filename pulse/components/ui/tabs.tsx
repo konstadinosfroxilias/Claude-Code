@@ -28,7 +28,7 @@ export function TabsTrigger({
   return (
     <TabsPrimitive.Trigger
       className={cn(
-        "inline-flex h-8 items-center justify-center rounded-[9px] px-3.5 text-sm font-medium text-mid transition-all",
+        "inline-flex h-11 items-center justify-center rounded-[9px] px-4 text-sm font-medium text-mid transition-all sm:h-8 sm:px-3.5",
         "data-[state=active]:bg-surface-3 data-[state=active]:text-hi data-[state=active]:shadow-sm",
         "hover:text-hi disabled:pointer-events-none disabled:opacity-50",
         className,

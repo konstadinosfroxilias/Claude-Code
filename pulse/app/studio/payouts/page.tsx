@@ -75,7 +75,7 @@ export default function PayoutsPage() {
         />
       </div>
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_320px]">
+      <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
         {/* Per-attendance breakdown */}
         <section>
           <h2 className="display mb-3 text-lg text-hi">
@@ -151,17 +151,26 @@ function EntryRow({ view }: { view: PayoutEntryView }) {
         entry.status === "reversed" && "opacity-50",
       )}
     >
-      <Avatar name={view.memberName} className="size-9" />
+      <Avatar name={view.memberName} className="size-9 shrink-0" />
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold text-hi">
           {view.memberName}
           <span className="font-normal text-mid"> · {view.className}</span>
         </p>
-        <p className="mt-0.5 text-xs text-low tnum">
+        <p className="mt-0.5 truncate text-xs text-low tnum">
           {formatDateTime(view.sessionStartsAt, lang)}
         </p>
+        {/* On phones the status chip sits under the name instead of competing
+            for the row's width. */}
+        <Badge variant={statusVariant} className="mt-1.5 sm:hidden">
+          {entry.status === "confirmed"
+            ? t("common.confirmed")
+            : entry.status === "pending"
+              ? t("common.pending")
+              : t("txn.status.reversed")}
+        </Badge>
       </div>
-      <Badge variant={statusVariant}>
+      <Badge variant={statusVariant} className="hidden shrink-0 sm:inline-flex">
         {entry.status === "confirmed"
           ? t("common.confirmed")
           : entry.status === "pending"
@@ -170,7 +179,7 @@ function EntryRow({ view }: { view: PayoutEntryView }) {
       </Badge>
       <span
         className={cn(
-          "display text-lg tnum",
+          "display shrink-0 text-lg tnum",
           entry.status === "reversed"
             ? "text-low line-through"
             : entry.status === "pending"

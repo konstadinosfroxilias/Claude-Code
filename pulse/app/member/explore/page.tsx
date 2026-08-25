@@ -100,7 +100,7 @@ function Explore() {
                 onClick={() => setView(key)}
                 aria-pressed={view === key}
                 className={cn(
-                  "flex h-8 items-center gap-1.5 rounded-[9px] px-3 text-sm font-medium transition-colors",
+                  "flex h-11 items-center gap-1.5 rounded-[9px] px-3.5 text-sm font-medium transition-colors sm:h-8 sm:px-3",
                   view === key
                     ? "bg-surface-3 text-hi"
                     : "text-mid hover:text-hi",
@@ -169,7 +169,7 @@ function Explore() {
             onClick={() => setAvailableToday((v) => !v)}
             aria-pressed={availableToday}
             className={cn(
-              "h-10 rounded-xl border px-3.5 text-sm font-medium transition-colors",
+              "h-11 rounded-xl border px-3.5 text-sm font-medium transition-colors sm:h-10",
               availableToday
                 ? "border-volt/40 bg-volt/10 text-volt"
                 : "border-line bg-surface-2 text-mid hover:text-hi",
@@ -265,7 +265,7 @@ function CategoryChip({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
+        "h-11 shrink-0 rounded-full border px-4 text-sm font-medium transition-colors sm:h-auto sm:px-3.5 sm:py-1.5",
         active
           ? "border-volt bg-volt text-volt-ink"
           : "border-line bg-surface-2 text-mid hover:text-hi",

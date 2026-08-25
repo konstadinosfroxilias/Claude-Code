@@ -97,7 +97,7 @@ export default function StudioProfilePage() {
     <div>
       <PageHeader title={t("dashProfile.title")} />
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-5">
           <div className="space-y-1.5">
             <Label htmlFor="name">{t("dashProfile.nameLabel")}</Label>
@@ -211,7 +211,7 @@ function ToggleChip({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
+        "h-11 rounded-full border px-4 text-sm font-medium transition-colors sm:h-auto sm:px-3.5 sm:py-1.5",
         active
           ? "border-volt bg-volt/15 text-volt"
           : "border-line bg-surface-2 text-mid hover:text-hi",

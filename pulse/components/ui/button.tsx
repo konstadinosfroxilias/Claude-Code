@@ -20,12 +20,16 @@ const buttonVariants = cva(
         danger:
           "bg-bad/10 text-bad border border-bad/25 hover:bg-bad/20",
       },
+      /*
+       * Mobile-first sizing: every control is >=44px tall on touch viewports
+       * and tightens up from `sm:` (>=640px) where a pointer is likely.
+       */
       size: {
-        sm: "h-8 rounded-[10px] px-3 text-xs [&_svg]:size-3.5",
-        md: "h-10 rounded-xl px-4 text-sm [&_svg]:size-4",
+        sm: "h-11 rounded-xl px-3.5 text-xs sm:h-8 sm:rounded-[10px] sm:px-3 [&_svg]:size-3.5",
+        md: "h-11 rounded-xl px-4 text-sm sm:h-10 [&_svg]:size-4",
         lg: "h-12 rounded-[14px] px-6 text-[15px] [&_svg]:size-4.5",
-        icon: "size-10 rounded-xl [&_svg]:size-4.5",
-        iconSm: "size-8 rounded-[10px] [&_svg]:size-4",
+        icon: "size-11 rounded-xl sm:size-10 [&_svg]:size-4.5",
+        iconSm: "size-11 rounded-xl sm:size-8 sm:rounded-[10px] [&_svg]:size-4",
       },
     },
     defaultVariants: { variant: "surface", size: "md" },

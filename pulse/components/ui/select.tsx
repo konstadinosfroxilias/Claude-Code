@@ -16,7 +16,7 @@ export function SelectTrigger({
   return (
     <SelectPrimitive.Trigger
       className={cn(
-        "flex h-10 w-full items-center justify-between gap-2 rounded-xl border border-line bg-surface-2 px-3.5 text-sm text-hi transition-colors",
+        "flex h-11 w-full items-center justify-between gap-2 rounded-xl border border-line bg-surface-2 px-3.5 text-sm text-hi transition-colors sm:h-10",
         "focus:border-volt/60 focus:outline-none focus:ring-2 focus:ring-volt/15 disabled:opacity-50",
         "data-[placeholder]:text-low",
         className,
@@ -62,7 +62,7 @@ export function SelectItem({
   return (
     <SelectPrimitive.Item
       className={cn(
-        "relative flex cursor-pointer select-none items-center rounded-lg py-2 pl-3 pr-8 text-sm text-mid outline-none transition-colors",
+        "relative flex min-h-11 cursor-pointer select-none items-center rounded-lg py-2 pl-3 pr-8 text-sm text-mid outline-none transition-colors sm:min-h-0",
         "focus:bg-surface-3 focus:text-hi data-[state=checked]:text-hi",
         className,
       )}

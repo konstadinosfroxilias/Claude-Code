@@ -63,7 +63,7 @@ export function MemberShell({ children }: { children: React.ReactNode }) {
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center gap-4 px-4">
           <Logo href="/member/home" />
 
-          <nav className="ml-6 hidden items-center gap-1 md:flex">
+          <nav className="ml-6 hidden items-center gap-1 lg:flex">
             {TABS.slice(0, 4).map((tab) => (
               <Link
                 key={tab.href}
@@ -83,7 +83,7 @@ export function MemberShell({ children }: { children: React.ReactNode }) {
           <div className="ml-auto flex items-center gap-2">
             <Link
               href="/member/wallet"
-              className="flex items-center gap-1.5 rounded-full border border-volt/30 bg-volt/10 px-3 py-1.5 text-sm font-bold text-volt transition-colors hover:bg-volt/20"
+              className="tap flex h-11 items-center gap-1.5 rounded-full border border-volt/30 bg-volt/10 px-3 text-sm font-bold text-volt transition-colors hover:bg-volt/20 sm:h-8"
               aria-label={t("wallet.balance")}
             >
               <Zap className="size-3.5 fill-current" />
@@ -93,11 +93,11 @@ export function MemberShell({ children }: { children: React.ReactNode }) {
             <Link
               href="/member/notifications"
               aria-label={t("notif.title")}
-              className="relative flex size-9 items-center justify-center rounded-xl text-mid transition-colors hover:bg-surface-2 hover:text-hi"
+              className="relative flex size-11 items-center justify-center rounded-xl text-mid transition-colors hover:bg-surface-2 hover:text-hi sm:size-9"
             >
               <Bell className="size-4.5" />
               {(unread ?? 0) > 0 && (
-                <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-volt" />
+                <span className="absolute right-2.5 top-2.5 size-2 rounded-full bg-volt sm:right-1.5 sm:top-1.5" />
               )}
             </Link>
 
@@ -105,7 +105,7 @@ export function MemberShell({ children }: { children: React.ReactNode }) {
               <DropdownMenu.Trigger asChild>
                 <button
                   aria-label={t("nav.profile")}
-                  className="rounded-full outline-none transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-volt"
+                  className="flex size-11 items-center justify-center rounded-full outline-none transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-volt sm:size-8"
                 >
                   <Avatar name={user?.name ?? "?"} className="size-8" />
                 </button>
@@ -134,7 +134,7 @@ export function MemberShell({ children }: { children: React.ReactNode }) {
                     <DropdownMenu.Item key={href} asChild>
                       <Link
                         href={href}
-                        className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-mid outline-none transition-colors hover:bg-surface-3 hover:text-hi data-[highlighted]:bg-surface-3 data-[highlighted]:text-hi"
+                        className="flex min-h-11 cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-mid outline-none transition-colors hover:bg-surface-3 hover:text-hi data-[highlighted]:bg-surface-3 data-[highlighted]:text-hi sm:min-h-0"
                       >
                         <Icon className="size-4" /> {t(key)}
                       </Link>
@@ -143,7 +143,7 @@ export function MemberShell({ children }: { children: React.ReactNode }) {
                   <DropdownMenu.Separator className="my-1 h-px bg-line" />
                   <DropdownMenu.Item
                     onSelect={signOut}
-                    className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-bad outline-none transition-colors data-[highlighted]:bg-bad/10"
+                    className="flex min-h-11 cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-bad outline-none transition-colors data-[highlighted]:bg-bad/10 sm:min-h-0"
                   >
                     <LogOut className="size-4" /> {t("common.logout")}
                   </DropdownMenu.Item>
@@ -155,14 +155,14 @@ export function MemberShell({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Page content */}
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-6 md:pb-12">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-6 lg:pb-12">
         {children}
       </main>
 
       {/* Mobile bottom tabs */}
       <nav
         aria-label="Main"
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-bg/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-lg md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-bg/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-lg lg:hidden"
       >
         <div className="mx-auto flex h-16 max-w-lg items-stretch justify-around px-2">
           {TABS.map((tab) => {

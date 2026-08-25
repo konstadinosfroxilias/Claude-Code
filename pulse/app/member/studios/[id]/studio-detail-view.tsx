@@ -122,7 +122,7 @@ export function StudioDetailView({ id }: { id: string }) {
           type="button"
           onClick={() => router.back()}
           aria-label={t("common.back")}
-          className="absolute left-4 top-4 flex size-9 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-transform hover:scale-105"
+          className="absolute left-3 top-3 flex size-11 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-transform hover:scale-105 sm:left-4 sm:top-4 sm:size-9"
         >
           <ArrowLeft className="size-4.5" />
         </button>
@@ -131,7 +131,7 @@ export function StudioDetailView({ id }: { id: string }) {
           onClick={toggleFav}
           aria-label={t("nav.favorites")}
           aria-pressed={!!isFav}
-          className="absolute right-4 top-4 flex size-9 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm transition-transform hover:scale-105"
+          className="absolute right-3 top-3 flex size-11 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm transition-transform hover:scale-105 sm:right-4 sm:top-4 sm:size-9"
         >
           <Heart
             className={cn(
@@ -221,7 +221,7 @@ export function StudioDetailView({ id }: { id: string }) {
         </div>
       )}
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px]">
+      <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div>
           {/* Schedule */}
           <section>
@@ -239,7 +239,7 @@ export function StudioDetailView({ id }: { id: string }) {
                     onClick={() => setDayOffset(i)}
                     aria-pressed={active}
                     className={cn(
-                      "shrink-0 rounded-xl border px-3.5 py-2 text-sm font-medium transition-colors",
+                      "h-11 shrink-0 rounded-xl border px-3.5 text-sm font-medium transition-colors sm:h-auto sm:py-2",
                       active
                         ? "border-volt bg-volt text-volt-ink"
                         : "border-line bg-surface-2 text-mid hover:text-hi",

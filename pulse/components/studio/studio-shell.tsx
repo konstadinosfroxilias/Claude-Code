@@ -130,11 +130,11 @@ export function StudioShell({ children }: { children: React.ReactNode }) {
               <Link
                 href="/studio/notifications"
                 aria-label={t("notif.title")}
-                className="relative flex size-9 items-center justify-center rounded-xl text-mid transition-colors hover:bg-surface-2 hover:text-hi"
+                className="relative flex size-11 items-center justify-center rounded-xl text-mid transition-colors hover:bg-surface-2 hover:text-hi sm:size-9"
               >
                 <Bell className="size-4.5" />
                 {(unread ?? 0) > 0 && (
-                  <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-volt" />
+                  <span className="absolute right-2.5 top-2.5 size-2 rounded-full bg-volt sm:right-1.5 sm:top-1.5" />
                 )}
               </Link>
               <div className="lg:hidden">
@@ -142,7 +142,7 @@ export function StudioShell({ children }: { children: React.ReactNode }) {
                   <DropdownMenu.Trigger asChild>
                     <button
                       aria-label={t("nav.settings")}
-                      className="rounded-full outline-none focus-visible:outline-2 focus-visible:outline-volt"
+                      className="flex size-11 items-center justify-center rounded-full outline-none focus-visible:outline-2 focus-visible:outline-volt sm:size-8"
                     >
                       <Avatar
                         name={user?.name ?? "?"}
@@ -160,7 +160,7 @@ export function StudioShell({ children }: { children: React.ReactNode }) {
                         <DropdownMenu.Item key={item.href} asChild>
                           <Link
                             href={item.href}
-                            className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-mid outline-none data-[highlighted]:bg-surface-3 data-[highlighted]:text-hi"
+                            className="flex min-h-11 cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-mid outline-none data-[highlighted]:bg-surface-3 data-[highlighted]:text-hi sm:min-h-0"
                           >
                             <item.icon className="size-4" /> {t(item.key)}
                           </Link>
@@ -169,7 +169,7 @@ export function StudioShell({ children }: { children: React.ReactNode }) {
                       <DropdownMenu.Item asChild>
                         <Link
                           href="/member/home"
-                          className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-mid outline-none data-[highlighted]:bg-surface-3 data-[highlighted]:text-hi"
+                          className="flex min-h-11 cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-mid outline-none data-[highlighted]:bg-surface-3 data-[highlighted]:text-hi sm:min-h-0"
                         >
                           <Eye className="size-4" /> {t("dash.memberApp")}
                         </Link>
@@ -181,7 +181,7 @@ export function StudioShell({ children }: { children: React.ReactNode }) {
                       <DropdownMenu.Separator className="my-1 h-px bg-line" />
                       <DropdownMenu.Item
                         onSelect={signOut}
-                        className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-bad outline-none data-[highlighted]:bg-bad/10"
+                        className="flex min-h-11 cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-bad outline-none data-[highlighted]:bg-bad/10 sm:min-h-0"
                       >
                         <LogOut className="size-4" /> {t("common.logout")}
                       </DropdownMenu.Item>

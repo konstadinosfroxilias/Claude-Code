@@ -24,10 +24,11 @@ export interface MapViewProps {
 
 const voltIcon = L.divIcon({
   className: "",
-  html: `<div style="width:16px;height:16px;border-radius:9999px;background:#c8f13f;border:3px solid #0a0b0e;box-shadow:0 0 0 2px #c8f13f66, 0 4px 10px rgba(0,0,0,.5)"></div>`,
-  iconSize: [16, 16],
-  iconAnchor: [8, 8],
-  popupAnchor: [0, -10],
+  // 44px transparent hit area around a 16px dot — thumb-friendly on touch.
+  html: `<div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center"><div style="width:16px;height:16px;border-radius:9999px;background:#c8f13f;border:3px solid #0a0b0e;box-shadow:0 0 0 2px #c8f13f66, 0 4px 10px rgba(0,0,0,.5)"></div></div>`,
+  iconSize: [44, 44],
+  iconAnchor: [22, 22],
+  popupAnchor: [0, -16],
 });
 
 function Recenter({ center, zoom }: { center: { lat: number; lng: number }; zoom: number }) {
@@ -48,9 +49,16 @@ export default function MapViewImpl({
     <MapContainer
       center={[center.lat, center.lng]}
       zoom={zoom}
-      scrollWheelZoom
+      /*
+       * Touch-first gestures: pinch-zoom and drag stay on so the map is fully
+       * usable by finger; the scroll wheel is off so a desktop page scroll
+       * doesn't get hijacked when the cursor crosses the map.
+       */
+      scrollWheelZoom={false}
+      touchZoom
+      dragging
       className={className}
-      style={{ minHeight: 320 }}
+      style={{ minHeight: 260 }}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'

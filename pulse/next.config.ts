@@ -12,6 +12,8 @@ const nextConfig: NextConfig = {
   output: "export",
   images: { unoptimized: true },
   trailingSlash: true,
+  /* The dev-only badge defaults to bottom-left, on top of the mobile tab bar. */
+  devIndicators: { position: "bottom-right" },
 };
 
 export default nextConfig;

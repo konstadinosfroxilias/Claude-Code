@@ -13,7 +13,7 @@ export function Logo({
     <Link
       href={href}
       className={cn(
-        "group inline-flex items-center gap-2 outline-none",
+        "group inline-flex h-11 items-center gap-2 outline-none sm:h-auto",
         className,
       )}
     >

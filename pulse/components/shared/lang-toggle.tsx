@@ -21,10 +21,8 @@ export function LangToggle({ className }: { className?: string }) {
           onClick={() => setLang(code)}
           aria-pressed={lang === code}
           className={cn(
-            "rounded-full px-2.5 py-1 uppercase tracking-wide transition-colors",
-            lang === code
-              ? "bg-volt text-volt-ink"
-              : "text-low hover:text-hi",
+            "flex h-11 items-center rounded-full px-4 uppercase tracking-wide transition-colors sm:h-auto sm:px-2.5 sm:py-1",
+            lang === code ? "bg-volt text-volt-ink" : "text-low hover:text-hi",
           )}
         >
           {code}

@@ -158,6 +158,23 @@ body {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
 }
 
+/*
+ * Guarantees a >=44px touch target on a visually compact control (chips,
+ * icon buttons, inline links) without changing its painted size.
+ */
+.tap::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  width: max(100%, 44px);
+  height: max(100%, 44px);
+}
+.tap {
+  position: relative;
+}
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -191,6 +208,17 @@ body {
 }
 .leaflet-popup-content {
   margin: 0;
+}
+/* Leaflet's own zoom buttons default to 30px — too small for a thumb. */
+/* !important: leaflet.css is bundled after this file and hard-codes 30px. */
+@media (max-width: 640px), (pointer: coarse) {
+  .leaflet-touch .leaflet-bar a,
+  .leaflet-bar a {
+    width: 44px !important;
+    height: 44px !important;
+    line-height: 44px !important;
+    font-size: 20px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

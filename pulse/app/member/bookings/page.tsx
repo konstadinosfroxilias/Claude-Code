@@ -238,7 +238,7 @@ function UpcomingCard({
               <p className="display text-base text-hi">{classType.name}</p>
               <Link
                 href={`/member/studios/${studio.id}`}
-                className="mt-0.5 flex items-center gap-1 text-sm text-mid hover:text-volt"
+                className="mt-0.5 inline-flex min-h-11 items-center gap-1 text-sm text-mid hover:text-volt sm:min-h-0"
               >
                 <MapPin className="size-3" /> {studio.name}
               </Link>

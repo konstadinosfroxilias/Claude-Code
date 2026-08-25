@@ -84,7 +84,7 @@ export function StudioCard({
             onClick={toggleFav}
             aria-label={t("nav.favorites")}
             aria-pressed={!!isFav}
-            className="absolute right-3 top-3 flex size-8 items-center justify-center rounded-full bg-black/35 backdrop-blur-sm transition-all hover:scale-110"
+            className="absolute right-2 top-2 flex size-11 items-center justify-center rounded-full bg-black/35 backdrop-blur-sm transition-all hover:scale-110 sm:right-3 sm:top-3 sm:size-8"
           >
             <Heart
               className={cn(

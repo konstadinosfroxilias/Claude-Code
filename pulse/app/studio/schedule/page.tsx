@@ -91,7 +91,7 @@ export default function SchedulePage() {
               onClick={() => setDayOffset(i)}
               aria-pressed={active}
               className={cn(
-                "shrink-0 rounded-xl border px-3.5 py-2 text-sm font-medium transition-colors",
+                "h-11 shrink-0 rounded-xl border px-3.5 text-sm font-medium transition-colors sm:h-auto sm:py-2",
                 active
                   ? "border-volt bg-volt text-volt-ink"
                   : "border-line bg-surface-2 text-mid hover:text-hi",
