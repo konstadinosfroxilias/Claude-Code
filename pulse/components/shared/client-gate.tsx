@@ -15,9 +15,7 @@ export function ClientGate({ children }: { children: React.ReactNode }) {
       <div className="flex min-h-dvh items-center justify-center bg-bg">
         <div className="flex items-center gap-2.5">
           <span className="size-2.5 rounded-full bg-volt animate-pulse-dot" />
-          <span className="display text-xl tracking-tight text-hi">
-            {APP_NAME}
-          </span>
+          <span className="wordmark text-xl text-hi">{APP_NAME}</span>
         </div>
       </div>
     );

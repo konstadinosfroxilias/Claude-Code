@@ -21,7 +21,8 @@ export function Logo({
         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-volt opacity-30 group-hover:opacity-60" />
         <span className="relative inline-flex size-2.5 rounded-full bg-volt" />
       </span>
-      <span className="display text-lg tracking-tight text-hi">{APP_NAME}</span>
+      {/* The wordmark is the ONLY place the Latin-only display face is used. */}
+      <span className="wordmark text-lg text-hi">{APP_NAME}</span>
     </Link>
   );
 }

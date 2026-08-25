@@ -32,11 +32,14 @@
   --color-bad: #ff6265;
   --color-info: #7aa7ff;
 
-  /* Type */
+  /* Type — both faces ship the Greek subset (see app/layout.tsx). */
   --font-sans: var(--font-body), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-display: var(--font-disp), var(--font-body), ui-sans-serif, system-ui,
     sans-serif;
+  /* Latin-only face — ONLY for the all-caps "PULSE" wordmark. */
+  --font-wordmark-stack: var(--font-wordmark), var(--font-disp),
+    ui-sans-serif, system-ui, sans-serif;
 
   /* Radii */
   --radius-xs: 0.5rem;
@@ -127,11 +130,21 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Display type — tight, confident headings */
+/* Display type — tight, confident headings. Greek-capable (Manrope). */
 .display {
   font-family: var(--font-display);
-  letter-spacing: -0.03em;
+  letter-spacing: -0.028em;
+  font-weight: 800;
+}
+
+/*
+ * The "PULSE" wordmark only. Space Grotesk has no Greek glyphs, so this class
+ * must never wrap user-generated or translated copy.
+ */
+.wordmark {
+  font-family: var(--font-wordmark-stack);
   font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 /* Subtle film-grain overlay for hero/cover imagery */
