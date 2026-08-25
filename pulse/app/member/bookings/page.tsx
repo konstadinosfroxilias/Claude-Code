@@ -21,6 +21,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { CoverArt } from "@/components/shared/cover-art";
 import { CreditChip } from "@/components/member/bits";
+import { AddToCalendar } from "@/components/member/add-to-calendar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -334,6 +335,7 @@ function UpcomingCard({
             <Button size="sm" variant="volt" onClick={onQr}>
               <QrCode /> {t("bookings.showQr")}
             </Button>
+            <AddToCalendar view={view} />
             <Button size="sm" variant="ghost" onClick={onCancel}>
               <X /> {t("common.cancel")}
             </Button>

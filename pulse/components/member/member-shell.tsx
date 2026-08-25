@@ -18,6 +18,7 @@ import {
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { Logo } from "@/components/shared/logo";
 import { Avatar } from "@/components/shared/avatar";
+import { ReminderScheduler } from "@/components/member/reminder-scheduler";
 import { useI18n, type TranslationKey } from "@/lib/i18n";
 import { useLiveQuery } from "@/lib/hooks/use-live-query";
 import { useCurrentUser } from "@/lib/hooks/use-session";
@@ -58,6 +59,9 @@ export function MemberShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-dvh flex-col bg-bg">
+      {/* In-tab class reminders (see lib/reminders for the push seam) */}
+      <ReminderScheduler />
+
       {/* Top bar */}
       <header className="sticky top-0 z-40 border-b border-line bg-bg/85 backdrop-blur-md">
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center gap-4 px-4">
