@@ -407,6 +407,86 @@ export const el = {
   "level.intermediate": "Μεσαίο",
   "level.advanced": "Προχωρημένοι",
 
+  // ---- Location / distance ---------------------------------------------------------------------------------------
+  "geo.primerTitle": "Δες πόσο κοντά σου είναι",
+  "geo.primerBody":
+    "Με την τοποθεσία σου δείχνουμε απόσταση και χρόνο διαδρομής σε κάθε στούντιο. Μένει στη συσκευή σου.",
+  "geo.enable": "Ενεργοποίηση",
+  "geo.notNow": "Όχι τώρα",
+  "geo.denied": "Η τοποθεσία είναι απενεργοποιημένη",
+  "geo.deniedBody":
+    "Μπορείς να την ενεργοποιήσεις από τις ρυθμίσεις του browser όποτε θες.",
+  "geo.locating": "Εντοπισμός…",
+  "geo.enabled": "Η τοποθεσία ενεργοποιήθηκε",
+  "geo.settingsLabel": "Τοποθεσία",
+  "geo.settingsOn": "Ενεργή — βλέπεις αποστάσεις",
+  "geo.settingsOff": "Ανενεργή — δεν εμφανίζονται αποστάσεις",
+
+  "distance.walk": "{time} λεπτά με τα πόδια",
+  "distance.drive": "{time} λεπτά με αυτοκίνητο",
+  "distance.walkShort": "{time}′ με τα πόδια",
+  "distance.driveShort": "{time}′ οδικώς",
+  "distance.withDistance": "{travel} · {dist}",
+  "distance.away": "{dist} από εσένα",
+
+  // ---- Home: near you --------------------------------------------------------------------------------------------
+  "home.nearYouTitle": "Κοντά σου, ξεκινάει σύντομα",
+  "home.nearYouTitleNoGeo": "Ξεκινάει σύντομα",
+  "home.nearYouSub": "Μαθήματα που ξεκινούν μέσα στις επόμενες {hours} ώρες",
+  "home.nearYouEmpty": "Δεν ξεκινάει κάτι άλλο σήμερα",
+  "home.nearYouEmptyHint": "Δες όλο το πρόγραμμα για τις επόμενες μέρες.",
+  "home.nearYouStartsIn": "σε {time}′",
+  "home.nearYouCapReached": "Όριο επισκέψεων",
+
+  // ---- Waitlist --------------------------------------------------------------------------------------------------
+  "waitlist.join": "Μπες σε λίστα αναμονής",
+  "waitlist.joinCta": "Μπες σε λίστα αναμονής",
+  "waitlist.joined": "Μπήκες στη λίστα αναμονής",
+  "waitlist.position": "Λίστα αναμονής · #{n}",
+  "waitlist.positionShort": "#{n} στη λίστα",
+  "waitlist.leave": "Έξοδος από τη λίστα",
+  "waitlist.left": "Βγήκες από τη λίστα αναμονής",
+  "waitlist.explainer":
+    "Δεν χρεώνεσαι τώρα. Κρατάμε {n} credits στην άκρη και αν ελευθερωθεί θέση, μπαίνεις αυτόματα.",
+  "waitlist.holdLabel": "Δέσμευση credits",
+  "waitlist.count": "{n} σε αναμονή",
+  "waitlist.countShort": "+{n} αναμονή",
+  "waitlist.full": "Το μάθημα είναι πλήρες",
+  "waitlist.autoBookedTitle": "Μπήκες! Αυτόματη κράτηση από τη λίστα",
+  "waitlist.autoBookedBody": "{class} στο {studio} — {time}. Το QR σου είναι έτοιμο.",
+  "waitlist.missedTitle": "Έχασες μια θέση που ελευθερώθηκε",
+  "waitlist.missedBodyCredits":
+    "Δεν είχες αρκετά credits για το {class} στο {studio}.",
+  "waitlist.missedBodyCap":
+    "Έχεις πιάσει το όριο επισκέψεων στο {studio} αυτόν τον μήνα.",
+  "waitlist.errAlready": "Είσαι ήδη στη λίστα αναμονής",
+  "waitlist.errNotFull": "Υπάρχουν ακόμη ελεύθερες θέσεις",
+  "waitlist.badge": "Σε αναμονή",
+
+  // ---- Reminders & calendar ---------------------------------------------------------------------------------------
+  "reminder.title": "Υπενθυμίσεις",
+  "reminder.upcomingSoon": "Ξεκινούν σύντομα",
+  "reminder.none": "Καμία επερχόμενη υπενθύμιση",
+  "reminder.noneHint": "Μόλις κλείσεις μάθημα, θα το δεις εδώ.",
+  "reminder.in2h": "Σε 2 ώρες: {class} στο {studio}",
+  "reminder.in30m": "Σε 30 λεπτά: {class} στο {studio}",
+  "reminder.startingNow": "Ξεκινάει τώρα: {class} στο {studio}",
+  "reminder.optInTitle": "Υπενθυμίσεις στον browser",
+  "reminder.optInBody":
+    "Στείλε μου ειδοποίηση πριν το μάθημα, όσο η εφαρμογή είναι ανοιχτή.",
+  "reminder.optInEnable": "Ενεργοποίηση",
+  "reminder.optInNotNow": "Όχι τώρα",
+  "reminder.optInOn": "Οι ειδοποιήσεις είναι ενεργές",
+  "reminder.optInBlocked": "Οι ειδοποιήσεις είναι μπλοκαρισμένες στον browser",
+  "reminder.tabOnlyNote":
+    "Οι υπενθυμίσεις λειτουργούν όσο η εφαρμογή είναι ανοιχτή σε καρτέλα.",
+
+  "calendar.add": "Προσθήκη στο ημερολόγιο",
+  "calendar.ics": "Λήψη .ics",
+  "calendar.google": "Google Calendar",
+  "calendar.eventNote": "Κράτηση PULSE — δείξε το QR στη ρεσεψιόν.",
+  "calendar.downloaded": "Το αρχείο ημερολογίου κατέβηκε",
+
   // ---- Amenities ------------------------------------------------------------------------------------------------
   "amenity.showers": "Ντους",
   "amenity.lockers": "Ντουλάπια",

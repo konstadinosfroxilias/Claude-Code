@@ -25,6 +25,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { SessionRow } from "@/components/member/session-row";
 import { BookingSheet } from "@/components/member/booking-sheet";
 import { RatingChip } from "@/components/member/bits";
+import { DistanceLabel } from "@/components/shared/distance-label";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -166,6 +167,10 @@ export function StudioDetailView({ id }: { id: string }) {
               <MapPin className="size-3.5" />
               {nb ? pick(nb.name) : ""} · {studio.address}
             </span>
+            <DistanceLabel
+              to={{ lat: studio.lat, lng: studio.lng }}
+              className="text-white/85"
+            />
           </div>
         </div>
       </div>

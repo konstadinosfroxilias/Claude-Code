@@ -11,6 +11,7 @@ import type { CategoryId, CityId, StudioFilter } from "@/lib/types";
 import { StudioCard } from "@/components/member/studio-card";
 import { MapView } from "@/components/shared/map-view";
 import { PageHeader } from "@/components/shared/page-header";
+import { GeoPrimer } from "@/components/shared/geo-primer";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -112,6 +113,8 @@ function Explore() {
           </div>
         }
       />
+
+      <GeoPrimer className="mb-4" />
 
       {/* Filter bar */}
       <div className="mb-5 space-y-3">

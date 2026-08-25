@@ -11,6 +11,7 @@ import { getServices } from "@/lib/services";
 import { CoverArt } from "@/components/shared/cover-art";
 import { Badge } from "@/components/ui/badge";
 import { RatingChip } from "@/components/member/bits";
+import { DistanceLabel } from "@/components/shared/distance-label";
 import { cn } from "@/lib/utils";
 
 export function StudioCard({
@@ -102,9 +103,13 @@ export function StudioCard({
             </h3>
             <RatingChip rating={studio.rating} />
           </div>
-          <p className="mt-1 flex items-center gap-1 text-xs text-low">
-            <MapPin className="size-3" />
-            {nb ? pick(nb.name) : ""}
+          <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-low">
+            <span className="inline-flex items-center gap-1">
+              <MapPin className="size-3" />
+              {nb ? pick(nb.name) : ""}
+            </span>
+            {/* Renders only when location permission was granted. */}
+            <DistanceLabel to={{ lat: studio.lat, lng: studio.lng }} />
           </p>
           {!compact && (
             <div className="mt-2.5 flex flex-wrap gap-1.5">

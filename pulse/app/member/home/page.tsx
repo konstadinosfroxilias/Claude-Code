@@ -13,6 +13,8 @@ import type { SessionView } from "@/lib/types";
 import { StudioCard } from "@/components/member/studio-card";
 import { SessionRow } from "@/components/member/session-row";
 import { BookingSheet } from "@/components/member/booking-sheet";
+import { NearYouSection } from "@/components/member/near-you";
+import { GeoPrimer } from "@/components/shared/geo-primer";
 import { CoverArt } from "@/components/shared/cover-art";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -149,6 +151,18 @@ export default function HomePage() {
           </div>
         )}
       </motion.div>
+
+      {/* Location primer — shown before any native prompt */}
+      <motion.div variants={rise} className="mt-4">
+        <GeoPrimer />
+      </motion.div>
+
+      {/* Near you, starting soon — the wake-up → book flow */}
+      {userId && (
+        <motion.div variants={rise} className="mt-8">
+          <NearYouSection userId={userId} onBook={setBookingTarget} />
+        </motion.div>
+      )}
 
       {/* Categories */}
       <motion.section variants={rise} className="mt-8">

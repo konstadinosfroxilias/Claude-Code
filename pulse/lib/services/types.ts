@@ -55,6 +55,17 @@ export interface CatalogService {
     dayISO: string;
     limit?: number;
   }): Promise<SessionView[]>;
+  /**
+   * Sessions starting within `withinHours` from now, across all studios —
+   * the "starting soon" feed. Includes full sessions so the UI can offer the
+   * waitlist. Ranking is done client-side (it depends on the member's
+   * location, which never leaves the device).
+   */
+  listStartingSoon(opts: {
+    cityId?: string;
+    withinHours: number;
+    limit?: number;
+  }): Promise<SessionView[]>;
   getSessionView(sessionId: string): Promise<SessionView | null>;
   listFavorites(userId: string): Promise<Studio[]>;
   isFavorite(userId: string, studioId: string): Promise<boolean>;

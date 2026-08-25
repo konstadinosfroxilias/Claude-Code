@@ -5,6 +5,7 @@ import type { SessionView } from "@/lib/types";
 import { useI18n } from "@/lib/i18n";
 import { formatTime } from "@/lib/utils";
 import { CreditChip, PeakBadge } from "@/components/member/bits";
+import { DistanceLabel } from "@/components/shared/distance-label";
 import { cn } from "@/lib/utils";
 
 /** One bookable slot — used in studio schedules and "available today". */
@@ -55,7 +56,7 @@ export function SessionRow({
         <p className="mt-0.5 truncate text-xs text-mid">
           {showStudio ? classType.name : session.instructor}
         </p>
-        <div className="mt-1.5 flex items-center gap-2">
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
           <PeakBadge peak={session.peak} />
           <span
             className={cn(
@@ -66,6 +67,10 @@ export function SessionRow({
             <Users className="size-3" />
             {full ? t("common.full") : t("common.spotsLeft", { n: spotsLeft })}
           </span>
+          <DistanceLabel
+            to={{ lat: studio.lat, lng: studio.lng }}
+            className="text-[11px] text-low"
+          />
         </div>
       </div>
 

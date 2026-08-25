@@ -190,6 +190,32 @@ const catalog: Services["catalog"] = {
       .filter((v): v is SessionView => v !== null && v.spotsLeft > 0)
       .slice(0, limit);
   },
+  async listStartingSoon({ cityId, withinHours, limit = 10 }) {
+    await simulate(READ_MS);
+    const state = db.get();
+    const now = Date.now();
+    // Leave a small lead time — a class starting in 3 minutes isn't bookable
+    // in practice.
+    const from = now + 10 * 60_000;
+    const until = now + withinHours * 3_600_000;
+    const endOfToday = addDays(startOfDay(new Date()), 1).getTime();
+    return state.sessions
+      .filter((s) => {
+        if (s.status !== "scheduled") return false;
+        const t = new Date(s.startsAt).getTime();
+        // "Starting soon" stays within today — tomorrow morning isn't "soon".
+        if (t < from || t > Math.min(until, endOfToday)) return false;
+        if (cityId) {
+          const st = state.studios.find((x) => x.id === s.studioId);
+          if (!st || st.cityId !== cityId) return false;
+        }
+        return true;
+      })
+      .sort((a, b) => a.startsAt.localeCompare(b.startsAt))
+      .map((s) => toSessionView(state, s))
+      .filter((v): v is SessionView => v !== null)
+      .slice(0, limit);
+  },
   async getSessionView(sessionId) {
     const state = db.get();
     const s = state.sessions.find((x) => x.id === sessionId);
