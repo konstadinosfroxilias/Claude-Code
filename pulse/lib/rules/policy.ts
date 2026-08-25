@@ -38,21 +38,30 @@ export const ACTIVE_BOOKING_STATUSES: Booking["status"][] = [
 ];
 
 /**
- * Visits counted against the cap for a booking attempt at `sessionStart`:
- * active bookings at the same studio whose session starts inside the rolling
- * window ending at the attempted session's start.
+ * Visits counted against the cap.
+ *
+ * The window opens `windowDays` before the EARLIER of now and the session
+ * being attempted, and stays open — so every active booking at that studio
+ * counts: past visits inside the rolling month AND every upcoming hold.
+ *
+ * Anchoring on the earlier of the two matters. If the window merely ended at
+ * the attempted session's start, bookings made for LATER dates would escape
+ * the count, and a member could hold a 5th visit by queuing an early class
+ * and then booking four later ones. It also keeps enforcement identical to
+ * the "x/4 used this month" meter the UI shows, so the two can never
+ * disagree.
  */
 export function countVisitsInWindow(
   sessionStartsOfActiveBookings: string[],
   sessionStart: Date,
   windowDays: number = POLICY.rollingWindowDays,
+  now: Date = new Date(),
 ): number {
-  const end = sessionStart.getTime();
-  const start = end - windowDays * 86_400_000;
-  return sessionStartsOfActiveBookings.filter((iso) => {
-    const t = new Date(iso).getTime();
-    return t > start && t <= end;
-  }).length;
+  const anchor = Math.min(now.getTime(), sessionStart.getTime());
+  const windowOpensAt = anchor - windowDays * 86_400_000;
+  return sessionStartsOfActiveBookings.filter(
+    (iso) => new Date(iso).getTime() > windowOpensAt,
+  ).length;
 }
 
 export function isLateCancellation(

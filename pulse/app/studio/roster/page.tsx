@@ -149,6 +149,11 @@ function Roster() {
               released: selected.session.spotsReleasedToPlatform,
             })}
           </Badge>
+          {selected.waitlistCount > 0 && (
+            <Badge variant="info">
+              {t("waitlist.count", { n: selected.waitlistCount })}
+            </Badge>
+          )}
           <span className="tnum">
             {t("dashRoster.earning", {
               price: formatEUR(selected.session.floorPriceEUR, lang),

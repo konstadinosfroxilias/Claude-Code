@@ -176,6 +176,11 @@ export default function SchedulePage() {
                         released: v.session.spotsReleasedToPlatform,
                       })}
                     </Badge>
+                    {v.waitlistCount > 0 && (
+                      <Badge variant="info">
+                        {t("waitlist.countShort", { n: v.waitlistCount })}
+                      </Badge>
+                    )}
                     <span className="text-[11px] text-low tnum">
                       {t("common.capacity")}: {v.session.capacity}
                     </span>

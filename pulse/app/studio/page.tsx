@@ -163,6 +163,11 @@ export default function StudioOverviewPage() {
                         released: v.session.spotsReleasedToPlatform,
                       })}
                     </Badge>
+                    {v.waitlistCount > 0 && (
+                      <Badge variant="info">
+                        {t("waitlist.countShort", { n: v.waitlistCount })}
+                      </Badge>
+                    )}
                     {past ? (
                       <span className="hidden text-xs text-low sm:block">
                         {t("dashHome.quickRoster")}

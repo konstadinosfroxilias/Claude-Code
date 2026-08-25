@@ -24,7 +24,8 @@ export function SessionRow({
   const { session, classType, studio, creditCost, spotsLeft } = view;
   const full = spotsLeft <= 0;
   const past = new Date(session.startsAt).getTime() <= Date.now();
-  const disabled = full || past;
+  // A full class is still tappable — that's how you reach the waitlist.
+  const disabled = past;
 
   return (
     <button
@@ -32,10 +33,11 @@ export function SessionRow({
       disabled={disabled}
       onClick={() => onBook(view)}
       className={cn(
-        "group flex w-full items-center gap-4 rounded-xl border border-line bg-surface-2 px-4 py-3 text-left transition-all",
-        disabled
-          ? "opacity-50"
-          : "hover:border-volt/40 hover:bg-surface-3 active:scale-[0.995]",
+        "group flex w-full items-center gap-4 rounded-xl border bg-surface-2 px-4 py-3 text-left transition-all",
+        disabled && "opacity-50",
+        full && !disabled && "border-dashed border-line-strong",
+        !full && "border-line",
+        !disabled && "hover:border-volt/40 hover:bg-surface-3 active:scale-[0.995]",
         className,
       )}
     >
@@ -67,6 +69,13 @@ export function SessionRow({
             <Users className="size-3" />
             {full ? t("common.full") : t("common.spotsLeft", { n: spotsLeft })}
           </span>
+          {full && !disabled && (
+            <span className="text-[11px] font-semibold text-info">
+              {view.waitlistCount > 0
+                ? `${t("waitlist.join")} · ${t("waitlist.countShort", { n: view.waitlistCount })}`
+                : t("waitlist.join")}
+            </span>
+          )}
           <DistanceLabel
             to={{ lat: studio.lat, lng: studio.lng }}
             className="text-[11px] text-low"

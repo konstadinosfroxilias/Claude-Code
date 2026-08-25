@@ -31,13 +31,18 @@ import type {
   Subscription,
   TimeSeriesPoint,
   VisitCapStatus,
+  WaitlistEntry,
+  WaitlistView,
 } from "@/lib/types";
 import { addDays, monthKey, startOfDay, uid } from "@/lib/utils";
 import type { Services } from "../types";
+import type { DBState } from "@/lib/mock/db";
 import {
   bookedCount,
   isActiveBooking,
   pushNotification,
+  renumberWaitlist,
+  toWaitlistView,
   READ_MS,
   ServiceError,
   simulate,
@@ -278,15 +283,9 @@ function capStatusFor(
     })
     .filter((x): x is string => !!x);
 
-  let used: number;
-  if (atSessionStart) {
-    used = countVisitsInWindow(starts, atSessionStart);
-  } else {
-    // Display mode: visits in the trailing window + all upcoming holds.
-    const windowStart =
-      Date.now() - POLICY.rollingWindowDays * 86_400_000;
-    used = starts.filter((iso) => new Date(iso).getTime() > windowStart).length;
-  }
+  // One rule for both display and enforcement (see countVisitsInWindow):
+  // omitting the session start just anchors the window at "now".
+  const used = countVisitsInWindow(starts, atSessionStart ?? new Date());
   return { used: Math.min(used, cap), cap, reached: used >= cap };
 }
 
@@ -297,12 +296,20 @@ function eligibilityFor(userId: string, sessionId: string): BookingEligibility {
   const view = toSessionView(state, s);
   if (!view) throw new ServiceError("session_not_found");
   const capStatus = capStatusFor(userId, s.studioId, new Date(s.startsAt));
+  const waitlistPosition = state.waitlist.find(
+    (w) => w.sessionId === sessionId && w.userId === userId,
+  )?.position;
 
-  const deny = (reason: BookingDenialReason): BookingEligibility => ({
+  const deny = (
+    reason: BookingDenialReason,
+    canJoinWaitlist = false,
+  ): BookingEligibility => ({
     ok: false,
     reason,
     creditCost: view.creditCost,
     capStatus,
+    canJoinWaitlist,
+    waitlistPosition,
   });
 
   if (s.status !== "scheduled" || new Date(s.startsAt).getTime() <= Date.now())
@@ -314,12 +321,169 @@ function eligibilityFor(userId: string, sessionId: string): BookingEligibility {
     )
   )
     return deny("already_booked");
-  if (view.spotsLeft <= 0) return deny("full");
+  if (view.spotsLeft <= 0) {
+    // Full is the one denial the member can act on: offer the waitlist,
+    // provided the cap and their balance would allow the eventual booking.
+    const affordable =
+      walletSummary(state, userId).balance >= view.creditCost;
+    return deny(
+      "full",
+      !capStatus.reached && affordable && waitlistPosition === undefined,
+    );
+  }
   if (capStatus.reached) return deny("visit_cap");
   if (walletSummary(state, userId).balance < view.creditCost)
     return deny("insufficient_credits");
 
-  return { ok: true, creditCost: view.creditCost, capStatus };
+  return {
+    ok: true,
+    creditCost: view.creditCost,
+    capStatus,
+    canJoinWaitlist: false,
+    waitlistPosition,
+  };
+}
+
+/**
+ * AUTO-BOOK: a spot on `sessionId` just freed up — promote the queue.
+ *
+ * Walks the queue in order and books the first member who still qualifies:
+ * a promotion that would breach the 4-visits-per-studio cap, or that they can
+ * no longer afford, is skipped (with a "you missed a spot" notification) and
+ * the next member is tried. Runs inside an existing db.mutate transaction.
+ */
+function promoteFromWaitlist(state: DBState, sessionId: string): void {
+  const session = state.sessions.find((s) => s.id === sessionId);
+  if (!session || session.status !== "scheduled") return;
+  if (new Date(session.startsAt).getTime() <= Date.now()) return;
+
+  const studio = state.studios.find((x) => x.id === session.studioId);
+  const classType = state.classTypes.find((c) => c.id === session.classTypeId);
+  if (!studio || !classType) return;
+
+  // Only promote while a spot is genuinely free.
+  const view = toSessionView(state, session);
+  if (!view || view.spotsLeft <= 0) return;
+
+  const queue = state.waitlist
+    .filter((w) => w.sessionId === sessionId)
+    .sort((a, b) => a.position - b.position);
+
+  for (const entry of queue) {
+    const capStatus = capStatusFor(
+      entry.userId,
+      session.studioId,
+      new Date(session.startsAt),
+    );
+    const balance = walletSummary(state, entry.userId).balance;
+    const cost = view.creditCost;
+
+    const skipReason: "cap" | "credits" | null = capStatus.reached
+      ? "cap"
+      : balance < cost
+        ? "credits"
+        : null;
+
+    if (skipReason) {
+      // Drop them from the queue and tell them why they missed it.
+      state.waitlist = state.waitlist.filter((w) => w.id !== entry.id);
+      pushNotification(state, {
+        userId: entry.userId,
+        kind: "booking",
+        title: {
+          el: "Έχασες μια θέση που ελευθερώθηκε",
+          en: "You missed a spot that opened up",
+        },
+        body:
+          skipReason === "cap"
+            ? {
+                el: `Έχεις πιάσει το όριο επισκέψεων στο ${studio.name} αυτόν τον μήνα.`,
+                en: `You've reached this month's visit limit at ${studio.name}.`,
+              }
+            : {
+                el: `Δεν είχες αρκετά credits για το ${classType.name} στο ${studio.name}.`,
+                en: `You didn't have enough credits for ${classType.name} at ${studio.name}.`,
+              },
+        href: "/member/bookings",
+      });
+      continue;
+    }
+
+    // Promote: the soft hold becomes a real reservation + pending spend.
+    const now = new Date().toISOString();
+    const booking: Booking = {
+      id: uid("bk"),
+      userId: entry.userId,
+      sessionId,
+      studioId: session.studioId,
+      status: "reserved",
+      creditCost: cost,
+      payoutEUR: session.floorPriceEUR,
+      qrToken: uid("qr"),
+      createdAt: now,
+      fromWaitlist: true,
+    };
+    state.bookings.push(booking);
+    state.creditTxs.push({
+      id: uid("tx"),
+      userId: entry.userId,
+      type: "spend",
+      status: "pending",
+      delta: -cost,
+      reason: "booking",
+      bookingId: booking.id,
+      studioId: session.studioId,
+      createdAt: now,
+    });
+    state.payoutEntries.push({
+      id: uid("po"),
+      studioId: session.studioId,
+      bookingId: booking.id,
+      sessionId,
+      userId: entry.userId,
+      amountEUR: session.floorPriceEUR,
+      status: "pending",
+      createdAt: now,
+    });
+    state.waitlist = state.waitlist.filter((w) => w.id !== entry.id);
+
+    const when = new Date(session.startsAt).toLocaleString("el-GR", {
+      weekday: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    pushNotification(state, {
+      userId: entry.userId,
+      kind: "booking",
+      title: {
+        el: "Μπήκες! Αυτόματη κράτηση από τη λίστα",
+        en: "You're in — auto-booked from the waitlist",
+      },
+      body: {
+        el: `${classType.name} στο ${studio.name} — ${when}. Το QR σου είναι έτοιμο.`,
+        en: `${classType.name} at ${studio.name} — ${when}. Your QR is ready.`,
+      },
+      href: "/member/bookings",
+    });
+    pushNotification(state, {
+      userId: studio.ownerId,
+      kind: "booking",
+      title: {
+        el: "Κράτηση από λίστα αναμονής",
+        en: "Booking filled from the waitlist",
+      },
+      body: {
+        el: `${classType.name} — μια θέση ξαναγέμισε αυτόματα.`,
+        en: `${classType.name} — a freed spot was filled automatically.`,
+      },
+      href: "/studio/roster",
+    });
+
+    renumberWaitlist(state, sessionId);
+    return; // exactly one spot was freed
+  }
+
+  renumberWaitlist(state, sessionId);
 }
 
 const booking: Services["booking"] = {
@@ -456,6 +620,8 @@ const booking: Services["booking"] = {
       // The studio accrual never materializes.
       const po = state.payoutEntries.find((p) => p.bookingId === b.id);
       if (po && po.status === "pending") po.status = "reversed";
+      // A spot just freed up — auto-book the next person in the queue.
+      promoteFromWaitlist(state, b.sessionId);
     });
     return { late: quote.late, feeCredits: quote.feeCredits };
   },
@@ -530,6 +696,7 @@ const booking: Services["booking"] = {
       });
       const po = state.payoutEntries.find((p) => p.bookingId === b.id);
       if (po && po.status === "pending") po.status = "reversed";
+      promoteFromWaitlist(state, b.sessionId);
     });
     const view = toBookingView(db.get(), db.get().bookings.find((x) => x.id === bookingId)!);
     if (!view) throw new ServiceError("unknown");
@@ -537,6 +704,86 @@ const booking: Services["booking"] = {
   },
   async visitCapStatus(userId, studioId) {
     return capStatusFor(userId, studioId);
+  },
+
+  /* ------------------------------ Waitlist ------------------------------ */
+  async joinWaitlist(userId, sessionId) {
+    await simulate(WRITE_MS);
+    const el = eligibilityFor(userId, sessionId);
+    if (el.reason !== "full") {
+      // Only a full session has a queue to join.
+      throw new ServiceError(
+        el.reason === "already_booked"
+          ? "already_booked"
+          : el.ok
+            ? "not_full"
+            : (el.reason ?? "unknown"),
+      );
+    }
+    const state0 = db.get();
+    if (
+      state0.waitlist.some(
+        (w) => w.sessionId === sessionId && w.userId === userId,
+      )
+    )
+      throw new ServiceError("already_waitlisted");
+    if (el.capStatus.reached) throw new ServiceError("visit_cap");
+    if (walletSummary(state0, userId).balance < el.creditCost)
+      throw new ServiceError("insufficient_credits");
+
+    let created: WaitlistEntry | null = null;
+    db.mutate((state) => {
+      const s = state.sessions.find((x) => x.id === sessionId)!;
+      const entry: WaitlistEntry = {
+        id: uid("wl"),
+        sessionId,
+        studioId: s.studioId,
+        userId,
+        // Provisional — renumberWaitlist assigns the real position.
+        position: state.waitlist.filter((w) => w.sessionId === sessionId).length + 1,
+        holdCredits: el.creditCost,
+        createdAt: new Date().toISOString(),
+      };
+      state.waitlist.push(entry);
+      renumberWaitlist(state, sessionId);
+      created = entry;
+    });
+    // Re-read so the caller gets the settled position.
+    const settled = db
+      .get()
+      .waitlist.find((w) => w.id === (created as WaitlistEntry).id);
+    return settled ?? created!;
+  },
+
+  async leaveWaitlist(userId, sessionId) {
+    await simulate(WRITE_MS);
+    db.mutate((state) => {
+      const before = state.waitlist.length;
+      state.waitlist = state.waitlist.filter(
+        (w) => !(w.sessionId === sessionId && w.userId === userId),
+      );
+      if (state.waitlist.length === before)
+        throw new ServiceError("not_waitlisted");
+      renumberWaitlist(state, sessionId);
+    });
+  },
+
+  async listMyWaitlist(userId) {
+    await simulate(READ_MS);
+    const state = db.get();
+    return state.waitlist
+      .filter((w) => w.userId === userId)
+      .map((w) => toWaitlistView(state, w))
+      .filter((v): v is WaitlistView => v !== null)
+      .sort((a, b) => a.session.startsAt.localeCompare(b.session.startsAt));
+  },
+
+  async listSessionWaitlist(sessionId) {
+    await simulate(READ_MS);
+    return db
+      .get()
+      .waitlist.filter((w) => w.sessionId === sessionId)
+      .sort((a, b) => a.position - b.position);
   },
 };
 
@@ -948,6 +1195,21 @@ const studioAdmin: Services["studioAdmin"] = {
           href: "/member/bookings",
         });
       }
+      // The class is gone — release every hold and tell the queue.
+      for (const w of state.waitlist.filter((x) => x.sessionId === sessionId)) {
+        const studio = state.studios.find((x) => x.id === s.studioId);
+        pushNotification(state, {
+          userId: w.userId,
+          kind: "booking",
+          title: { el: "Μάθημα ακυρώθηκε", en: "Class cancelled" },
+          body: {
+            el: `${studio?.name ?? ""} — βγήκες από τη λίστα αναμονής.`,
+            en: `${studio?.name ?? ""} — you were removed from the waitlist.`,
+          },
+          href: "/member/bookings",
+        });
+      }
+      state.waitlist = state.waitlist.filter((x) => x.sessionId !== sessionId);
     });
   },
   async getRoster(sessionId) {

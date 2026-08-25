@@ -32,6 +32,8 @@ import type {
   Subscription,
   User,
   VisitCapStatus,
+  WaitlistEntry,
+  WaitlistView,
 } from "@/lib/types";
 
 export interface AuthService {
@@ -87,6 +89,19 @@ export interface BookingService {
   /** Studio-side: mark a no-show — fee to member, payout reversed. */
   markNoShow(bookingId: string): Promise<BookingView>;
   visitCapStatus(userId: string, studioId: string): Promise<VisitCapStatus>;
+
+  /* ------------------------------ Waitlist ------------------------------ */
+  /**
+   * Queue for a full session. Charges nothing now: verifies the balance and
+   * records a soft hold. Throws `not_full`, `already_waitlisted`,
+   * `already_booked`, `insufficient_credits` or `visit_cap`.
+   */
+  joinWaitlist(userId: string, sessionId: string): Promise<WaitlistEntry>;
+  /** Leave the queue and release the hold; positions behind shift up. */
+  leaveWaitlist(userId: string, sessionId: string): Promise<void>;
+  listMyWaitlist(userId: string): Promise<WaitlistView[]>;
+  /** Studio-side: who is queued for a session, in order. */
+  listSessionWaitlist(sessionId: string): Promise<WaitlistEntry[]>;
 }
 
 export interface WalletService {

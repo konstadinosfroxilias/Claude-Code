@@ -21,6 +21,7 @@ import type {
   Studio,
   Subscription,
   User,
+  WaitlistEntry,
 } from "@/lib/types";
 import { computeCreditCost, isPeakHour } from "@/lib/rules/pricing";
 import { addDays, startOfDay } from "@/lib/utils";
@@ -43,6 +44,7 @@ export interface DBState {
   reviews: Review[];
   notifications: AppNotification[];
   favorites: Favorite[];
+  waitlist: WaitlistEntry[];
 }
 
 /* ------------------------------- Static data ------------------------------ */
@@ -1243,5 +1245,7 @@ export function buildSeed(now: Date = new Date()): DBState {
     reviews,
     notifications,
     favorites,
+    // Seeded empty: the demo builds its own queues as sessions fill up.
+    waitlist: [],
   };
 }

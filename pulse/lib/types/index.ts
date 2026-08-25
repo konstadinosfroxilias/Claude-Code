@@ -133,6 +133,24 @@ export type BookingStatus =
   | "late_cancelled"
   | "no_show";
 
+/**
+ * A member queued for a full session.
+ *
+ * Joining charges nothing: `holdCredits` is a SOFT hold (verified against the
+ * balance at join time, not deducted). On promotion the hold becomes a real
+ * pending credit spend, exactly like a normal booking.
+ */
+export interface WaitlistEntry {
+  id: string;
+  sessionId: string;
+  studioId: string;
+  userId: string;
+  /** 1-based queue position; recomputed when entries leave. */
+  position: number;
+  holdCredits: number;
+  createdAt: string;
+}
+
 export interface Booking {
   id: string;
   userId: string;
@@ -147,6 +165,8 @@ export interface Booking {
   createdAt: string;
   checkedInAt?: string;
   cancelledAt?: string;
+  /** True when this reservation came from an automatic waitlist promotion. */
+  fromWaitlist?: boolean;
 }
 
 export type PlanId = "starter" | "plus" | "premium";
@@ -260,10 +280,20 @@ export interface SessionView {
   /** Bookings currently holding a platform spot. */
   booked: number;
   spotsLeft: number;
+  /** Members queued for this session (0 when nobody is waiting). */
+  waitlistCount: number;
 }
 
 export interface BookingView {
   booking: Booking;
+  session: Session;
+  classType: ClassType;
+  studio: Studio;
+}
+
+/** A member's waitlist entry, enriched for "My bookings". */
+export interface WaitlistView {
+  entry: WaitlistEntry;
   session: Session;
   classType: ClassType;
   studio: Studio;
@@ -296,6 +326,13 @@ export interface BookingEligibility {
   reason?: BookingDenialReason;
   creditCost: number;
   capStatus: VisitCapStatus;
+  /**
+   * True when the ONLY thing blocking the booking is that the session is
+   * full — i.e. the member may join the waitlist instead.
+   */
+  canJoinWaitlist: boolean;
+  /** Set when this member already holds a queue place. */
+  waitlistPosition?: number;
 }
 
 export interface CancellationQuote {

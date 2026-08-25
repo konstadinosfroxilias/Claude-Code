@@ -3,14 +3,19 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { CalendarPlus, MapPin, QrCode, ScanLine, X } from "lucide-react";
+import { CalendarPlus, MapPin, QrCode, ScanLine, Users, X } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n";
 import { useCurrentUser } from "@/lib/hooks/use-session";
 import { useLiveQuery } from "@/lib/hooks/use-live-query";
 import { getServices } from "@/lib/services";
-import type { BookingStatus, BookingView, CancellationQuote } from "@/lib/types";
+import type {
+  BookingStatus,
+  BookingView,
+  CancellationQuote,
+  WaitlistView,
+} from "@/lib/types";
 import { cn, formatDateTime } from "@/lib/utils";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -48,6 +53,11 @@ export default function BookingsPage() {
   const { data: bookings, loading } = useLiveQuery(
     (svc) =>
       userId ? svc.booking.listMyBookings(userId) : Promise.resolve([]),
+    [userId],
+  );
+  const { data: waitlist } = useLiveQuery(
+    (svc) =>
+      userId ? svc.booking.listMyWaitlist(userId) : Promise.resolve([]),
     [userId],
   );
 
@@ -132,6 +142,30 @@ export default function BookingsPage() {
               </AnimatePresence>
             </motion.div>
           )}
+
+          {/* Waitlisted classes — no credits charged yet */}
+          {waitlist && waitlist.length > 0 && (
+            <div className="mt-6">
+              <h2 className="display mb-3 text-sm uppercase tracking-wide text-low">
+                {t("waitlist.badge")}
+              </h2>
+              <motion.div layout className="space-y-2">
+                <AnimatePresence initial={false}>
+                  {waitlist.map((w) => (
+                    <motion.div
+                      key={w.entry.id}
+                      layout
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.97 }}
+                    >
+                      <WaitlistCard view={w} userId={userId} />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </motion.div>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="past">
@@ -199,6 +233,54 @@ export default function BookingsPage() {
         view={cancelTarget}
         onClose={() => setCancelTarget(null)}
       />
+    </div>
+  );
+}
+
+function WaitlistCard({
+  view,
+  userId,
+}: {
+  view: WaitlistView;
+  userId: string | null;
+}) {
+  const { t, lang } = useI18n();
+  const { entry, session, classType, studio } = view;
+  const [busy, setBusy] = useState(false);
+
+  const leave = async () => {
+    if (!userId) return;
+    setBusy(true);
+    try {
+      await getServices().booking.leaveWaitlist(userId, session.id);
+      toast(t("waitlist.left"));
+    } catch {
+      toast.error(t("common.retry"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-wrap items-center gap-3 rounded-xl border border-info/25 bg-info/5 px-4 py-3">
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-info/15 text-info">
+        <Users className="size-4" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold text-hi">
+          {classType.name}
+          <span className="font-normal text-mid"> · {studio.name}</span>
+        </p>
+        <p className="mt-0.5 text-xs text-low tnum">
+          {formatDateTime(session.startsAt, lang)}
+        </p>
+      </div>
+      <Badge variant="info">
+        {t("waitlist.position", { n: entry.position })}
+      </Badge>
+      <Button size="sm" variant="ghost" loading={busy} onClick={leave}>
+        {t("waitlist.leave")}
+      </Button>
     </div>
   );
 }

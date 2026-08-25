@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { animate, motion } from "framer-motion";
-import { AlertTriangle, Check, ShieldAlert, Zap } from "lucide-react";
+import { AlertTriangle, Check, ShieldAlert, Users, Zap } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -73,6 +73,50 @@ export function BookingSheet({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId, userId]);
+
+  const joinWaitlist = async () => {
+    if (!view) return;
+    setBusy(true);
+    try {
+      const entry = await getServices().booking.joinWaitlist(
+        userId,
+        view.session.id,
+      );
+      toast.success(t("waitlist.joined"), {
+        description: t("waitlist.position", { n: entry.position }),
+      });
+      onClose();
+    } catch (e) {
+      const code = e instanceof ServiceError ? e.code : "unknown";
+      toast.error(
+        code === "already_waitlisted"
+          ? t("waitlist.errAlready")
+          : code === "not_full"
+            ? t("waitlist.errNotFull")
+            : code === "insufficient_credits"
+              ? t("booking.errCredits")
+              : code === "visit_cap"
+                ? t("booking.errCap")
+                : t("common.retry"),
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const leaveWaitlist = async () => {
+    if (!view) return;
+    setBusy(true);
+    try {
+      await getServices().booking.leaveWaitlist(userId, view.session.id);
+      toast(t("waitlist.left"));
+      onClose();
+    } catch {
+      toast.error(t("common.retry"));
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const confirm = async () => {
     if (!view || !eligibility?.ok) return;
@@ -211,7 +255,32 @@ export function BookingSheet({
               </div>
             )}
 
-            {eligibility && !eligibility.ok && (
+            {/* Full, but joinable: explain the hold instead of showing an error. */}
+            {eligibility?.canJoinWaitlist && (
+              <div className="mt-3 flex gap-3 rounded-xl border border-info/30 bg-info/8 p-4 text-sm text-info">
+                <Users className="size-4.5 shrink-0" />
+                <div>
+                  <p className="font-semibold">{t("waitlist.full")}</p>
+                  <p className="mt-1 font-normal opacity-90">
+                    {t("waitlist.explainer", { n: creditCost })}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {eligibility?.waitlistPosition !== undefined && (
+              <div className="mt-3 flex items-center justify-between rounded-xl border border-info/30 bg-info/8 px-4 py-3 text-sm text-info">
+                <span className="font-semibold">
+                  {t("waitlist.position", { n: eligibility.waitlistPosition })}
+                </span>
+                <Users className="size-4" />
+              </div>
+            )}
+
+            {eligibility &&
+              !eligibility.ok &&
+              !eligibility.canJoinWaitlist &&
+              eligibility.waitlistPosition === undefined && (
               <div
                 className={cn(
                   "mt-3 flex gap-3 rounded-xl border p-4 text-sm",
@@ -256,17 +325,40 @@ export function BookingSheet({
               </div>
             )}
 
-            <Button
-              variant="volt"
-              size="lg"
-              className="mt-5 w-full"
-              disabled={!eligibility?.ok}
-              loading={busy || !eligibility}
-              onClick={confirm}
-            >
-              <Zap className="fill-current" />
-              {t("booking.confirmCta", { n: creditCost })}
-            </Button>
+            {eligibility?.waitlistPosition !== undefined ? (
+              <Button
+                variant="surface"
+                size="lg"
+                className="mt-5 w-full"
+                loading={busy}
+                onClick={leaveWaitlist}
+              >
+                {t("waitlist.leave")}
+              </Button>
+            ) : eligibility?.canJoinWaitlist ? (
+              <Button
+                variant="volt"
+                size="lg"
+                className="mt-5 w-full"
+                loading={busy}
+                onClick={joinWaitlist}
+              >
+                <Users />
+                {t("waitlist.joinCta")}
+              </Button>
+            ) : (
+              <Button
+                variant="volt"
+                size="lg"
+                className="mt-5 w-full"
+                disabled={!eligibility?.ok}
+                loading={busy || !eligibility}
+                onClick={confirm}
+              >
+                <Zap className="fill-current" />
+                {t("booking.confirmCta", { n: creditCost })}
+              </Button>
+            )}
             <p className="mt-3 text-center text-xs text-low">
               {t("studio.cancellationPolicy", {
                 hours: studio.cancellationCutoffHours,

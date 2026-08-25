@@ -6,6 +6,8 @@ import type {
   LocalizedText,
   Session,
   SessionView,
+  WaitlistEntry,
+  WaitlistView,
   WalletSummary,
 } from "@/lib/types";
 import { computeCreditCost } from "@/lib/rules/pricing";
@@ -60,7 +62,31 @@ export function toSessionView(db: DBState, s: Session): SessionView | null {
       s.peak,
       released > 0 ? Math.min(1, booked / released) : 1,
     ),
+    waitlistCount: (db.waitlist ?? []).filter((w) => w.sessionId === s.id)
+      .length,
   };
+}
+
+export function toWaitlistView(
+  db: DBState,
+  entry: WaitlistEntry,
+): WaitlistView | null {
+  const session = db.sessions.find((s) => s.id === entry.sessionId);
+  if (!session) return null;
+  const classType = db.classTypes.find((c) => c.id === session.classTypeId);
+  const studio = db.studios.find((st) => st.id === entry.studioId);
+  if (!classType || !studio) return null;
+  return { entry, session, classType, studio };
+}
+
+/** Re-number a session's queue 1..n after someone joins or leaves. */
+export function renumberWaitlist(db: DBState, sessionId: string): void {
+  db.waitlist
+    .filter((w) => w.sessionId === sessionId)
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+    .forEach((w, i) => {
+      w.position = i + 1;
+    });
 }
 
 export function toBookingView(db: DBState, b: Booking): BookingView | null {
