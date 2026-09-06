@@ -4,8 +4,12 @@
    enable → nudge/routine card → rebook sheet → mute, discovery rail, invite
    link + deep link, "X going", settings toggles, EN parity, no h-scroll. */
 import { chromium } from "playwright";
+import { fileURLToPath } from "node:url";
+import { mkdirSync } from "node:fs";
 const BASE = "http://localhost:3000";
-const SHOT = (n) => `./shots/eng-${n}.png`;
+const SHOTS = fileURLToPath(new URL("./shots/", import.meta.url));
+mkdirSync(SHOTS, { recursive: true });
+const SHOT = (n) => `${SHOTS}eng-${n}.png`;
 let fails = 0;
 const check = (name, ok, extra = "") => {
   console.log(`${ok ? "  ✓" : "  ✗"} ${name}${extra ? " — " + extra : ""}`);

@@ -6,8 +6,12 @@
    which is a legitimate product action — then:
      member joins the queue → owner frees a spot via no-show → #1 auto-books. */
 import { chromium } from "playwright";
+import { fileURLToPath } from "node:url";
+import { mkdirSync } from "node:fs";
 const BASE = "http://localhost:3000";
-const SHOT = (n) => `./shots/wle2e-${n}.png`;
+const SHOTS = fileURLToPath(new URL("./shots/", import.meta.url));
+mkdirSync(SHOTS, { recursive: true });
+const SHOT = (n) => `${SHOTS}wle2e-${n}.png`;
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 let fails = 0;
 const check = (name, ok, extra = "") => {

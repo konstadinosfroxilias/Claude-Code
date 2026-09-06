@@ -2,8 +2,12 @@
    Removes an already-earned unlock from the persisted mock DB so the next
    sync re-earns it — exercising evaluate → persist → toast → idempotency. */
 import { chromium } from "playwright";
+import { fileURLToPath } from "node:url";
+import { mkdirSync } from "node:fs";
 const BASE = "http://localhost:3000";
-const SHOT = (n) => `./shots/unlock-${n}.png`;
+const SHOTS = fileURLToPath(new URL("./shots/", import.meta.url));
+mkdirSync(SHOTS, { recursive: true });
+const SHOT = (n) => `${SHOTS}unlock-${n}.png`;
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 let fails = 0;
 const check = (name, ok, extra = "") => {
