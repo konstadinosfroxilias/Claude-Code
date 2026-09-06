@@ -151,6 +151,35 @@ instead. Two controls that can wrap onto separate lines need real height
   (`2 · 2 · 3 · rest · 2 · 3 · 2 · current`) holds whatever weekday you run on.
   Don't assert absolute class counts; assert the shape.
 
+## The Supabase backend
+
+There are two backends behind the same `Services` contract. Mock mode is the
+default and is what the browser suites above exercise. To verify the Postgres
+side you do NOT need Docker or a hosted project:
+
+```bash
+su postgres -c "psql -c 'create database pulse_test'"
+psql -d pulse_test -f supabase/scripts/local_auth_shim.sql   # fakes auth.uid()
+node supabase/scripts/apply-migrations.mjs "postgresql://…/pulse_test"
+psql -d pulse_test -v ON_ERROR_STOP=1 -f supabase/scripts/test_logic.sql
+```
+
+- `test_logic.sql` covers booking, the 4-visit cap, ledger pending→confirmed,
+  cancellation fees, waitlist promotion (with the cap and broke-member skips)
+  and RLS. It aborts on the first failed assertion.
+- **Concurrency matters here.** Run several `book_session` calls in parallel
+  against a one-spot session and assert exactly one booking exists — that is
+  the check that `SELECT … FOR UPDATE` is doing its job.
+- `verify-parity.ts` proves mock and database agree. Seed with
+  `seed-local.ts` first: it writes `/tmp/pulse-seed-at.txt`, and the parity
+  script rebuilds the mock with that exact timestamp. Without it the two
+  schedules are generated at different instants and everything looks broken.
+- Regenerate types after every migration: `npm run db:types -- "<url>"`.
+  `supabase gen types` needs Docker; that script is the offline equivalent.
+- Supabase mode cannot be driven in a browser here (no PostgREST/GoTrue without
+  Docker). Against a real project, `npm run db:smoke` exercises the whole
+  service layer under RLS in one command.
+
 ## Copy safety
 
 Greek substring matching produces false alarms: a bare `κιλ` matches

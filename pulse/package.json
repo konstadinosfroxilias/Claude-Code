@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:migrate": "node supabase/scripts/apply-migrations.mjs",
+    "db:seed": "tsx --tsconfig tsconfig.json supabase/seed.ts",
+    "db:types": "node supabase/scripts/gen-types.mjs",
+    "db:smoke": "tsx --tsconfig tsconfig.json supabase/scripts/smoke.ts"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.19",
@@ -16,6 +20,7 @@
     "@radix-ui/react-slot": "^1.3.0",
     "@radix-ui/react-switch": "^1.3.3",
     "@radix-ui/react-tabs": "^1.1.17",
+    "@supabase/supabase-js": "^2.115.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.42.2",
@@ -38,10 +43,12 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
     "playwright": "^1.61.1",
     "tailwindcss": "^4",
+    "tsx": "^4.23.13",
     "typescript": "^5"
   }
 }

@@ -1,26 +1,28 @@
 /**
  * Service registry — the ONLY entry point UI code uses for data.
  *
- * `getServices()` returns the active implementation set. With
- * NEXT_PUBLIC_USE_MOCK=true (the default) that's the localStorage-backed mock;
- * to go live, implement `Services` against your real API and return it from
- * the else-branch below. Nothing else in the app changes.
+ * Two interchangeable implementations of the same `Services` contract:
+ *
+ *   NEXT_PUBLIC_USE_MOCK=true  (default) → lib/services/mock
+ *       Everything in localStorage. No network, no accounts, works offline,
+ *       and "Reset demo data" reseeds it.
+ *
+ *   NEXT_PUBLIC_USE_MOCK=false           → lib/services/supabase
+ *       Real Postgres behind Supabase: RLS, atomic booking/ledger RPCs, auth
+ *       and realtime. Needs NEXT_PUBLIC_SUPABASE_URL + _ANON_KEY and a seeded
+ *       project (see the README, "Running against Supabase").
+ *
+ * No UI component imports either implementation, so switching backends is a
+ * one-line env change with zero component edits.
  */
 import { USE_MOCK } from "@/lib/config";
 import type { Services } from "./types";
 import { mockServices } from "./mock";
+import { supabaseServices } from "./supabase";
 
 export type { Services } from "./types";
 export { ServiceError } from "./mock/helpers";
 
 export function getServices(): Services {
-  if (USE_MOCK) return mockServices;
-  // NOTE: the engagement layer (goals, streaks, achievements, nudges) is part
-  // of this same contract — see EngagementService in ./types.ts for the exact
-  // rows a backend needs to persist. No UI change is required to switch.
-  // Real backend goes here, e.g.:
-  //   return createApiServices({ baseUrl: API_BASE_URL });
-  throw new Error(
-    "No real Services implementation wired yet — set NEXT_PUBLIC_USE_MOCK=true or implement lib/services/api.",
-  );
+  return USE_MOCK ? mockServices : supabaseServices;
 }

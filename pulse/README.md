@@ -16,10 +16,15 @@ It is a **two-sided marketplace** behind role-based auth:
   pricing and spots-released controls, roster & check-in, radically
   transparent payouts, analytics.
 
-The whole app runs **end-to-end on mock data** (in-memory, persisted to
-`localStorage`, reseeded daily) and is architected so real services plug in
-behind one seam with **zero UI changes** — see
-[Swapping in a real backend](#swapping-in-a-real-backend).
+It runs on **either of two interchangeable backends**, selected by a single env
+flag and with **zero UI differences** between them:
+
+- **Mock** (default) — in-memory, persisted to `localStorage`, reseeded daily.
+  No accounts, no network, works offline.
+- **Supabase** — real Postgres with row-level security, auth, atomic
+  booking/ledger functions and realtime.
+
+See [Two backends, one contract](#two-backends-one-contract).
 
 ## Run it
 
@@ -29,8 +34,10 @@ npm install
 npm run dev        # → http://localhost:3000
 ```
 
-`npm run build && npm start` for a production build. No keys, no env vars
-needed — copy `.env.example` to `.env.local` if you want to flip flags.
+`npm run build && npm start` for a production build. No keys and no env vars
+are needed for mock mode; copy `.env.example` to `.env.local` to change
+anything. To run against a real database instead, see
+[Running against Supabase](#running-against-supabase).
 
 **Demo accounts** (pick on the `/auth` screen):
 
@@ -235,8 +242,10 @@ lib/
   services/
     types.ts              ★ THE SEAM — typed async interfaces for every domain
     index.ts              getServices() registry, switched by NEXT_PUBLIC_USE_MOCK
-    mock/                 the only current implementation (swap target)
+    mock/                 backend #1: localStorage
       engagement.ts       goal/streak/achievement/nudge/discovery reads + writes
+    supabase/             backend #2: Postgres (mappers.ts · realtime.ts)
+  supabase/               client singleton + GENERATED database.types.ts
   mock/                   seed.ts (Greek catalog generator) · db.ts (localStorage store)
                           facts.ts (bookings → attendance facts for the rules)
   hooks/                  useLiveQuery (fetch + subscribe to service change feed)
@@ -244,50 +253,283 @@ lib/
                           (all persisted; engagement.ts holds per-DEVICE state only)
 ```
 
+```
+supabase/
+  migrations/             0001 core · 0002 engagement · 0003 functions
+                          0004 RLS · 0005 realtime · 0006 views
+  seed-data.ts            mock seed → rows (the mock↔Supabase parity guarantee)
+  seed.ts                 seeds a hosted project (npm run db:seed)
+  scripts/                migrations runner · type generator · local seed
+                          test_logic.sql · verify-parity.ts · smoke.ts
+```
+
 **Data flow:** UI component → `useLiveQuery(svc => svc.x.y())` →
 `getServices()` → active `Services` implementation. Writes go through the
 same services, which emit on the change feed; every live query refetches.
-Components never touch `lib/mock` — that directory is an implementation
-detail of the mock services.
+Components never touch `lib/mock`, `lib/supabase` or `@supabase/supabase-js` —
+those are implementation details of the two service backends.
 
-## Swapping in a real backend
+## Two backends, one contract
 
 The contract is `Services` in **`lib/services/types.ts`** — twelve small
 interfaces (auth, catalog, booking, wallet, subscriptions, payouts, reviews,
-notifications, studioAdmin, analytics, **engagement**, demo) plus a `subscribe`
-change feed. The UI depends on nothing else.
+notifications, studioAdmin, analytics, engagement, demo) plus a `subscribe`
+change feed. The UI depends on nothing else, and there are now **two complete
+implementations** of it:
 
-> **Engagement specifically:** a backend needs only the four tables listed in
-> [Engagement data](#engagement-data--what-is-stored-vs-derived) and must keep
-> `lib/rules/engagement.ts` as the source of truth (it is pure and takes `now`
-> as an argument, so it runs server-side unchanged). `EngagementService` in
-> `lib/services/types.ts` carries the full TODO, including the two invariants
-> to preserve: goals clamp to 1–5, and `syncAchievements` /
-> `markNudgeDelivered` are idempotent.
+| `NEXT_PUBLIC_USE_MOCK` | Implementation | What you get |
+|---|---|---|
+| `true` (default) | `lib/services/mock` | Everything in `localStorage`. No accounts, no network, works on a plane. "Reset demo data" reseeds it. |
+| `false` | `lib/services/supabase` | Real Postgres: RLS, auth, atomic booking/ledger functions, realtime. |
 
-1. **Create `lib/services/api/`** implementing `Services` against your
-   REST/tRPC backend (fetch per method; map errors to `ServiceError` codes —
-   the UI already renders `full`, `insufficient_credits`, `visit_cap`,
-   `already_booked`, `in_past`).
-2. **Wire it** in `lib/services/index.ts`'s else-branch and set
-   `NEXT_PUBLIC_USE_MOCK=false`. That's the entire switch.
-3. **Real auth** — replace `AuthService` (mock lives in
-   `lib/services/mock`, session mirror in `lib/stores/session.ts`) with your
-   provider (NextAuth/Clerk/etc.). Keep `getCurrentUser()` and the role
-   field; the route guards in `app/member/layout.tsx` / `app/studio/layout.tsx`
-   already key off it.
-4. **Database** — the entities in `lib/types` map 1:1 to tables
-   (Booking, CreditTransaction and PayoutEntry are your ledgers — keep the
-   signed-delta + status model; balance stays a fold over the ledger).
-   Move `lib/rules/*` server-side unchanged and enforce reserve/check-in/cancel
-   in one transaction each.
-5. **Stripe Connect** — `WalletService.topUp` → Checkout/PaymentIntents;
-   `SubscriptionService.changePlan` → Billing; `PayoutService` → per-studio
-   connected accounts, `PayoutEntry.confirmed` ⇒ transfer line items. The
-   per-attendance breakdown screen is already the statement UI.
-6. **Live updates** — map `Services.subscribe` to your websocket/SSE/poll;
-   `useLiveQuery` needs nothing else.
-7. Delete `lib/mock/` when done. No component changes.
+Switching is a one-line env change. **No component code differs between the
+two** — components never import Supabase, and `getServices()` is the only thing
+that knows which backend is live.
+
+Two rules keep them honest:
+
+- Anything that must be **atomic** (booking, check-in, cancel, waitlist
+  promotion, top-up) is a Postgres function. The Supabase service only calls
+  `rpc()` and re-throws the same `ServiceError` codes the UI already renders.
+- Anything that is a **rule** is imported from `lib/rules/*` by *both*
+  implementations. The entire engagement layer runs through
+  `lib/rules/engagement.ts` on either backend, so streak, goal and achievement
+  logic literally cannot drift. Numbers that SQL also needs (`PRICING_CONFIG`,
+  `POLICY`) are pushed into the `pricing_config` and `platform_policy` tables
+  by the seed rather than retyped in SQL.
+
+## Running against Supabase
+
+```bash
+# 1. Create a project at supabase.com, then:
+cp .env.example .env.local          # fill in URL + anon key + service-role key
+
+# 2. Apply the schema (or `supabase db push` if you use the CLI)
+export DATABASE_URL="postgresql://postgres:[pw]@db.[ref].supabase.co:5432/postgres"
+npm run db:migrate
+
+# 3. Load the demo data — the same content mock mode shows
+npm run db:seed
+
+# 4. Prove the wiring end to end (signs in, books, cancels, under RLS)
+npm run db:smoke
+
+# 5. Flip the switch and restart
+echo "NEXT_PUBLIC_USE_MOCK=false" >> .env.local
+npm run dev
+```
+
+The seed is **idempotent** — every row upserts on its primary key and auth
+users are created only if missing, so re-running changes nothing. Because the
+schedule is generated relative to "now", re-run it whenever the demo classes
+have drifted into the past.
+
+After any migration, regenerate the DB types:
+
+```bash
+supabase gen types typescript --project-id <ref> > lib/supabase/database.types.ts
+# or, with no Docker and no CLI:
+npm run db:types -- "$DATABASE_URL"
+```
+
+### What lives where
+
+| File | Contents |
+|---|---|
+| `supabase/migrations/0001_core.sql` | Enums, lookup tables, profiles, studios, sessions, bookings, waitlist, ledger, payouts, reviews, favorites, notifications, config tables |
+| `supabase/migrations/0002_engagement.sql` | Goals, achievements catalog, unlocks, nudge prefs and deliveries — plus the healthy-by-design constraints, written down |
+| `supabase/migrations/0003_functions.sql` | The atomic business logic: `book_session`, `check_in`, `mark_no_show`, `cancel_booking`, `join_waitlist`, `promote_waitlist`, `top_up`, `change_plan`, `cancel_session`, `ensure_cycle_current` |
+| `supabase/migrations/0004_rls.sql` | Row-level security and grants |
+| `supabase/migrations/0005_realtime.sql` | Realtime publication |
+| `supabase/migrations/0006_views.sql` | `session_view` — occupancy + derived credit cost in one read |
+| `supabase/seed-data.ts` | Mock seed → database rows (the parity guarantee) |
+| `supabase/seed.ts` | Seeds a hosted project |
+| `supabase/scripts/` | Migration runner, offline type generator, local seed, SQL tests, parity check, smoke test |
+
+### Verifying the backend
+
+Everything below runs against a plain local Postgres — no Docker, no hosted
+project — which is how the SQL layer is tested:
+
+```bash
+createdb pulse_test
+psql -d pulse_test -f supabase/scripts/local_auth_shim.sql   # fakes auth.uid()
+node supabase/scripts/apply-migrations.mjs "postgresql://…/pulse_test"
+psql -d pulse_test -v ON_ERROR_STOP=1 -f supabase/scripts/test_logic.sql
+```
+
+`test_logic.sql` asserts the things that actually matter: a spot is consumed
+exactly once, the fifth booking at one studio is refused, the ledger and payout
+flip together on check-in, a late cancellation charges the fee, waitlist
+promotion skips a capped or broke member and tells them why, and one member
+cannot read another's ledger.
+
+`supabase/scripts/verify-parity.ts` goes further and proves mock mode and the
+seeded database produce **identical** numbers — same attendance facts, same
+streak, same balance, same visit-cap position, and the same credit cost
+computed independently in SQL and in TypeScript.
+
+### Auth and RLS
+
+Supabase Auth backs `profiles`, and `profiles.role` drives member vs studio
+owner exactly as before. The app's one-tap role picker signs into two seeded
+accounts (`demo.member@pulse.fit` / `demo.owner@pulse.fit`), so the demo stays
+frictionless while running through real authentication.
+
+The policies are production-shaped, not demo-shaped:
+
+- Members read and write **only their own** bookings, wallet, goal,
+  achievements and nudge settings.
+- Studio owners manage **only their own** studio, classes, sessions, roster and
+  payouts.
+- The catalog (studios, sessions, reviews, achievements catalog) is public.
+- Booking, check-in, cancel, waitlist and top-up have **no table-level write
+  policy at all** — they are reachable only through `SECURITY DEFINER`
+  functions that do their own permission checks. A client cannot hand-craft a
+  booking row or mint credits even with a valid token.
+
+There is no cross-member read anywhere in the engagement layer, which is what
+makes leaderboards and comparison mechanics impossible by construction rather
+than by convention.
+
+### Realtime
+
+`0005_realtime.sql` publishes bookings, waitlist entries, notifications,
+sessions, credit transactions and achievement unlocks. The client subscribes in
+`lib/services/supabase/realtime.ts`, and RLS applies to realtime too, so a
+member only receives rows they may read.
+
+It **degrades gracefully**: if the socket never connects or realtime is off,
+the app falls back to local change emits plus ordinary fetches and behaves
+exactly as it does today. Nothing in the UI depends on it.
+
+### Payments — still mock, with one seam
+
+Top-up and plan changes write the correct ledger rows (`topup_pack`,
+`cycle_grant`) and charge nothing; the "mock payment — no real charge" copy is
+unchanged. The seam is deliberately narrow:
+
+- `WalletService.topUp` → `top_up()` — confirm a Stripe PaymentIntent *before*
+  calling it; the ledger row is the fulfilment step.
+- `SubscriptionService.changePlan` → `change_plan()` — drive from Stripe
+  Billing webhooks instead of a direct call.
+- `PayoutService` → Stripe Connect. `payout_entries` is already a
+  per-attendance statement: each confirmed row is one transfer line item.
+
+Nothing else in the app touches money, so swapping in Stripe means editing
+those three places.
+
+## Extending it
+
+### Add a real studio
+
+A studio is one row plus its categories. Everything else (its page, map pin,
+search, filters, cover art) follows automatically:
+
+```sql
+insert into studios (
+  id, owner_id, name, city_id, neighborhood_id,
+  description_el, description_en, address, lat, lng,
+  amenities, default_floor_price_eur, cancellation_cutoff_hours, art_seed
+) values (
+  'st_new_box',
+  (select id from profiles where email = 'owner@thatstudio.gr'),
+  'That Studio', 'thessaloniki', 'kentro',
+  'Περιγραφή στα ελληνικά.', 'English description.',
+  'Οδός 1, Θεσσαλονίκη', 40.6301, 22.9439,
+  array['showers','lockers','towels'], 11, 12, 42
+);
+
+insert into studio_categories (studio_id, category_id)
+values ('st_new_box', 'pilates');
+
+insert into class_types (id, studio_id, category_id, name, duration_min,
+                         level, description_el, description_en)
+values ('ct_new_reformer', 'st_new_box', 'pilates', 'Reformer Flow', 55,
+        'all', 'Ροή στο reformer.', 'A flow on the reformer.');
+```
+
+Sessions are then created from the studio dashboard (Schedule → New class),
+which is the intended path for a real owner: they set their own
+`spots_released_to_platform` and `floor_price_eur` per class, and the platform
+never overrides them.
+
+To onboard the owner: create the auth user (Supabase dashboard → Authentication
+→ Add user), insert a matching `profiles` row with `role = 'studio_owner'`, and
+point `studios.owner_id` at it. RLS does the rest.
+
+### Onboarding a studio's real requirements
+
+Real studios arrive with rules the demo doesn't model — a membership tier that
+blocks platform bookings at peak hours, an intro offer, a waiver, a different
+cancellation window per class type. Where each belongs:
+
+| Requirement | Where it goes |
+|---|---|
+| Per-studio policy (cutoff, cap override, no-show fee) | Columns on `studios`, read by the functions in `0003_functions.sql` |
+| Per-class-type policy | Columns on `class_types`, or a `class_type_policies` table |
+| Anything free-form and studio-specific | A `jsonb` column, e.g. `studios.settings` — no migration per studio |
+| Platform-wide pricing or policy changes | `lib/rules/pricing.ts` / `lib/rules/policy.ts`, then re-run the seed to push them into `pricing_config` / `platform_policy` |
+
+Worked example — a studio wants a 24-hour cancellation window on one class type
+only:
+
+1. `alter table class_types add column cancellation_cutoff_hours integer;`
+2. In `quote_cancellation()`, prefer `class_types.cancellation_cutoff_hours`
+   over the studio's, then the platform default. One function, one line.
+3. `npm run db:types`, and the new column is typed everywhere.
+
+No service interface changes, so no UI changes.
+
+### Add a field, a table, or an achievement
+
+1. Write a new numbered migration in `supabase/migrations/`. Keep it idempotent
+   (`if not exists`, `create or replace`, `on conflict`).
+2. Apply it (`npm run db:migrate`) and regenerate types (`npm run db:types`).
+3. If the field should reach the UI, add it to `lib/types`, then update **both**
+   implementations and the mapper in `lib/services/supabase/mappers.ts`. The
+   compiler points at every place that needs attention.
+
+For a new **achievement**, see [Extending the catalog](#extending-the-catalog):
+the key, group and threshold live in `lib/rules/engagement.ts` and are pushed to
+the `achievements` table by the seed, so the rule and the row cannot disagree.
+
+> **Healthy-by-design constraint — preserve this.** The schema has no weight,
+> body-measurement or calorie column, and must never gain one. Progress is
+> counted in classes attended and minutes moved. Goals and streaks stay
+> week-based with rest tolerance, `goals.weekly_target` stays `CHECK`ed to 1–5
+> so no client can set an escalating target, and
+> `engagement_prefs.nudges_enabled` stays `DEFAULT false`. The reasoning is
+> written into `0002_engagement.sql` so it survives contact with future changes.
+
+## Going to production
+
+Everything below is deliberately *not* done yet — this is a demo-grade
+foundation, and each item is a known, bounded piece of work.
+
+1. **Real auth.** Replace `signInAsDemo` in `lib/services/supabase/index.ts`
+   with Supabase email/OAuth signup and an onboarding flow that inserts the
+   `profiles` row (a trigger on `auth.users` is the usual approach). The route
+   guards in `app/member/layout.tsx` and `app/studio/layout.tsx` already key off
+   `profiles.role`. Then remove the demo accounts from the seed.
+2. **RLS hardening.** Today any signed-in user can read every `profiles` row,
+   because the roster shows member names — narrow that to "owners may read
+   profiles of members booked into their own sessions". Review the public
+   catalog policies if any studio data should be private, and rate-limit the
+   `SECURITY DEFINER` functions.
+3. **Stripe.** Checkout for top-ups and subscriptions, Connect for studio
+   payouts, driven from webhooks; see the payments seam above.
+4. **Operational bits** not modelled here: email/SMS, receipts, refunds beyond
+   credits, GDPR export/delete, and an admin surface for approving studios.
+
+### Deployment
+
+The frontend talks to Supabase directly, so hosting stays trivial: the app
+builds to a static export (`output: "export"`) and runs on any static or edge
+host — the Netlify config is already in `netlify.toml`. There is no server to
+operate; Supabase is the backend. Set the `NEXT_PUBLIC_*` variables in the host
+dashboard, and keep `SUPABASE_SERVICE_ROLE_KEY` out of it entirely — that key
+belongs only to the seed script, run from a trusted machine.
 
 ### Where to plug in real geolocation persistence
 
