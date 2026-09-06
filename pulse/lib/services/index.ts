@@ -15,6 +15,9 @@ export { ServiceError } from "./mock/helpers";
 
 export function getServices(): Services {
   if (USE_MOCK) return mockServices;
+  // NOTE: the engagement layer (goals, streaks, achievements, nudges) is part
+  // of this same contract — see EngagementService in ./types.ts for the exact
+  // rows a backend needs to persist. No UI change is required to switch.
   // Real backend goes here, e.g.:
   //   return createApiServices({ baseUrl: API_BASE_URL });
   throw new Error(

@@ -14,6 +14,10 @@ import { StudioCard } from "@/components/member/studio-card";
 import { SessionRow } from "@/components/member/session-row";
 import { BookingSheet } from "@/components/member/booking-sheet";
 import { NearYouSection } from "@/components/member/near-you";
+import { GoalCard } from "@/components/member/goal-card";
+import { NudgeCard, NudgePrimer, useActiveNudge } from "@/components/member/habit-nudge";
+import { RoutineCard } from "@/components/member/routine-card";
+import { TrySomethingNew } from "@/components/member/try-something-new";
 import { GeoPrimer } from "@/components/shared/geo-primer";
 import { CoverArt } from "@/components/shared/cover-art";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -152,6 +156,21 @@ export default function HomePage() {
         )}
       </motion.div>
 
+      {/* Weekly goal — consistency, never appearance */}
+      {userId && (
+        <motion.div variants={rise} className="mt-4">
+          <GoalCard userId={userId} />
+        </motion.div>
+      )}
+
+      {/* Habit layer: opt-in primer, then this week's nudge OR the routine card */}
+      {userId && (
+        <motion.div variants={rise} className="mt-4 space-y-4">
+          <NudgePrimer userId={userId} />
+          <HabitSlot userId={userId} onBook={setBookingTarget} />
+        </motion.div>
+      )}
+
       {/* Location primer — shown before any native prompt */}
       <motion.div variants={rise} className="mt-4">
         <GeoPrimer />
@@ -161,6 +180,13 @@ export default function HomePage() {
       {userId && (
         <motion.div variants={rise} className="mt-8">
           <NearYouSection userId={userId} onBook={setBookingTarget} />
+        </motion.div>
+      )}
+
+      {/* Try something new — variety, entirely optional */}
+      {userId && (
+        <motion.div variants={rise} className="mt-8">
+          <TrySomethingNew userId={userId} onBook={setBookingTarget} />
         </motion.div>
       )}
 
@@ -248,6 +274,25 @@ export default function HomePage() {
         />
       )}
     </motion.div>
+  );
+}
+
+/**
+ * One habit card at a time: the week's nudge when the member opted in and
+ * one applies, otherwise the standing "your routine" suggestion.
+ */
+function HabitSlot({
+  userId,
+  onBook,
+}: {
+  userId: string;
+  onBook: (view: SessionView) => void;
+}) {
+  const nudge = useActiveNudge(userId);
+  return nudge ? (
+    <NudgeCard userId={userId} onBook={onBook} />
+  ) : (
+    <RoutineCard userId={userId} onBook={onBook} />
   );
 }
 

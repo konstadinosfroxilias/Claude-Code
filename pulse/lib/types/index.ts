@@ -247,7 +247,13 @@ export interface Review {
   createdAt: string;
 }
 
-export type NotificationKind = "booking" | "wallet" | "payout" | "system";
+export type NotificationKind =
+  | "booking"
+  | "wallet"
+  | "payout"
+  | "system"
+  /** Opt-in habit nudges (see lib/rules/engagement). */
+  | "habit";
 
 export interface AppNotification {
   id: string;
@@ -426,4 +432,204 @@ export interface SessionCreateInput {
   spotsReleasedToPlatform: number;
   floorPriceEUR: number;
   peak: boolean;
+}
+
+/* ---------------------------------------------------------------------------
+   Engagement layer — healthy by design.
+
+   Everything here motivates through CONSISTENCY, PROGRESS, VARIETY and
+   ENJOYMENT. There is deliberately no weight, calorie, body-shape or
+   "before/after" concept anywhere in the model. Goals and streaks are
+   WEEK-based (never daily), rest weeks are first-class, and every nudge is
+   opt-in and muteable. See lib/rules/engagement.ts for the rules.
+--------------------------------------------------------------------------- */
+
+/** A member's self-chosen weekly class target (1–5, default 2). Persisted. */
+export interface MemberGoal {
+  userId: string;
+  weeklyTarget: number;
+  updatedAt: string;
+}
+
+/** Where this week stands against the goal. Derived from bookings. */
+export interface WeeklyProgress {
+  /** Monday 00:00 local, ISO. */
+  weekStart: string;
+  /** Next Monday 00:00 local, ISO (exclusive). */
+  weekEnd: string;
+  /** Attended (checked-in / completed) classes with a start inside the week. */
+  attended: number;
+  target: number;
+  met: boolean;
+  /** attended / target, capped at 1. */
+  ratio: number;
+  /** Reserved classes later this week — "already on the calendar". */
+  planned: number;
+  /** Whole days left in the week including today (1–7). */
+  daysLeft: number;
+}
+
+/**
+ * Week streak states, from warmest to freshest:
+ * - on_track:    this week already has a class — the streak includes it.
+ * - building:    last week was active; this week is still open.
+ * - rested:      last week was a rest week — allowed, the streak is kept.
+ * - fresh_start: no live streak. "New week, fresh start." Never a failure.
+ */
+export type StreakState = "on_track" | "building" | "rested" | "fresh_start";
+
+export interface StreakStatus {
+  /** Active weeks (≥1 attended class) in the current run. Rest weeks don't count, but don't break it. */
+  weeks: number;
+  state: StreakState;
+  /** Longest run ever, for a quiet "personal best" line. */
+  longest: number;
+}
+
+export interface EngagementSummary {
+  goal: MemberGoal;
+  progress: WeeklyProgress;
+  streak: StreakStatus;
+}
+
+export type AchievementId =
+  | "first_booking"
+  | "first_checkin"
+  | "classes_5"
+  | "classes_10"
+  | "classes_25"
+  | "classes_50"
+  | "goal_week"
+  | "goal_month"
+  | "three_categories"
+  | "new_neighborhood"
+  | "explorer_5"
+  | "early_bird"
+  | "comeback";
+
+export type AchievementGroup = "start" | "consistency" | "variety" | "moments";
+
+/** Catalog row. Titles/bodies live in i18n (`achievements.<id>.title/body`). */
+export interface Achievement {
+  id: AchievementId;
+  group: AchievementGroup;
+  order: number;
+  /** Countable goal (e.g. 25 classes); undefined for one-off moments. */
+  target?: number;
+}
+
+/** Persisted unlock. One row per member × achievement. */
+export interface MemberAchievement {
+  userId: string;
+  achievementId: AchievementId;
+  unlockedAt: string;
+}
+
+export interface AchievementView {
+  achievement: Achievement;
+  unlockedAt?: string;
+  /** Progress toward `target` (0..target). Equals target once unlocked. */
+  progress: number;
+}
+
+export type HourBand = "morning" | "midday" | "evening";
+
+export interface ProgressInsights {
+  classesThisMonth: number;
+  classesAllTime: number;
+  minutesThisMonth: number;
+  minutesAllTime: number;
+  /** All-time category mix, most attended first. */
+  categoryMix: { categoryId: CategoryId; count: number }[];
+  favoriteStudio?: { studioId: string; name: string; count: number };
+  /** 0 = Sunday … 6 = Saturday (JS convention). */
+  mostActiveWeekday?: number;
+  mostActiveHourBand?: HourBand;
+  /** Last 8 weeks, oldest first. */
+  weeklyTrend: { weekStart: string; label: string; attended: number; minutes: number }[];
+  /** Last 6 months, oldest first. */
+  monthlyTrend: { month: string; label: string; attended: number }[];
+  studiosVisited: number;
+}
+
+/** "Your week in movement" — shareable, body-neutral. */
+export interface WeeklyRecap {
+  /** Which week the recap describes. */
+  scope: "current" | "last";
+  weekStart: string;
+  weekEnd: string;
+  attended: number;
+  target: number;
+  met: boolean;
+  minutes: number;
+  categoryIds: CategoryId[];
+  studioNames: string[];
+  /** A studio visited for the very first time this week, if any. */
+  firstTimeStudio?: string;
+  streakWeeks: number;
+}
+
+/** Opt-in nudge preferences. Off by default; muting is one tap. */
+export interface EngagementPrefs {
+  userId: string;
+  nudgesEnabled: boolean;
+  /** While set and in the future, no nudges are produced. */
+  nudgesMutedUntil?: string;
+  updatedAt: string;
+}
+
+/** Persisted "already shown" marker so a nudge is delivered at most once. */
+export interface NudgeDelivery {
+  userId: string;
+  nudgeId: string;
+  deliveredAt: string;
+}
+
+export type NudgeKind =
+  /** "You usually train Tue 19:00 — here's this week's." */
+  | "usual_slot"
+  /** "Book the same class as last time?" */
+  | "rebook_last"
+  /** Kind check-in after ≥14 quiet days. No guilt. */
+  | "been_a_while"
+  /** Frequent trainers are told a lighter week is a good idea. */
+  | "ease_off";
+
+export interface HabitNudge {
+  /** Stable per kind × week so a nudge is delivered at most once. */
+  id: string;
+  kind: NudgeKind;
+  /** Bookable session for usual_slot / rebook_last. */
+  session?: SessionView;
+}
+
+/** The member's inferred "usual slot", when the history is clear enough. */
+export interface RoutineSignal {
+  weekday: number;
+  hour: number;
+  studioId: string;
+  classTypeId: string;
+  /** Times this exact pattern was attended in the lookback window. */
+  count: number;
+}
+
+/** Next logical booking: the routine slot, or a plain rebook of the last class. */
+export interface RoutineSuggestion {
+  basis: "usual_slot" | "last_class";
+  signal?: RoutineSignal;
+  session: SessionView;
+}
+
+export type DiscoveryReason =
+  | "untried_category"
+  | "untried_studio"
+  | "new_neighborhood";
+
+/** "Try something new" candidate — optional, never pushed. */
+export interface DiscoverySuggestion {
+  reason: DiscoveryReason;
+  studio: Studio;
+  categoryId: CategoryId;
+  /** A beginner-friendly upcoming session with spots, when one exists. */
+  session?: SessionView;
 }

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { CreditChip, PeakBadge } from "@/components/member/bits";
+import { GoingSignal, InviteFriendButton } from "@/components/member/share-class";
 import { useI18n } from "@/lib/i18n";
 import { getServices, ServiceError } from "@/lib/services";
 import type { BookingEligibility, SessionView } from "@/lib/types";
@@ -196,6 +197,19 @@ export function BookingSheet({
                 </Link>
               </Button>
             </div>
+            {/* Bring someone along — a link, nothing more */}
+            <div className="mt-3 flex w-full items-center justify-between gap-3 rounded-xl border border-line bg-surface-2 px-4 py-3 text-left">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-hi">{t("social.inviteTitle")}</p>
+                <p className="text-xs text-mid">{t("social.inviteBody")}</p>
+              </div>
+              <InviteFriendButton
+                session={session}
+                classType={classType}
+                studio={studio}
+                variant="outline"
+              />
+            </div>
           </div>
         ) : (
           /* ---------------- Review ---------------- */
@@ -213,6 +227,7 @@ export function BookingSheet({
                   <p className="mt-0.5 text-xs text-low">
                     {session.instructor} · {session.durationMin}&#8217;
                   </p>
+                  <GoingSignal booked={view.booked} className="mt-1.5" />
                 </div>
                 <PeakBadge peak={session.peak} />
               </div>

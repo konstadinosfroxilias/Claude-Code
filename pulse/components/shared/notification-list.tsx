@@ -8,6 +8,7 @@ import {
   CheckCheck,
   Euro,
   Megaphone,
+  Sparkles,
   Wallet,
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
@@ -25,6 +26,7 @@ const KIND_ICON: Record<NotificationKind, typeof Wallet> = {
   wallet: Wallet,
   payout: Euro,
   system: Megaphone,
+  habit: Sparkles,
 };
 
 export function NotificationScreen({ userId }: { userId: string }) {

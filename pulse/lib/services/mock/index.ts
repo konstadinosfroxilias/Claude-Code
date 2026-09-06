@@ -4,13 +4,11 @@
  * when a real backend arrives (see README → "Swapping in a real backend").
  */
 import { mockDb } from "@/lib/mock/db";
+import { buildAttendanceFacts } from "@/lib/mock/facts";
 import { DEMO_MEMBER_ID, DEMO_OWNER_ID } from "@/lib/mock/seed";
+import { computeStreak } from "@/lib/rules/engagement";
 import { useSessionStore } from "@/lib/stores/session";
-import {
-  countVisitsInWindow,
-  isLateCancellation,
-  POLICY,
-} from "@/lib/rules/policy";
+import { isLateCancellation, POLICY } from "@/lib/rules/policy";
 import type {
   Booking,
   BookingDenialReason,
@@ -39,6 +37,7 @@ import type { Services } from "../types";
 import type { DBState } from "@/lib/mock/db";
 import {
   bookedCount,
+  capStatusFor as capStatusForState,
   isActiveBooking,
   pushNotification,
   renumberWaitlist,
@@ -51,6 +50,7 @@ import {
   walletSummary,
   WRITE_MS,
 } from "./helpers";
+import { engagement } from "./engagement";
 
 const db = mockDb;
 
@@ -270,23 +270,7 @@ function capStatusFor(
   studioId: string,
   atSessionStart?: Date,
 ): VisitCapStatus {
-  const state = db.get();
-  const cap = POLICY.visitCapPerStudioPerMonth;
-  const starts = state.bookings
-    .filter(
-      (b) =>
-        b.userId === userId && b.studioId === studioId && isActiveBooking(b),
-    )
-    .map((b) => {
-      const s = state.sessions.find((x) => x.id === b.sessionId);
-      return s?.startsAt;
-    })
-    .filter((x): x is string => !!x);
-
-  // One rule for both display and enforcement (see countVisitsInWindow):
-  // omitting the session start just anchors the window at "now".
-  const used = countVisitsInWindow(starts, atSessionStart ?? new Date());
-  return { used: Math.min(used, cap), cap, reached: used >= cap };
+  return capStatusForState(db.get(), userId, studioId, atSessionStart);
 }
 
 function eligibilityFor(userId: string, sessionId: string): BookingEligibility {
@@ -1253,18 +1237,9 @@ const analytics: Services["analytics"] = {
       (x) => new Date(x.start).getTime() >= monthStart,
     ).length;
 
-    // Week streak: consecutive 7-day windows (back from today) with ≥1 class.
-    let streakWeeks = 0;
-    for (let w = 0; w < 52; w++) {
-      const end = now.getTime() - w * 7 * 86_400_000;
-      const start = end - 7 * 86_400_000;
-      const hit = withStart.some((x) => {
-        const t = new Date(x.start).getTime();
-        return t > start && t <= end;
-      });
-      if (hit) streakWeeks++;
-      else break;
-    }
+    // Week streak — the same rest-aware rule the engagement layer shows, so
+    // the profile tile and the goal card can never disagree.
+    const streakWeeks = computeStreak(buildAttendanceFacts(state, userId), now).weeks;
 
     const catCounts = new Map<CategoryId, number>();
     for (const x of withStart) {
@@ -1454,6 +1429,7 @@ export const mockServices: Services = {
   notifications,
   studioAdmin,
   analytics,
+  engagement,
   demo,
   subscribe: (listener) => db.subscribe(listener),
 };

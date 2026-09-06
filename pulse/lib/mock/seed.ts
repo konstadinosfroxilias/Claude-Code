@@ -12,8 +12,12 @@ import type {
   City,
   ClassType,
   CreditTransaction,
+  EngagementPrefs,
   Favorite,
+  MemberAchievement,
+  MemberGoal,
   Neighborhood,
+  NudgeDelivery,
   PayoutEntry,
   Plan,
   Review,
@@ -24,7 +28,14 @@ import type {
   WaitlistEntry,
 } from "@/lib/types";
 import { computeCreditCost, isPeakHour } from "@/lib/rules/pricing";
+import {
+  evaluateAchievements,
+  GOAL_DEFAULT,
+  startOfWeek,
+} from "@/lib/rules/engagement";
+import { POLICY } from "@/lib/rules/policy";
 import { addDays, startOfDay } from "@/lib/utils";
+import { buildAttendanceFacts } from "./facts";
 import { createRng, type Rng } from "./random";
 
 export interface DBState {
@@ -45,6 +56,11 @@ export interface DBState {
   notifications: AppNotification[];
   favorites: Favorite[];
   waitlist: WaitlistEntry[];
+  /* Engagement layer — only these four are persisted; the rest is derived. */
+  goals: MemberGoal[];
+  memberAchievements: MemberAchievement[];
+  engagementPrefs: EngagementPrefs[];
+  nudgeDeliveries: NudgeDelivery[];
 }
 
 /* ------------------------------- Static data ------------------------------ */
@@ -903,33 +919,53 @@ export function buildSeed(now: Date = new Date()): DBState {
     t: Omit<CreditTransaction, "id" | "userId">,
   ): CreditTransaction => ({ id: nid(), userId: DEMO_MEMBER_ID, ...t });
 
-  // Previous cycle: grant +22 fully spent across 5 visits (net 0).
-  creditTxs.push(
-    tx({
-      type: "topup",
-      reason: "cycle_grant",
-      status: "confirmed",
-      delta: 22,
-      createdAt: iso(addDays(today, -42)),
-      settledAt: iso(addDays(today, -42)),
-    }),
-  );
+  // The two previous cycles: +22 each. Their visits are seeded below and the
+  // ledger is balanced afterwards (see "Balance the old cycles").
+  for (const dayOff of [-72, -42]) {
+    creditTxs.push(
+      tx({
+        type: "topup",
+        reason: "cycle_grant",
+        status: "confirmed",
+        delta: 22,
+        createdAt: iso(addDays(today, dayOff)),
+        settledAt: iso(addDays(today, dayOff)),
+      }),
+    );
+  }
 
-  /** Helper: book the demo member into a real session near a target day. */
+  /**
+   * Helper: book the demo member into a real session near a target day.
+   *
+   * `sameWeek` pins the pick to the target's Monday–Sunday week (the
+   * engagement layer counts per week, so history must land where intended);
+   * `hour` prefers the slot closest to that local hour (builds a visible
+   * "usual slot" routine).
+   */
   const memberBooking = (
     studioId: string,
     dayOffset: number,
     opts: {
       status: Booking["status"];
-      pending?: boolean;
+      sameWeek?: boolean;
+      hour?: number;
     },
   ): Booking | null => {
-    const target = addDays(today, dayOffset).getTime();
+    const targetDay = addDays(today, dayOffset);
+    const target =
+      opts.hour !== undefined
+        ? at(targetDay, opts.hour).getTime()
+        : targetDay.getTime();
+    const weekStart = startOfWeek(targetDay).getTime();
+    const weekEnd = addDays(startOfWeek(targetDay), 7).getTime();
     const candidates = sessions
       .filter(
         (s) =>
           s.studioId === studioId &&
           Math.abs(new Date(s.startsAt).getTime() - target) < 3 * 86_400_000 &&
+          (!opts.sameWeek ||
+            (new Date(s.startsAt).getTime() >= weekStart &&
+              new Date(s.startsAt).getTime() < weekEnd)) &&
           (dayOffset < 0
             ? new Date(s.startsAt).getTime() < now.getTime()
             : new Date(s.startsAt).getTime() > now.getTime() + 3_600_000) &&
@@ -950,7 +986,32 @@ export function buildSeed(now: Date = new Date()): DBState {
           Math.abs(new Date(a.startsAt).getTime() - target) -
           Math.abs(new Date(b.startsAt).getTime() - target),
       );
-    const s = candidates[0];
+    let s: Session | undefined = candidates[0];
+    if (!s && dayOffset < -DAYS_BACK) {
+      // Older than the generated calendar: materialize just this one past
+      // session so long-range history (streaks, achievements) exists without
+      // seeding 22 studios × 60 days of sessions into localStorage.
+      const studio = studios.find((x) => x.id === studioId);
+      const ct = rng.pick(classTypes.filter((c) => c.studioId === studioId));
+      if (!studio || !ct) return null;
+      const start = at(targetDay, opts.hour ?? 18.5);
+      const { cap, released } = capacityFor(ct.categoryId, rng);
+      s = {
+        id: `se_${studioId}_h${Math.abs(dayOffset)}`,
+        studioId,
+        classTypeId: ct.id,
+        startsAt: iso(start),
+        durationMin: ct.durationMin,
+        instructor: rng.pick(INSTRUCTORS),
+        capacity: cap,
+        spotsReleasedToPlatform: released,
+        floorPriceEUR: studio.defaultFloorPriceEUR,
+        peak: isPeakHour(start),
+        status: "completed",
+        seedBooked: Math.max(0, released - 1),
+      };
+      sessions.push(s);
+    }
     if (!s) return null;
     const cost = creditCostOf(s);
     const b: Booking = {
@@ -989,39 +1050,76 @@ export function buildSeed(now: Date = new Date()): DBState {
     return b;
   };
 
-  // Previous-cycle history (5 completed visits, spends confirmed, total 22).
-  //
-  // Day offsets matter: the visit cap counts every active booking from 30 days
-  // back onward, so these must sit OUTSIDE that window or they eat into the
-  // demo member's CORE allowance. Two recent CORE visits (-10, -5) plus one
-  // upcoming (+3) put them at exactly 3/4 — one bookable visit left, then the
-  // cap blocks, which is the story the demo is meant to tell.
-  const prevSpends: [string, number][] = [
-    ["st_core", -48],
-    ["st_loft", -36],
-    ["st_northside", -33],
-    ["st_core", -34],
-    ["st_volt", -16],
+  /*
+   * Eight weeks of attendance history — the engagement layer's raw material.
+   *
+   * Offsets are WEEK-relative: `wd(d)` is d days after the Monday of the
+   * current week (so wd(-7) is last Monday, wd(-4) last Thursday), which keeps
+   * the per-week pattern stable whatever weekday the demo runs on:
+   *
+   *   wk7 2 · wk6 2 · wk5 3 · wk4 REST · wk3 2 · wk2 3 · wk1 2 · wk0 (in progress)
+   *
+   * That gives a 6–7 week streak that survives a rest week, a "goal month"
+   * sitting at 3 of 4 weeks (the natural "next up"), 17+ classes toward the
+   * 25-class badge, and a clear routine: Thursday evenings at Northside.
+   *
+   * Cap constraints (rolling 30 days, see countVisitsInWindow) still hold:
+   * CORE visits inside the window are exactly -10, -5 and +3 → 3/4, the story
+   * the booking demo tells; Northside sits at 3/4 so the routine suggestion
+   * is bookable; no other studio exceeds 2.
+   */
+  const w0 = startOfWeek(today);
+  const wd = (d: number) =>
+    Math.round((w0.getTime() - today.getTime()) / 86_400_000) + d;
+  const ROUTINE_HOUR = 19; // Thursday evenings at Northside Boxing Lab
+  const history: { studioId: string; off: number; hour?: number }[] = [
+    // wk7 (the 07:30 mat class is the early-bird moment)
+    { studioId: "st_core", off: wd(-48) },
+    { studioId: "st_mat", off: wd(-45), hour: 7.5 },
+    // wk6
+    { studioId: "st_loft", off: wd(-41) },
+    { studioId: "st_northside", off: wd(-39), hour: ROUTINE_HOUR },
+    // wk5
+    { studioId: "st_core", off: wd(-34) },
+    { studioId: "st_volt", off: wd(-33) },
+    { studioId: "st_salt", off: wd(-31) },
+    // wk4 — rest week, on purpose
+    // wk3
+    { studioId: "st_muaythai", off: wd(-20) },
+    { studioId: "st_northside", off: wd(-18), hour: ROUTINE_HOUR },
+    // wk2
+    { studioId: "st_iron", off: wd(-13) },
+    { studioId: "st_northside", off: wd(-11), hour: ROUTINE_HOUR },
+    { studioId: "st_loft", off: wd(-10) },
+    // wk1
+    { studioId: "st_pylaia", off: wd(-6) },
+    { studioId: "st_northside", off: wd(-4), hour: ROUTINE_HOUR },
+    // wk0 — only materialize what is already in the past
+    { studioId: "st_salt", off: wd(0), hour: 9 },
   ];
-  const prevCosts = [5, 4, 5, 4, 4];
-  prevSpends.forEach(([studioId, dayOff], i) => {
-    const b = memberBooking(studioId, dayOff, { status: "completed" });
-    if (b) {
-      b.creditCost = prevCosts[i]; // normalize so the old cycle nets to zero
-      creditTxs.push(
-        tx({
-          type: "spend",
-          reason: "booking",
-          status: "confirmed",
-          delta: -prevCosts[i],
-          bookingId: b.id,
-          studioId,
-          createdAt: b.createdAt,
-          settledAt: b.checkedInAt,
-        }),
-      );
-    }
-  });
+  const attendedSpend = (b: Booking) =>
+    creditTxs.push(
+      tx({
+        type: "spend",
+        reason: "booking",
+        status: "confirmed",
+        delta: -b.creditCost,
+        bookingId: b.id,
+        studioId: b.studioId,
+        createdAt: b.createdAt,
+        settledAt: b.checkedInAt,
+      }),
+    );
+  for (const h of history) {
+    // Never seed a "past" visit in the future (wk0 rows on an early weekday).
+    if (addDays(today, h.off).getTime() > now.getTime()) continue;
+    const b = memberBooking(h.studioId, h.off, {
+      status: "completed",
+      sameWeek: true,
+      hour: h.hour,
+    });
+    if (b) attendedSpend(b);
+  }
 
   // Current cycle grant.
   creditTxs.push(
@@ -1034,37 +1132,13 @@ export function buildSeed(now: Date = new Date()): DBState {
       settledAt: iso(cycleStart),
     }),
   );
-  // Top-up pack inside the cycle.
-  creditTxs.push(
-    tx({
-      type: "topup",
-      reason: "topup_pack",
-      status: "confirmed",
-      delta: 12,
-      createdAt: iso(addDays(today, -9)),
-      settledAt: iso(addDays(today, -9)),
-    }),
-  );
 
   // Current cycle completed visits: 2× CORE (drives the 3/4 cap story) + 1 more.
   const cur1 = memberBooking("st_core", -10, { status: "completed" });
   const cur2 = memberBooking("st_core", -5, { status: "completed" });
   const cur3 = memberBooking("st_breathe", -3, { status: "completed" });
   for (const b of [cur1, cur2, cur3]) {
-    if (b) {
-      creditTxs.push(
-        tx({
-          type: "spend",
-          reason: "booking",
-          status: "confirmed",
-          delta: -b.creditCost,
-          bookingId: b.id,
-          studioId: b.studioId,
-          createdAt: b.createdAt,
-          settledAt: b.checkedInAt,
-        }),
-      );
-    }
+    if (b) attendedSpend(b);
   }
 
   // A late cancellation: spend reversed + fee charged.
@@ -1112,6 +1186,85 @@ export function buildSeed(now: Date = new Date()): DBState {
       );
     }
   }
+
+  /*
+   * Balance the ledger. Old cycles: whatever the seeded visits cost beyond
+   * the two +22 grants was bought as top-up packs back then. Current cycle:
+   * a top-up pack (or two) so the demo starts with a comfortable balance
+   * (≥12 credits) whatever this week's history came to.
+   */
+  const cycleStartMs = cycleStart.getTime();
+  const spent = (pred: (t: CreditTransaction) => boolean) =>
+    creditTxs
+      .filter((t) => t.delta < 0 && t.status !== "reversed" && pred(t))
+      .reduce((a, t) => a - t.delta, 0);
+  const packFor = (need: number) =>
+    POLICY.topUpPacks.find((p) => p.credits >= need) ??
+    POLICY.topUpPacks[POLICY.topUpPacks.length - 1];
+  let oldDeficit =
+    spent((t) => new Date(t.createdAt).getTime() < cycleStartMs) - 44;
+  let packDay = -60;
+  while (oldDeficit > 0) {
+    const pack = packFor(oldDeficit);
+    creditTxs.push(
+      tx({
+        type: "topup",
+        reason: "topup_pack",
+        status: "confirmed",
+        delta: pack.credits,
+        createdAt: iso(addDays(today, packDay)),
+        settledAt: iso(addDays(today, packDay)),
+      }),
+    );
+    oldDeficit -= pack.credits;
+    packDay += 7;
+  }
+  let balance = creditTxs
+    .filter((t) => t.status !== "reversed")
+    .reduce((a, t) => a + t.delta, 0);
+  const currentPacks: number[] = [];
+  while (balance < 12) {
+    const pack = packFor(12 - balance);
+    currentPacks.push(pack.credits);
+    creditTxs.push(
+      tx({
+        type: "topup",
+        reason: "topup_pack",
+        status: "confirmed",
+        delta: pack.credits,
+        createdAt: iso(addDays(today, -9 + currentPacks.length - 1)),
+        settledAt: iso(addDays(today, -9 + currentPacks.length - 1)),
+      }),
+    );
+    balance += pack.credits;
+  }
+  const topUpNotifAmount = currentPacks[0] ?? 12;
+
+  /* Engagement: goal + achievements already earned by the seeded history ---- */
+  const goals: MemberGoal[] = [
+    {
+      userId: DEMO_MEMBER_ID,
+      weeklyTarget: GOAL_DEFAULT,
+      updatedAt: iso(addDays(today, -30)),
+    },
+  ];
+  // Evaluate the seeded bookings with the same rules the app uses, so what is
+  // unlocked on day one is exactly what the history justifies.
+  const facts = buildAttendanceFacts(
+    { bookings, sessions, classTypes, studios },
+    DEMO_MEMBER_ID,
+  );
+  const memberAchievements: MemberAchievement[] = evaluateAchievements(
+    facts,
+    GOAL_DEFAULT,
+    now,
+  )
+    .filter((e) => e.achieved)
+    .map((e) => ({
+      userId: DEMO_MEMBER_ID,
+      achievementId: e.id,
+      unlockedAt: e.achievedAt ?? iso(now),
+    }));
 
   /* Reviews ------------------------------------------------------------------ */
   const reviews: Review[] = [];
@@ -1176,7 +1329,10 @@ export function buildSeed(now: Date = new Date()): DBState {
     notif(
       DEMO_MEMBER_ID,
       "wallet",
-      { el: "+12 credits προστέθηκαν", en: "+12 credits added" },
+      {
+        el: `+${topUpNotifAmount} credits προστέθηκαν`,
+        en: `+${topUpNotifAmount} credits added`,
+      },
       {
         el: "Το top-up πακέτο σου ολοκληρώθηκε.",
         en: "Your top-up pack was processed.",
@@ -1253,5 +1409,10 @@ export function buildSeed(now: Date = new Date()): DBState {
     favorites,
     // Seeded empty: the demo builds its own queues as sessions fill up.
     waitlist: [],
+    goals,
+    memberAchievements,
+    // Nudges are opt-in: nobody starts enabled. The soft primer asks first.
+    engagementPrefs: [],
+    nudgeDeliveries: [],
   };
 }

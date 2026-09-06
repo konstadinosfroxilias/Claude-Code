@@ -22,15 +22,32 @@ import { chromium } from "playwright";
 const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
 ```
 
+Ready-made suites live next to this file and run from the repo root against a
+dev server on :3000 (screenshots land in the gitignored `shots/`):
+
+```bash
+npx tsx --tsconfig tsconfig.json .claude/skills/verify/rules-test.ts  # pure rules, no browser
+node .claude/skills/verify/engagement-test.mjs   # goal · streak · achievements · nudges · discovery · social
+node .claude/skills/verify/unlock-test.mjs       # the achievement unlock moment
+node .claude/skills/verify/waitlist-e2e.mjs      # waitlist → no-show → auto-book
+node .claude/skills/verify/copy-audit.mjs        # body-neutral copy sweep, both languages
+node .claude/skills/verify/tap-probe.mjs         # .tap hit areas are real, and don't collide
+```
+
 - Each new browser context = empty localStorage = fresh seed (idempotent runs).
 - Copy is Greek by default — select by Greek strings, or click `EN` first.
 - Sign-in: `/auth` → `button:has-text("Συνέχεια ως Έλενα Βασιλείου")` (member)
   or `…FORGE Athletic Club` (owner). Both roles share the same localStorage DB
   within one context — that's what makes the cross-side flow testable.
 - Allow ~800ms after navigation for the mock services' artificial latency.
-- The DB key is versioned (`pulse.db.v3` — see `lib/config.ts` `STORAGE_KEYS`).
-  If a test reads/writes localStorage directly, read the key from there rather
-  than hard-coding it; bumps happen whenever the seed shape changes.
+- The DB key is versioned (`pulse.db.v4` — see `lib/config.ts` `STORAGE_KEYS`).
+  If a test reads/writes localStorage directly, **discover** the key rather
+  than hard-coding it — bumps happen whenever the seed shape changes, and a
+  stale literal fails as a confusing `null` deref:
+
+  ```js
+  const KEY = Object.keys(localStorage).find((k) => k.startsWith("pulse.db."));
+  ```
 
 ## Flows worth driving
 
@@ -97,5 +114,51 @@ const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromi
 ## Tap targets
 
 Controls must be ≥44px on touch. Audit by measuring every
-`button,a,[role=button],input,[role=combobox]` rect at 390px. Expect only the
-OpenStreetMap attribution links to fall below — those are required fine print.
+`button,a,[role=button],input,[role=combobox]` rect at 390px. Two entries are
+expected to fall below and are fine:
+
+- the OpenStreetMap attribution links (required fine print), and
+- the settings toggle (`components/ui/switch.tsx`), painted 40×24 but carrying
+  `.tap`, which gives it a real 44px hit area.
+
+**`.tap` is invisible to a rect-based audit.** It enlarges the hit area with a
+`::after` overlay, so `getBoundingClientRect()` still reports the small painted
+box. Prove the area is real by clicking outside the painted box and asserting
+the control reacted (`.claude/skills/verify/tap-probe.mjs`) — `document.elementFromPoint`
+should return the control itself.
+
+**Never stack two `.tap` controls vertically.** Their 44px bands overlap and
+the later sibling silently steals the other's taps — this bit the goal card's
+footer, where a tap just under "change goal" navigated to the progress page
+instead. Two controls that can wrap onto separate lines need real height
+(`min-h-11 … sm:min-h-0`), not overlapping pseudo-elements.
+
+## Engagement layer
+
+- `.claude/skills/verify/rules-test.ts` (run with `npx tsx`) covers the healthy-by-design
+  invariants directly against `lib/rules/engagement.ts`: goal clamping, one
+  rest week preserved / two breaking the run, ease-off for frequent trainers,
+  nudges silent when muted or when the goal is met. Run it before touching
+  that module — it is much faster than driving the browser, and those rules
+  are the product's non-negotiables.
+- The rules refuse to count a class that hasn't started yet. A test fixture
+  that places "attended" classes later today will silently under-count.
+- **Forcing an unlock moment:** achievements are idempotent, so a fresh member
+  won't produce one on demand. Delete one row from `memberAchievements` in the
+  persisted DB and reload — the next sync re-earns it, exercising the real
+  evaluate → persist → toast path (`.claude/skills/verify/unlock-test.mjs`).
+- The demo member's seeded history is WEEK-relative, so the pattern
+  (`2 · 2 · 3 · rest · 2 · 3 · 2 · current`) holds whatever weekday you run on.
+  Don't assert absolute class counts; assert the shape.
+
+## Copy safety
+
+Greek substring matching produces false alarms: a bare `κιλ` matches
+**ποι-κιλ-ία** ("variety"), which is exactly the framing the product wants.
+Match whole words. `.claude/skills/verify/copy-audit.mjs` sweeps every member surface in
+both languages for weight/calorie/appearance/daily-streak language and should
+always report clean.
+
+Likewise, "no Greek in EN mode" must be scoped to UI **chrome** with data
+tokens stripped: studio addresses, instructor and member names, and reviews
+(`Review.lang`) are deliberately Greek in both languages.

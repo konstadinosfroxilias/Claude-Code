@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
@@ -45,6 +45,33 @@ export function StudioDetailView({ id }: { id: string }) {
   const [reviewOpen, setReviewOpen] = useState(false);
 
   const day = useMemo(() => addDays(startOfDay(new Date()), dayOffset), [dayOffset]);
+
+  // Shared class link ("invite a friend"): /member/studios/<id>/?session=<sid>
+  // opens the booking sheet on that class and jumps the schedule to its day.
+  // Read from window.location (not useSearchParams) so the static export
+  // needs no Suspense boundary.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const sid = new URLSearchParams(window.location.search).get("session");
+    if (!sid) return;
+    let alive = true;
+    getServices()
+      .catalog.getSessionView(sid)
+      .then((v) => {
+        if (!alive || !v || v.studio.id !== id) return;
+        const off = Math.round(
+          (startOfDay(new Date(v.session.startsAt)).getTime() -
+            startOfDay(new Date()).getTime()) /
+            86_400_000,
+        );
+        if (off >= 0 && off < 7) setDayOffset(off);
+        setBookingTarget(v);
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [id]);
 
   const { data: studio, loading } = useLiveQuery(
     (svc) => svc.catalog.getStudio(id),

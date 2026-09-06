@@ -11,6 +11,7 @@ import {
   LogOut,
   Settings,
   Sparkles,
+  TrendingUp,
   User as UserIcon,
   Wallet as WalletIcon,
   Zap,
@@ -19,6 +20,7 @@ import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { Logo } from "@/components/shared/logo";
 import { Avatar } from "@/components/shared/avatar";
 import { ReminderScheduler } from "@/components/member/reminder-scheduler";
+import { EngagementSync } from "@/components/member/engagement-sync";
 import { useI18n, type TranslationKey } from "@/lib/i18n";
 import { useLiveQuery } from "@/lib/hooks/use-live-query";
 import { useCurrentUser } from "@/lib/hooks/use-session";
@@ -61,6 +63,8 @@ export function MemberShell({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-dvh flex-col bg-bg">
       {/* In-tab class reminders (see lib/reminders for the push seam) */}
       <ReminderScheduler />
+      {/* Achievement unlocks + opt-in habit nudges (see lib/rules/engagement) */}
+      <EngagementSync />
 
       {/* Top bar */}
       <header className="sticky top-0 z-40 border-b border-line bg-bg/85 backdrop-blur-md">
@@ -130,6 +134,7 @@ export function MemberShell({ children }: { children: React.ReactNode }) {
                   {(
                     [
                       ["/member/profile", UserIcon, "nav.profile"],
+                      ["/member/progress", TrendingUp, "nav.progress"],
                       ["/member/favorites", Heart, "nav.favorites"],
                       ["/member/subscription", Sparkles, "nav.subscription"],
                       ["/member/settings", Settings, "nav.settings"],

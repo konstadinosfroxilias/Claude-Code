@@ -1,12 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   Activity,
+  ArrowRight,
   CalendarDays,
   Dumbbell,
   Flame,
   MapPinned,
+  Trophy,
   Zap,
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
@@ -14,6 +17,8 @@ import { useCurrentUser } from "@/lib/hooks/use-session";
 import { useLiveQuery } from "@/lib/hooks/use-live-query";
 import { formatDay } from "@/lib/utils";
 import { Avatar } from "@/components/shared/avatar";
+import { GoalCard } from "@/components/member/goal-card";
+import { AchievementsSection } from "@/components/member/achievements";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 
@@ -95,6 +100,13 @@ export default function ProfilePage() {
         </div>
       </motion.div>
 
+      {/* Weekly goal + streak — adjustable right here */}
+      {userId && (
+        <div className="mt-6">
+          <GoalCard userId={userId} />
+        </div>
+      )}
+
       {/* Activity grid */}
       <h2 className="display mb-3 mt-8 text-lg text-hi">
         {t("profile.activity")}
@@ -142,6 +154,24 @@ export default function ProfilePage() {
             </motion.div>
           ))}
         </motion.div>
+      )}
+
+      {/* Achievements — unlocked first, then a gentle "next up" */}
+      {userId && (
+        <section className="mt-10">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="display flex items-center gap-2 text-lg text-hi">
+              <Trophy className="size-4.5 text-volt" /> {t("achievements.title")}
+            </h2>
+            <Link
+              href="/member/progress"
+              className="inline-flex h-11 items-center gap-1 text-sm font-medium text-volt hover:text-volt-bright sm:h-auto"
+            >
+              {t("progress.viewAll")} <ArrowRight className="size-3.5" />
+            </Link>
+          </div>
+          <AchievementsSection userId={userId} />
+        </section>
       )}
     </div>
   );

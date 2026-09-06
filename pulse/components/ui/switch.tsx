@@ -11,7 +11,9 @@ export function Switch({
   return (
     <SwitchPrimitive.Root
       className={cn(
-        "peer inline-flex h-6 w-10 shrink-0 cursor-pointer items-center rounded-full border border-line bg-surface-3 transition-colors",
+        // `tap` keeps the painted switch compact while guaranteeing a >=44px
+        // touch target on phones (see .tap in globals.css).
+        "tap peer inline-flex h-6 w-10 shrink-0 cursor-pointer items-center rounded-full border border-line bg-surface-3 transition-colors",
         "data-[state=checked]:border-volt/40 data-[state=checked]:bg-volt/90",
         "focus-visible:outline-2 focus-visible:outline-volt disabled:cursor-not-allowed disabled:opacity-50",
         className,

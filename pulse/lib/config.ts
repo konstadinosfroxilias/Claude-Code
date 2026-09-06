@@ -19,8 +19,9 @@ export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 
 /** localStorage keys (namespaced + versioned so a schema bump reseeds cleanly). */
 export const STORAGE_KEYS = {
-  // v3 reworked seeded visit-cap history — bumping forces a clean reseed.
-  db: "pulse.db.v3",
+  // v4 added the engagement layer (goals, achievements, 8 weeks of history) —
+  // bumping forces a clean reseed.
+  db: "pulse.db.v4",
   session: "pulse.session.v1",
   prefs: "pulse.prefs.v1",
 } as const;

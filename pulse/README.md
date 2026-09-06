@@ -9,7 +9,9 @@ It is a **two-sided marketplace** behind role-based auth:
 
 - **Member app** (`/member/*`) — discovery, map + filters, booking with
   dynamic credit pricing, QR check-in, wallet & ledger, subscription tiers,
-  favorites, notifications, activity stats.
+  favorites, notifications, activity stats, and a
+  [habit/engagement layer](#the-engagement-layer-habit-not-compulsion)
+  (weekly goal, rest-tolerant streak, achievements, progress, gentle nudges).
 - **Studio dashboard** (`/studio/*`) — schedule & availability, per-session
   pricing and spots-released controls, roster & check-in, radically
   transparent payouts, analytics.
@@ -34,7 +36,7 @@ needed — copy `.env.example` to `.env.local` if you want to flip flags.
 
 | Role | Who | What you'll see |
 |---|---|---|
-| Member | Έλενα Βασιλείου | Active Plus plan, credit history, upcoming bookings, 3/4 visit cap at CORE Reformer |
+| Member | Έλενα Βασιλείου | Active Plus plan, credit history, upcoming bookings, 3/4 visit cap at CORE Reformer, 8 weeks of attendance (with a rest week), a weekly goal, 10 unlocked achievements |
 | Studio owner | FORGE Athletic Club (Δημήτρης Οικονόμου) | Full schedule, live roster, accrued payouts, analytics |
 
 The two sides share one mock DB: book a FORGE class as Έλενα, sign in as the
@@ -89,6 +91,98 @@ These aren't copy — they're enforced in code:
   behind an opt-in primer. **Background push is not faked** — see
   [Where to plug in real push](#where-to-plug-in-real-push).
 
+## The engagement layer (habit, not compulsion)
+
+A motivation layer sits on top of booking whose only job is to help a member
+build a **real, sustainable movement habit** — which is what ultimately fills
+studio spots. It is derived almost entirely from attendance the app already
+records; the member never logs anything.
+
+- **Weekly goal + progress ring.** A self-chosen target of **1–5 classes a
+  week** (default 2, changeable anytime in the goal card, profile or
+  settings). Home and profile show a segmented ring — "2 of 3 this week" —
+  that resets each week. Meeting it fires one warm celebration per week.
+- **Week-based streak with rest tolerance.** Consecutive *weeks* with at least
+  one class. **A single rest week never breaks it**; two quiet weeks in a row
+  simply end the run. The four states each get their own kind copy:
+  `on_track`, `building` ("the week is open"), `rested` ("you took a rest week
+  — that counts too"), `fresh_start` ("new week, fresh start"). There is no
+  daily streak anywhere, by design — daily targets push overtraining.
+- **Achievements** (13) reward consistency and variety, never volume extremes:
+  first booking, first check-in, 5/10/25/50 classes, first week at goal, four
+  consecutive weeks at goal, three categories, a second neighborhood, five
+  studios, an early-morning class, and a **comeback after a break** (framed as
+  a win). Locked ones appear as a gentle "next up" with honest progress.
+- **Your progress** (`/member/progress`): classes this month and all-time,
+  **minutes moved**, category mix, favorite studio, usual training day and
+  time band, plus 8-week and 6-month trends in Recharts (same validated chart
+  steps as the studio dashboard).
+- **"Your week in movement"** recap card, shareable as a PNG rendered on a
+  canvas or as plain text — both entirely client-side, nothing is uploaded.
+- **Habit nudges**, opt-in behind the same soft-primer pattern as location and
+  reminders. At most one per week, learned from the member's own history:
+  their usual slot, a rebook of the last class, or a kind "it's been a while"
+  after 14 quiet days. **One tap mutes them for two weeks**; settings has a
+  switch and shows the mute state in words.
+- **Ease off, don't push.** A member averaging **5+ classes a week over 3 of
+  the last 4 weeks** gets exactly one message — "take a breath, a lighter week
+  will do you more good" — and no booking nudges at all. Anyone who has
+  already met the week's goal gets no nudge either.
+- **Your routine** — the next logical booking (usual slot, else the last
+  class), bookable in one tap. Shown when no nudge applies, so home never
+  stacks two prompts.
+- **Try something new** — untried categories first, then new neighborhoods,
+  then untried studios, ranked by distance *only* when location was granted,
+  preferring a beginner-friendly upcoming class. Entirely optional: no badge,
+  streak or nudge is attached to it.
+- **Light social, no competition.** "Invite a friend" shares a deep link that
+  opens the booking sheet on that exact class, and a session shows a plain
+  "3 going". **There are no leaderboards and no member-vs-member comparison
+  anywhere** — that is a deliberate product constraint, not an omission.
+
+### Healthy by design — constraints future changes must preserve
+
+These are enforced in code, not just in copy. `lib/rules/engagement.ts` is the
+single place they live, and the reasoning is in comments there.
+
+| Constraint | Where it is enforced |
+|---|---|
+| Motivate via consistency, progress, variety, enjoyment — **never** appearance, body shape, weight or calories | The domain model has no such concept; progress is counted in classes and **minutes moved** only |
+| Goals and streaks are **weekly**, never daily | `computeWeeklyProgress`, `computeStreak` bucket by ISO week (Monday) |
+| Rest is part of training | One rest week is skipped, not penalised (`computeStreak`); `rested` copy is warm |
+| Targets stay 1–5 and never auto-escalate | `clampGoal` + the stepper's own bounds; nothing in the app ever raises a target |
+| Frequent trainers are eased, not pushed | `planNudges` returns `["ease_off"]` and nothing else past the threshold |
+| Nudges are opt-in and muteable | `EngagementPrefs.nudgesEnabled` defaults false; `isMuted` short-circuits `planNudges` |
+| A met goal never triggers another prompt | `planNudges` returns `[]` once `progress.met` |
+| Missed weeks are never failure | No "lost streak" state exists — the fourth state is `fresh_start` |
+| No comparison mechanics | No ranking data is computed or stored; "X going" is a count, never a list or a rank |
+
+### Engagement data — what is stored vs derived
+
+Only **four** collections are persisted (in the same localStorage mock store as
+everything else). Everything visible is recomputed from bookings on read, so
+nothing can drift:
+
+| Persisted | Shape |
+|---|---|
+| `goals` | `{ userId, weeklyTarget, updatedAt }` |
+| `memberAchievements` | `{ userId, achievementId, unlockedAt }` |
+| `engagementPrefs` | `{ userId, nudgesEnabled, nudgesMutedUntil?, updatedAt }` |
+| `nudgeDeliveries` | `{ userId, nudgeId, deliveredAt }` — makes a nudge fire once |
+
+Derived on every read from `Booking` + `Session` + `ClassType` + `Studio` via
+`buildAttendanceFacts` (`lib/mock/facts.ts`) and the pure rules: weekly
+progress, streak, achievement eligibility, insights, the recap, the inferred
+routine and every nudge decision. The achievements **catalog** is a constant
+(`ACHIEVEMENTS`), not data.
+
+The seed gives the demo member eight weeks of history shaped as
+`2 · 2 · 3 · rest · 2 · 3 · 2 · (current)` — deliberately including a rest week
+— so the streak, the "next up" badges, the trends and the recap all look real
+on first load, and Thursday evenings at Northside Boxing Lab read as a routine.
+Unlocks are not hand-written: the seed runs the same `evaluateAchievements`
+the app uses, so day-one state is exactly what that history earns.
+
 ## Core business logic
 
 All rules live in `lib/rules/` — one module each, config-first:
@@ -132,17 +226,22 @@ lib/
   config.ts               APP_NAME (single rename point), USE_MOCK flag, storage keys
   types/                  the entire domain model + service DTOs
   rules/                  pricing.ts (credit costs) · policy.ts (caps, fees, cutoffs)
+                          engagement.ts (goals, streaks, achievements, nudges — PURE)
   geo/                    haversine + walk/drive travel estimates (pure)
   calendar/               .ics builder + Google Calendar url (pure, client-side)
+  share/                  recap-image.ts — canvas PNG for the weekly recap
   reminders/              opt-in store, Notification helpers, PUSH SEAM (TODO)
   i18n/                   el.ts (master) · en.ts (parity typechecked) · useI18n()
   services/
     types.ts              ★ THE SEAM — typed async interfaces for every domain
     index.ts              getServices() registry, switched by NEXT_PUBLIC_USE_MOCK
     mock/                 the only current implementation (swap target)
+      engagement.ts       goal/streak/achievement/nudge/discovery reads + writes
   mock/                   seed.ts (Greek catalog generator) · db.ts (localStorage store)
+                          facts.ts (bookings → attendance facts for the rules)
   hooks/                  useLiveQuery (fetch + subscribe to service change feed)
-  stores/                 zustand: session, language prefs, geo (all persisted)
+  stores/                 zustand: session, language prefs, geo, engagement UI
+                          (all persisted; engagement.ts holds per-DEVICE state only)
 ```
 
 **Data flow:** UI component → `useLiveQuery(svc => svc.x.y())` →
@@ -153,10 +252,18 @@ detail of the mock services.
 
 ## Swapping in a real backend
 
-The contract is `Services` in **`lib/services/types.ts`** — eleven small
+The contract is `Services` in **`lib/services/types.ts`** — twelve small
 interfaces (auth, catalog, booking, wallet, subscriptions, payouts, reviews,
-notifications, studioAdmin, analytics, demo) plus a `subscribe` change feed.
-The UI depends on nothing else.
+notifications, studioAdmin, analytics, **engagement**, demo) plus a `subscribe`
+change feed. The UI depends on nothing else.
+
+> **Engagement specifically:** a backend needs only the four tables listed in
+> [Engagement data](#engagement-data--what-is-stored-vs-derived) and must keep
+> `lib/rules/engagement.ts` as the source of truth (it is pure and takes `now`
+> as an argument, so it runs server-side unchanged). `EngagementService` in
+> `lib/services/types.ts` carries the full TODO, including the two invariants
+> to preserve: goals clamp to 1–5, and `syncAchievements` /
+> `markNudgeDelivered` are idempotent.
 
 1. **Create `lib/services/api/`** implementing `Services` against your
    REST/tRPC backend (fetch per method; map errors to `ServiceError` codes —
@@ -233,6 +340,12 @@ All seed data lives in **`lib/mock/seed.ts`**:
   templates in `CLASS_TEMPLATES`, and capacity defaults in `capacityFor`.
 - **Plans / packs / fees** — `PLANS` in the seed, `POLICY.topUpPacks`,
   `POLICY` fees.
+- **New achievement** — add the id to the `AchievementId` union
+  (`lib/types`), a row to `ACHIEVEMENTS` and a branch to
+  `evaluateAchievements` (`lib/rules/engagement.ts`), an icon in
+  `components/member/achievements.tsx`, and `achievements.<id>.title/body` in
+  both dictionaries. Keep it about consistency or variety — nothing
+  volume-extreme, intensity-glorifying or appearance-related.
 - **Rename the product** — change `APP_NAME` in `lib/config.ts`.
 
 ## Design system
@@ -260,6 +373,11 @@ uses `LocalizedText {el,en}`.
   With a real backend you can migrate reads to server components screen by
   screen — the service interfaces don't change.
 - Demo data reseeds after ~20h (sessions are generated relative to "now")
-  and on schema version bumps (`STORAGE_KEYS.db`).
+  and on schema version bumps (`STORAGE_KEYS.db`, currently `pulse.db.v4` —
+  the engagement layer bumped it from v3).
+- The engagement layer is **client-side only**, like the rest of the demo. In-tab
+  nudges reuse the reminder plumbing and therefore share its limitation: they
+  cannot wake a closed tab. See
+  [Where to plug in real push](#where-to-plug-in-real-push).
 - Payments, auth and emails are intentionally stubbed behind the service
   layer; there are no secrets anywhere in the repo.

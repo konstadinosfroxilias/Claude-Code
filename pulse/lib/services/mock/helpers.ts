@@ -6,12 +6,17 @@ import type {
   LocalizedText,
   Session,
   SessionView,
+  VisitCapStatus,
   WaitlistEntry,
   WaitlistView,
   WalletSummary,
 } from "@/lib/types";
 import { computeCreditCost } from "@/lib/rules/pricing";
-import { ACTIVE_BOOKING_STATUSES } from "@/lib/rules/policy";
+import {
+  ACTIVE_BOOKING_STATUSES,
+  countVisitsInWindow,
+  POLICY,
+} from "@/lib/rules/policy";
 import { uid } from "@/lib/utils";
 
 /** Typed failure the UI can map to i18n copy. */
@@ -126,6 +131,55 @@ export function walletSummary(db: DBState, userId: string): WalletSummary {
     cycleSpent,
     cycleEndsAt: sub?.cycleEnd ?? new Date().toISOString(),
   };
+}
+
+/** The member's visit-cap position at a studio (see countVisitsInWindow). */
+export function capStatusFor(
+  db: DBState,
+  userId: string,
+  studioId: string,
+  atSessionStart?: Date,
+): VisitCapStatus {
+  const cap = POLICY.visitCapPerStudioPerMonth;
+  const starts = db.bookings
+    .filter(
+      (b) =>
+        b.userId === userId && b.studioId === studioId && isActiveBooking(b),
+    )
+    .map((b) => db.sessions.find((x) => x.id === b.sessionId)?.startsAt)
+    .filter((x): x is string => !!x);
+  // One rule for both display and enforcement: omitting the session start
+  // just anchors the window at "now".
+  const used = countVisitsInWindow(starts, atSessionStart ?? new Date());
+  return { used: Math.min(used, cap), cap, reached: used >= cap };
+}
+
+/**
+ * The session as a view IF this member could book it right now: scheduled,
+ * in the future, a platform spot left, under the cap, affordable and not
+ * already held. Used by suggestions so we never suggest something the
+ * booking sheet would then refuse.
+ */
+export function bookableView(
+  db: DBState,
+  userId: string,
+  s: Session,
+  now: Date = new Date(),
+): SessionView | null {
+  if (s.status !== "scheduled") return null;
+  const start = new Date(s.startsAt);
+  if (start.getTime() <= now.getTime() + 30 * 60_000) return null;
+  const view = toSessionView(db, s);
+  if (!view || view.spotsLeft <= 0) return null;
+  if (
+    db.bookings.some(
+      (b) => b.sessionId === s.id && b.userId === userId && isActiveBooking(b),
+    )
+  )
+    return null;
+  if (capStatusFor(db, userId, s.studioId, start).reached) return null;
+  if (walletSummary(db, userId).balance < view.creditCost) return null;
+  return view;
 }
 
 export function pushNotification(

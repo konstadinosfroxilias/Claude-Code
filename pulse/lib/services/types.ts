@@ -5,6 +5,7 @@
  * implementations behind getServices() — UI components never change.
  */
 import type {
+  AchievementView,
   AppNotification,
   BookingEligibility,
   BookingView,
@@ -13,9 +14,18 @@ import type {
   City,
   ClassType,
   CreditTransaction,
+  DiscoverySuggestion,
+  EngagementPrefs,
+  EngagementSummary,
+  HabitNudge,
   Invoice,
   LanguageCode,
+  LocalizedText,
+  MemberGoal,
   MemberStats,
+  ProgressInsights,
+  RoutineSuggestion,
+  WeeklyRecap,
   PayoutEntryView,
   PayoutStatement,
   PayoutSummary,
@@ -181,6 +191,81 @@ export interface DemoService {
   reset(): Promise<void>;
 }
 
+/**
+ * Engagement — weekly goal, week streak, achievements, progress, nudges,
+ * discovery. Only the goal, achievement unlocks, nudge prefs and nudge
+ * deliveries are PERSISTED; everything else is derived from bookings through
+ * the pure rules in lib/rules/engagement.ts, so every implementation agrees.
+ *
+ * ─────────────────────────────────────────────────────────────────────────
+ * TODO(backend) — THIS INTERFACE IS THE SEAM. Today it is implemented only by
+ * lib/services/mock/engagement.ts against the localStorage store. A real
+ * backend implements the SAME methods and the UI does not change at all:
+ *
+ *   Persist just four things (everything else stays derived):
+ *     goals               (user_id PK, weekly_target int 1..5, updated_at)
+ *     member_achievements (user_id + achievement_id PK, unlocked_at)
+ *     engagement_prefs    (user_id PK, nudges_enabled bool, nudges_muted_until)
+ *     nudge_deliveries    (user_id + nudge_id PK, delivered_at)
+ *
+ *   Keep lib/rules/engagement.ts as the single source of truth — it is pure
+ *   and takes `now` as a parameter, so it can run server-side unchanged.
+ *   Row-level security is simply "a member reads and writes only their own
+ *   rows"; the achievements CATALOG is static (ACHIEVEMENTS in that module)
+ *   and needs no table unless you want it editable.
+ *
+ *   Two invariants a backend MUST preserve:
+ *     - setGoal clamps to 1..5 (clampGoal). Never auto-escalate a target.
+ *     - syncAchievements and markNudgeDelivered are idempotent; the latter
+ *       resolves true only on the first delivery of a given nudge id.
+ * ─────────────────────────────────────────────────────────────────────────
+ */
+export interface EngagementService {
+  getGoal(userId: string): Promise<MemberGoal>;
+  /** Clamped to 1–5. Never auto-escalated by the app. */
+  setGoal(userId: string, weeklyTarget: number): Promise<MemberGoal>;
+  /** Goal + this week's progress + streak in one read (home / profile). */
+  getSummary(userId: string): Promise<EngagementSummary>;
+
+  /** Full catalog with the member's unlock state and progress. */
+  listAchievements(userId: string): Promise<AchievementView[]>;
+  /**
+   * Evaluate against the latest bookings, persist any new unlocks and return
+   * ONLY the newly unlocked ones (drives the unlock moment). Idempotent.
+   */
+  syncAchievements(userId: string): Promise<AchievementView[]>;
+
+  getProgressInsights(userId: string): Promise<ProgressInsights>;
+  getWeeklyRecap(userId: string): Promise<WeeklyRecap>;
+
+  getPrefs(userId: string): Promise<EngagementPrefs>;
+  setPrefs(
+    userId: string,
+    patch: Partial<Pick<EngagementPrefs, "nudgesEnabled" | "nudgesMutedUntil">>,
+  ): Promise<EngagementPrefs>;
+
+  /** Current nudges (0 or 1). Empty unless the member opted in and isn't muted. */
+  getNudges(userId: string): Promise<HabitNudge[]>;
+  /**
+   * Record that a nudge was surfaced so it is never repeated; optionally
+   * mirror it into the in-app notification feed. Resolves true only the
+   * first time (so callers can fire a browser notification exactly once).
+   */
+  markNudgeDelivered(
+    userId: string,
+    nudgeId: string,
+    notification?: { title: LocalizedText; body: LocalizedText; href?: string },
+  ): Promise<boolean>;
+  /** Next logical booking: usual slot if the history shows one, else a rebook of the last class. */
+  getRoutine(userId: string): Promise<RoutineSuggestion | null>;
+
+  /** Untried categories / studios with a beginner-friendly upcoming class. */
+  listDiscoveries(
+    userId: string,
+    opts?: { cityId?: string; limit?: number },
+  ): Promise<DiscoverySuggestion[]>;
+}
+
 export interface Services {
   auth: AuthService;
   catalog: CatalogService;
@@ -192,6 +277,7 @@ export interface Services {
   notifications: NotificationService;
   studioAdmin: StudioAdminService;
   analytics: AnalyticsService;
+  engagement: EngagementService;
   demo: DemoService;
   /**
    * Change feed: fires after any write so live queries can refetch.
